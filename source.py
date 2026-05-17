@@ -584,12 +584,11 @@ def announce(operating_mode, webhook):
             exit()
 
 
-def check_ri_update(webhook):
+def check_ri_update():
     global version
 
     if os.path.exists(f"/Users/{getpass.getuser()}/Downloads/RobloxInvites.py"):
         write_to_log("info", "Found update!")
-
         write_to_log("info", "Starting backup of old server data...")
         os.makedirs("../RobloxInvitesBackups/", exist_ok=True)
         if os.path.exists(f"../RobloxInvitesBackups/{version}/"):
@@ -602,12 +601,6 @@ def check_ri_update(webhook):
             pass
         write_to_log("info", "Server backup successful!")
 
-        send_embed(
-            "Installing Update...",
-            f"An update has been issued to the production server. It will be installed shortly.\nCheck out the patch notes in #updates!\n-# Sent by Roblox Invites {version}",
-            blue,
-            webhook,
-        )
         write_to_log("info", "Updating Roblox Invites...")
         if os.path.exists(__file__):
             os.remove(__file__)
@@ -617,19 +610,12 @@ def check_ri_update(webhook):
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
 
-def check_ct_update(webhook):
+def check_ct_update():
     global version
     global custom_titles
 
     if os.path.exists(f"/Users/{getpass.getuser()}/Downloads/custom_titles.json"):
-        write_to_log("info", "Found custom title update!")
-        send_embed(
-            "Installing Custom Title Update...",
-            f"A Custom Title update has been detected. It will be installed shortly.\n-# Sent by Roblox Invites {version}",
-            blue,
-            webhook,
-        )
-        write_to_log("info", "Updating custom titles...")
+        write_to_log("info", "Found custom title update! Updating custom titles...")
         os.rename(
             f"/Users/{getpass.getuser()}/Downloads/custom_titles.json",
             "./server/custom_titles.json",
@@ -738,14 +724,12 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "4.3.0"
+version = "4.4.0"
 update_desc = f"""
 **Roblox Invites {version}**
-- Only 10 added and 10 updated games will be shown at maximum in Custom Titles updates
-- The Custom Titles JSON is only loaded from once when updating instead of twice
+- Removed all logging-based channels and their respective webhooks
 """
 
-update_webhook = "webhook_url"
 announcement_webhook = "webhook_url"
 webhook = "webhook_url"
 ct_webhook = "webhook_url"
@@ -763,8 +747,8 @@ write_to_log("info", f"Successfully initalized Roblox Invites {version}!")
 
 while True:
     try:
-        check_ri_update(update_webhook)
-        check_ct_update(update_webhook)
+        check_ri_update()
+        check_ct_update()
 
         users = load_data(
             "users.json",
