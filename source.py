@@ -636,10 +636,9 @@ def check_ct_update(webhook):
         )
 
         custom_titles_old = custom_titles
-        custom_titles = load_data("custom_titles.json", {})["titles"]
-        custom_titles_version = load_data("custom_titles.json", {"version": 0})[
-            "version"
-        ]
+        ct_json = load_data("custom_titles.json", {"version": 0, "titles": {}})
+        custom_titles = ct_json["titles"]
+        custom_titles_version = ct_json["version"]
         custom_titles_delta = {"version": custom_titles_version, "titles": {}}
 
         ct_update_msg = ""
@@ -655,15 +654,23 @@ def check_ct_update(webhook):
 
         ct_update_msg += "**Added these games:**\n"
         if added_games != {}:
-            for key, value in added_games.items():
-                ct_update_msg += f" - {value['game']}\n    - Title: {value['title']}\n  - Color: #{value['color']}\n"
+            for i, (key, value) in enumerate(added_games.items()):
+                if i < 20:
+                    ct_update_msg += f" - {value['game']}\n    - Title: {value['title']}\n  - Color: #{value['color']}\n"
+                else:
+                    ct_update_msg += f"-# {len(list(added_games.keys())) - 10} more games were added.\n"
+                    break
         else:
             ct_update_msg += "No new games were added.\n"
 
         ct_update_msg += "\n**Updated these games:**\n"
         if updated_games != {}:
-            for key, value in updated_games.items():
-                ct_update_msg += f" - {value['game']}\n    - Title: {custom_titles_old[key]['title']} -> {value['title']}\n  - Color: #{custom_titles_old[key]['color']} -> #{value['color']}\n"
+            for i, (key, value) in enumerate(updated_games.items()):
+                if i < 10:
+                    ct_update_msg += f" - {value['game']}\n    - Title: {custom_titles_old[key]['title']} -> {value['title']}\n  - Color: #{custom_titles_old[key]['color']} -> #{value['color']}\n"
+                else:
+                    ct_update_msg += f"-# {len(list(updated_games.keys())) - 10} more games were updated.\n"
+                    break
         else:
             ct_update_msg += "No games were updated.\n"
 
@@ -731,17 +738,17 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "4.2.0"
+version = "4.3.0"
 update_desc = f"""
 **Roblox Invites {version}**
-- Changed the formatting of automatically sent Custom Titles updates
-- If a game's Custom Titles entry is updated, it will be reflected in the update log
+- Only 10 added and 10 updated games will be shown at maximum in Custom Titles updates
+- The Custom Titles JSON is only loaded from once when updating instead of twice
 """
 
-update_webhook = "UPDATE_LOG_WEBHOOK"
-announcement_webhook = "UPDATE_ANNOUNCEMENT_WEBHOOK"
-webhook = "MAIN_WEBHOOK"
-ct_webhook = "CUSTOM_TITLE_UPDATE_WEBHOOK"
+update_webhook = "webhook_url"
+announcement_webhook = "webhook_url"
+webhook = "webhook_url"
+ct_webhook = "webhook_url"
 
 maintenance_info = {
     "reason": "I'll be pushing Roblox Invites version 4.2.0 to the production server.",
