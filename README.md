@@ -35,11 +35,11 @@ Roblox Invites uses a variety of JSON files in /server to store configuration da
 ```
 <br>
 
-**/server/cookies.json stores cookies.**<br>
+**/server/cookies.json stores Roblox cookies.**<br>
 Currently, only the cookie at index 0 is used.<br>
 ```
 [
-    "COOKIE (str)"
+    "ROBLOSECURITY_COOKIE (str)"
 ]
 ```
 <br>
