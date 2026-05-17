@@ -32,7 +32,7 @@ print("Playtime for All Users:")
 playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)
 for user, playtime in playtimes:
     print(
-        f"{user}: Calculated - {playtime / 3600:.2f}h | Logged - {data[user]['total_playtime'] / 3600:.2f}h (DIFF: {(playtime / 3600 - data[user]['total_playtime'] / 3600):.2f}h)"
+        f"{user}: {playtime / 3600:.2f}h"
     )
 
 print("\nPlaytime for Top 20 Games:")
