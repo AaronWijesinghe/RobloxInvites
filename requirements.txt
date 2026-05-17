@@ -1,0 +1,2 @@
+# These modules are required to use Roblox Invites.
+requests<3.0.0
