@@ -77,6 +77,6 @@ When you modify this file while the bot is running, you only need to include a v
 
 ## Other JSON Files
 **You won't need to modify these files.**
-- /server/cached_ids.json stores cached Root Place IDs, universe IDs, and game names (which aren't updated often).
+- /server/cached_ids.json stores cached Root Place IDs, universe IDs, and game names. None of this data is updated once it is cached.
 - /server/old_user_presences.json stores the current presence data of all users. This is loaded at startup.
 - /server/stats.json stores user playtimes and the games a given user plays.
