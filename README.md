@@ -24,7 +24,7 @@ Run source.py using Python 3.14.5+ (older versions can be used) with the modules
 Roblox Invites uses a variety of JSON files in /server to store configuration data, user data, Custom Titles, cookies, and more.<br>
 **You will need to modify some of these files manually.** The purpose and formatting of each modifiable file can be seen below.<br>
 
-/server/blacklisted.json stores blacklisted Place IDs.<br>
+**/server/blacklisted.json stores blacklisted Place IDs.**<br>
 ```
 [
     {
@@ -35,7 +35,7 @@ Roblox Invites uses a variety of JSON files in /server to store configuration da
 ```
 <br>
 
-/server/cookies.json stores cookies. Currently, only the cookie at index 0 is used.<br>
+**/server/cookies.json stores cookies.** Currently, only the cookie at index 0 is used.<br>
 ```
 [
     "COOKIE (str)"
@@ -43,7 +43,7 @@ Roblox Invites uses a variety of JSON files in /server to store configuration da
 ```
 <br>
 
-/server/custom_titles.json stores Custom Titles.<br>
+**/server/custom_titles.json stores Custom Titles.**<br>
 ```
 [
     "version": CUSTOM_TITLES_VERSION (int),
@@ -59,23 +59,7 @@ Roblox Invites uses a variety of JSON files in /server to store configuration da
 ```
 <br>
 
-/server/custom_titles.json stores Custom Titles.<br>
-```
-[
-    "version": CUSTOM_TITLES_VERSION (type: int),
-    "titles": {
-        "UNIVERSE_ID (type: str)": {
-            "title": "CUSTOM_TITLE (str)",
-            "color": "COLOR_IN_HEX (str)",
-            "game": "GAME_NAME (str)",
-            "place_id": ROOT_PLACE_ID (int)
-        }
-    }
-]
-```
-<br>
-
-/server/users.json stores the users who will participate in your hosting of the bot.<br>
+**/server/users.json stores the users who will participate in your hosting of the bot.**<br>
 When you modify this file while the bot is running, you only need to include a value for the "username" key. The bot will automatically add the other information.<br>
 ```
 [
