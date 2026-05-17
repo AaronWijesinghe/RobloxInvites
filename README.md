@@ -5,5 +5,5 @@ Roblox Invites is server software that invites your players to the Roblox games 
 - Sends invites when a player joins a Roblox game
 - Tracks your players' playtimes across Roblox games
 
-## How do I use this?
-Clone the repository.
+## Usage
+You'll need to clone this repository first.
