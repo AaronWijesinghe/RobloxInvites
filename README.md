@@ -44,6 +44,7 @@ Roblox Invites uses a variety of JSON files in /server to store configuration da
 <br>
 
 **/server/custom_titles.json stores Custom Titles.**<br>
+You can add Custom Titles using the Custom Titles Wizard in this repository.<br>
 ```
 [
     "version": CUSTOM_TITLES_VERSION (int),
