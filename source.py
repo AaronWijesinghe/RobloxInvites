@@ -5,7 +5,6 @@ import os
 import shutil
 import sys
 import time
-from copy import deepcopy
 from datetime import datetime
 from io import BytesIO
 from itertools import batched
@@ -659,6 +658,7 @@ version = "4.4.1"
 update_desc = f"""
 **Roblox Invites {version}**
 - Made the code look cleaner
+- Remove the use of deepcopy() when saving old user presence data
 """
 
 announcement_webhook = "webhook_url"
@@ -711,7 +711,7 @@ while True:
             }
 
         check_presences()
-        old_user_presences = deepcopy(user_presences)
+        old_user_presences = user_presences
         save_data(old_user_presences, "old_user_presences.json")
         time.sleep(1)
     except requests.exceptions.ConnectionError:
