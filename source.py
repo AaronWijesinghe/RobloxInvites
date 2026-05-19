@@ -78,9 +78,7 @@ def write_to_log(type, message):
     os.makedirs("./logs/", exist_ok=True)
     timestamp_date = datetime.now().strftime("%m-%d-%Y")
     timestamp_time = datetime.now().strftime("%H:%M:%S")
-    open(f"./logs/{timestamp_date}.log", "a").write(
-        f"[{timestamp_time}] [{type.upper()}] {message}\n"
-    )
+    open(f"./logs/{timestamp_date}.log", "a").write(f"[{timestamp_time}] [{type.upper()}] {message}\n")
 
 
 def load_data(
@@ -92,9 +90,7 @@ def load_data(
     if os.path.exists(f"./server/{file}"):
         return json.loads(open(f"./server/{file}").read())
     elif no_exist_ok:
-        write_to_log(
-            "info", f"Created file './server/{file}' with data '{no_exist_data}'"
-        )
+        write_to_log("info", f"Created file './server/{file}' with data '{no_exist_data}'")
         save_data(no_exist_data, file)
         return {}
     elif not no_exist_ok and no_exist_message != "":
@@ -132,12 +128,8 @@ def cache_id(place_id: int) -> None:
             cached_ids[key] = {}
 
     if str_place_id not in cached_ids["indexes"]:
-        universe_id = session.get(
-            f"https://apis.roblox.com/universes/v1/places/{place_id}/universe"
-        ).json()["universeId"]
-        game_data = session.get(
-            f"https://games.roblox.com/v1/games?universeIds={universe_id}"
-        ).json()
+        universe_id = session.get(f"https://apis.roblox.com/universes/v1/places/{place_id}/universe").json()["universeId"]
+        game_data = session.get(f"https://games.roblox.com/v1/games?universeIds={universe_id}").json()
         game_name = game_data["data"][0]["name"]
         game_root_place_id = game_data["data"][0]["rootPlaceId"]
         cached_ids["indexes"][str_place_id] = universe_id
@@ -177,9 +169,7 @@ def check_root_place_id(place_id_1, place_id_2):
 
 def get_game_data(universe_id, key):
     try:
-        game_data = session.get(
-            f"https://games.roblox.com/v1/games?universeIds={universe_id}"
-        ).json()["data"][0][key]
+        game_data = session.get(f"https://games.roblox.com/v1/games?universeIds={universe_id}").json()["data"][0][key]
         if type(game_data) is str:
             return game_data.strip()
         else:
@@ -190,9 +180,7 @@ def get_game_data(universe_id, key):
 
 def get_server_data(place_id, key):
     try:
-        server_data = session.get(
-            f"https://games.roblox.com/v1/games/{place_id}/servers/0?sortOrder=2&excludeFullGames=false&limit=10"
-        ).json()["data"][0][key]
+        server_data = session.get(f"https://games.roblox.com/v1/games/{place_id}/servers/0?sortOrder=2&excludeFullGames=false&limit=10").json()["data"][0][key]
         return server_data
     except:
         return None
@@ -290,9 +278,7 @@ def send_leave_message(i, place_id, type):
         return
 
     embed_title = f"{displaynames[i]} left *{game}*{period}"
-    embed_desc = (
-        f"Time played: {playtime_str}\nTotal playtime for this game: {playtime_str_2}"
-    )
+    embed_desc = f"Time played: {playtime_str}\nTotal playtime for this game: {playtime_str_2}"
 
     if type == "website":
         embed_desc = f"{displaynames[i]} (@{usernames[i]}) is currently on the Roblox website or transferring between servers.\nIt's also possible that Roblox's APIs are showing this message in error.\n\nTime played: {playtime_str}\nTotal playtime for this game: {playtime_str_2}"
@@ -305,14 +291,9 @@ def send_leave_message(i, place_id, type):
             .replace("!", ".")
         )
         if type == "website":
-            embed_desc = embed_desc.replace(
-                "is currently", f"has left *{game}*{period} They are"
-            )
+            embed_desc = embed_desc.replace("is currently", f"has left *{game}*{period} They are")
         else:
-            embed_desc = (
-                f"{displaynames[i]} (@{usernames[i]}) has left *{game}*{period}\n"
-                + embed_desc
-            )
+            embed_desc = f"{displaynames[i]} (@{usernames[i]}) has left *{game}*{period}\n" + embed_desc
 
     send_embed(embed_title, embed_desc, red, webhook)
 
@@ -344,9 +325,7 @@ def get_playtime_str(i, place_id, playtime_type):
         and "root_place_id" in stats[usernames[i]]["currently_playing"]
     ):
         if stats[usernames[i]]["currently_playing"]["root_place_id"] == rpid:
-            playtime += (
-                round(time.time()) - stats[usernames[i]]["currently_playing"]["start"]
-            )
+            playtime += (round(time.time()) - stats[usernames[i]]["currently_playing"]["start"])
 
     hours = round(playtime // 3600)
     minutes = round((playtime % 3600) // 60)
@@ -424,21 +403,13 @@ def check_presences():
                     }
                 elif user in transfers:
                     if time.time() - transfers[user]["start"] > 5:
-                        send_leave_message(
-                            i,
-                            transfers[user]["old_place_id"],
-                            "absolute" if status == 0 else "website",
-                        )
+                        send_leave_message(i, transfers[user]["old_place_id"], "absolute" if status == 0 else "website")
                         finish_tracking_playtime(user)
                         del transfers[user]
-            print(
-                f"{user} is {'offline.' if status == 0 else 'on the Roblox website!'}"
-            )
+            print(f"{user} is {'offline.' if status == 0 else 'on the Roblox website!'}")
         elif status == 2 and (game_instance_id is None or place_id is None):
             print(f"{user} has their joins off, or you aren't following them.")
-            print(
-                f"   -> Follow them @ https://roblox.com/users/{user_id_list[i]}/profile"
-            )
+            print(f"   -> Follow them @ https://roblox.com/users/{user_id_list[i]}/profile")
         elif status == 2:
             assert old_user_presences is not None
             assert stats is not None
@@ -450,9 +421,7 @@ def check_presences():
                     ] == [place_id, game_instance_id]:
                         del transfers[user]
                     elif check_root_place_id(transfers[user]["old_place_id"], place_id):
-                        stats[user]["currently_playing"]["game_instance_id"] = (
-                            game_instance_id
-                        )
+                        stats[user]["currently_playing"]["game_instance_id"] = game_instance_id
                         send_invite(i, place_id, game_instance_id, transfer=True)
                     else:
                         start_tracking_playtime(user, place_id, game_instance_id)
@@ -460,12 +429,8 @@ def check_presences():
                     continue
 
                 if user_presences[user] != old_user_presences[user]:
-                    if check_root_place_id(
-                        old_user_presences[user]["place_id"], place_id
-                    ):
-                        stats[user]["currently_playing"]["game_instance_id"] = (
-                            game_instance_id
-                        )
+                    if check_root_place_id(old_user_presences[user]["place_id"], place_id):
+                        stats[user]["currently_playing"]["game_instance_id"] = (game_instance_id)
                         send_invite(i, place_id, game_instance_id, transfer=True)
                     else:
                         start_tracking_playtime(user, place_id, game_instance_id)
@@ -473,9 +438,7 @@ def check_presences():
             else:
                 start_tracking_playtime(user, place_id, game_instance_id)
                 send_invite(i, place_id, game_instance_id)
-            print(
-                f"{user} is in a game: {underline}roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}{end}"
-            )
+            print(f"{user} is in a game: {underline}roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}{end}")
         elif status == 3:
             print(f"{user} is in Roblox Studio.")
 
@@ -484,14 +447,6 @@ def check_presences():
         print(f"    - {blacklisted_ids[id]} ({blacklisted_games[id]})")
     if len(blacklisted_ids) == 0:
         print("No Place IDs are currently blacklisted.")
-
-
-def client_exception(error):
-    global checks_since_start
-
-    clear()
-    print(f"{gold}[Times Checked: {checks_since_start}]{end}")
-    print(error)
 
 
 def get_user_ids():
@@ -513,28 +468,20 @@ def get_user_ids():
 
     try:
         data = {"usernames": new_usernames}
-        req = session.post(
-            "https://users.roblox.com/v1/usernames/users", json=data
-        ).json()
+        req = session.post("https://users.roblox.com/v1/usernames/users", json=data).json()
         ids = [user["id"] for user in req["data"]]
         unames = [user["name"].lower() for user in req["data"]]
         displaynames = [user["displayName"] for user in req["data"]]
 
         if len(unames) != len(set(unames)):
             write_to_log("fatal", "Invites can't be checked twice for the same user.")
-            print(
-                1, f"{underline}Invites can't be checked twice for the same user.{end}"
-            )
+            print(f"{underline}Invites can't be checked twice for the same user.{end}")
             exit()
 
         faulty_users = [user for user in new_usernames if user.lower() not in unames]
         if len(faulty_users) > 0:
-            write_to_log(
-                "fatal", f"These users don't exist: [@{', @'.join(faulty_users)}]"
-            )
-            print(
-                f"{underline}These users don't exist: [@{', @'.join(faulty_users)}]{end}"
-            )
+            write_to_log("fatal", f"These users don't exist: [@{', @'.join(faulty_users)}]")
+            print(f"{underline}These users don't exist: [@{', @'.join(faulty_users)}]{end}")
             exit()
 
         user_id_map = dict(zip(unames, ids))
@@ -594,9 +541,7 @@ def check_ri_update():
         if os.path.exists(f"../RobloxInvitesBackups/{version}/"):
             shutil.rmtree(f"../RobloxInvitesBackups/{version}/")
         try:
-            shutil.copytree(
-                os.path.dirname(__file__), f"../RobloxInvitesBackups/{version}/"
-            )
+            shutil.copytree(os.path.dirname(__file__), f"../RobloxInvitesBackups/{version}/")
         except:
             pass
         write_to_log("info", "Server backup successful!")
@@ -681,31 +626,17 @@ user_presences = {}
 user_id_list = []
 checks_since_start = 0
 
-cookies = load_data(
-    "cookies.json",
-    [],
-    False,
-    "Add a cookie to /server/cookies.json before running Roblox Invites.",
-)
+cookies = load_data("cookies.json", [], False, "Add a cookie to /server/cookies.json before running Roblox Invites.")
 if len(cookies) > 0:
     header = {"Cookie": f".ROBLOSECURITY={cookies[0]}"}
 else:
-    write_to_log(
-        "fatal", "Add a cookie to /server/cookies.json before running Roblox Invites."
-    )
-    print(
-        f"{underline}Add a cookie to /server/cookies.json before running the program.{end}"
-    )
+    write_to_log("fatal", "Add a cookie to /server/cookies.json before running Roblox Invites.")
+    print(f"{underline}Add a cookie to /server/cookies.json before running the program.{end}")
     exit()
 
 stats = load_data("stats.json")
 cached_ids = load_data("cached_ids.json", {"indexes": [], "caches": {}})
-users = load_data(
-    "users.json",
-    [{"username": ""}],
-    False,
-    "At least one user must be present in /server/users.json.",
-)
+users = load_data("users.json", [{"username": ""}], False, "At least one user must be present in /server/users.json.",)
 blacklisted = load_data("blacklisted.json", [])
 old_user_presences = load_data("old_user_presences.json")
 custom_titles = load_data("custom_titles.json")["titles"]
@@ -724,10 +655,10 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "4.4.0"
+version = "4.4.1"
 update_desc = f"""
 **Roblox Invites {version}**
-- Removed all logging-based channels and their respective webhooks
+- Made the code look cleaner
 """
 
 announcement_webhook = "webhook_url"
@@ -750,12 +681,7 @@ while True:
         check_ri_update()
         check_ct_update()
 
-        users = load_data(
-            "users.json",
-            [{"username": ""}],
-            False,
-            "At least one user must be present in /server/users.json.",
-        )
+        users = load_data("users.json", [{"username": ""}], False, "At least one user must be present in /server/users.json.",)
         blacklisted = load_data("blacklisted.json", [])
         blacklisted_ids = [b["place_id"] for b in blacklisted]
         blacklisted_games = [b["game"] for b in blacklisted]
@@ -789,16 +715,16 @@ while True:
         save_data(old_user_presences, "old_user_presences.json")
         time.sleep(1)
     except requests.exceptions.ConnectionError:
-        client_exception(
-            f"{errors['requests.exceptions.ConnectionError']} Retrying in 5s..."
-        )
+        clear()
+        print(f"{gold}[Times Checked: {checks_since_start}]{end}")
+        print(f"{errors['requests.exceptions.ConnectionError']} Retrying in 5s...")
         time.sleep(5)
     except KeyboardInterrupt:
         break
     except Exception as e:
+        clear()
         err = f"{type(e).__module__}.{type(e).__name__}"
-        client_exception(
-            errors[err] if err in errors.keys() else f"An error has occured: {err}"
-        )
+        print(f"{gold}[Times Checked: {checks_since_start}]{end}")
+        print(errors[err] if err in errors.keys() else f"An error has occured: {err}")
         write_to_log("error", f"{err}: {str(e)}")
         time.sleep(1)
