@@ -9,6 +9,7 @@ from datetime import datetime
 from io import BytesIO
 from itertools import batched
 from sys import exit
+from copy import deepcopy
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -658,7 +659,6 @@ version = "4.4.1"
 update_desc = f"""
 **Roblox Invites {version}**
 - Made the code look cleaner
-- Remove the use of deepcopy() when saving old user presence data
 """
 
 announcement_webhook = "webhook_url"
@@ -681,7 +681,7 @@ while True:
         check_ri_update()
         check_ct_update()
 
-        users = load_data("users.json", [{"username": ""}], False, "At least one user must be present in /server/users.json.",)
+        users = load_data("users.json", [{"username": ""}], False, "At least one user must be present in /server/users.json.")
         blacklisted = load_data("blacklisted.json", [])
         blacklisted_ids = [b["place_id"] for b in blacklisted]
         blacklisted_games = [b["game"] for b in blacklisted]
@@ -711,7 +711,7 @@ while True:
             }
 
         check_presences()
-        old_user_presences = user_presences
+        old_user_presences = deepcopy(user_presences)
         save_data(old_user_presences, "old_user_presences.json")
         time.sleep(1)
     except requests.exceptions.ConnectionError:
