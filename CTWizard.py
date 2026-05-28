@@ -31,7 +31,7 @@ os.chdir(os.path.dirname(__file__))
 
 clear()
 print(f"{gold}[Custom Title Wizard]{end}")
-print(f"Version v{version} | Supports Roblox Invites v4.2.0\n")
+print(f"Version v{version} | Supports Roblox Invites v4.4.1\n")
 place_id = get_number(input("Enter the place ID or the link of a Roblox game: "))
 message = input("Enter the custom title ({0} represents the display name of a user): ")
 hex_color = input("Enter the hex code of the color: ").lower()
