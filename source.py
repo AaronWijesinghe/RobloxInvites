@@ -111,8 +111,8 @@ def check_joins(i, place_id, game_instance_id):
     joined = []
     for _ in range(len(list(user_presences.keys()))):
         if (
-            user_presences[usernames[_]]["place_id"] == place_id
-            and user_presences[usernames[_]]["game_instance_id"] == game_instance_id
+            user_presences[str(user_ids[_])]["place_id"] == place_id
+            and user_presences[str(user_ids[_])]["game_instance_id"] == game_instance_id
             and _ != i
         ):
             joined += [(displaynames[_], usernames[_])]
@@ -203,8 +203,8 @@ def send_invite(i, place_id, game_instance_id, transfer=False):
     global blacklisted_ids
     global custom_titles
 
-    if usernames[i] in transfers:
-        del transfers[usernames[i]]
+    if str(user_ids[i]) in transfers:
+        del transfers[str(user_ids[i])]
 
     if place_id in blacklisted_ids:
         return
@@ -298,34 +298,36 @@ def send_leave_message(i, place_id, type):
     send_embed(embed_title, embed_desc, red, webhook)
 
 
-def fix_stats(username):
+def fix_stats(user_id):
     default_stats = {
         "total_playtime": 0,
         "games_played": [],
         "games_playtime": {},
         "currently_playing": {},
     }
-    if username not in stats:
-        stats[username] = {}
+    if str(user_id) not in stats:
+        stats[str(user_id)] = {}
     for key in default_stats.keys():
-        if key not in stats[username]:
-            stats[username][key] = default_stats[key]
+        if key not in stats[str(user_id)]:
+            stats[str(user_id)][key] = default_stats[key]
     save_data(stats, "stats.json")
 
 
 def get_playtime_str(i, place_id, playtime_type):
+    user_id = str(user_ids[i])
+
     playtime = 0
     rpid = get_root_place_id(place_id)
-    fix_stats(usernames[i])
+    fix_stats(user_id)
 
-    if playtime_type == "both" and str(rpid) in stats[usernames[i]]["games_playtime"]:
-        playtime += stats[usernames[i]]["games_playtime"][str(rpid)]["playtime"]
+    if playtime_type == "both" and str(rpid) in stats[user_id]["games_playtime"]:
+        playtime += stats[user_id]["games_playtime"][str(rpid)]["playtime"]
     if (
         playtime_type in ["current", "both"]
-        and "root_place_id" in stats[usernames[i]]["currently_playing"]
+        and "root_place_id" in stats[user_id]["currently_playing"]
     ):
-        if stats[usernames[i]]["currently_playing"]["root_place_id"] == rpid:
-            playtime += (round(time.time()) - stats[usernames[i]]["currently_playing"]["start"])
+        if stats[user_id]["currently_playing"]["root_place_id"] == rpid:
+            playtime += (round(time.time()) - stats[user_id]["currently_playing"]["start"])
 
     hours = round(playtime // 3600)
     minutes = round((playtime % 3600) // 60)
@@ -338,14 +340,14 @@ def get_playtime_str(i, place_id, playtime_type):
         return f"{seconds}s"
 
 
-def start_tracking_playtime(username, place_id, game_instance_id):
-    fix_stats(username)
-    if stats[username]["currently_playing"] != {}:
-        finish_tracking_playtime(username)
+def start_tracking_playtime(user_id, place_id, game_instance_id):
+    fix_stats(user_id)
+    if stats[str(user_id)]["currently_playing"] != {}:
+        finish_tracking_playtime(str(user_id))
     root_place_id = get_root_place_id(place_id)
-    if root_place_id not in stats[username]["games_played"]:
-        stats[username]["games_played"] += [root_place_id]
-    stats[username]["currently_playing"] = {
+    if root_place_id not in stats[str(user_id)]["games_played"]:
+        stats[str(user_id)]["games_played"] += [root_place_id]
+    stats[str(user_id)]["currently_playing"] = {
         "root_place_id": root_place_id,
         "game_instance_id": game_instance_id,
         "start": round(time.time()),
@@ -353,29 +355,29 @@ def start_tracking_playtime(username, place_id, game_instance_id):
     save_data(stats, "stats.json")
 
 
-def finish_tracking_playtime(username):
-    fix_stats(username)
-    current = stats[username]["currently_playing"]
+def finish_tracking_playtime(user_id):
+    fix_stats(user_id)
+    current = stats[str(user_id)]["currently_playing"]
     if "start" in current:
         root_place_id = current.get("root_place_id")
         diff = round(time.time()) - current["start"]
-        if str(root_place_id) not in stats[username]["games_playtime"]:
-            stats[username]["games_playtime"][str(root_place_id)] = {"playtime": diff}
+        if str(root_place_id) not in stats[str(user_id)]["games_playtime"]:
+            stats[str(user_id)]["games_playtime"][str(root_place_id)] = {"playtime": diff}
         else:
-            stats[username]["games_playtime"][str(root_place_id)]["playtime"] += diff
-        stats[username]["total_playtime"] = sum(
+            stats[str(user_id)]["games_playtime"][str(root_place_id)]["playtime"] += diff
+        stats[str(user_id)]["total_playtime"] = sum(
             [
                 playtime["playtime"]
-                for playtime in stats[username]["games_playtime"].values()
+                for playtime in stats[str(user_id)]["games_playtime"].values()
             ]
         )
-        stats[username]["currently_playing"] = {}
+        stats[str(user_id)]["currently_playing"] = {}
     save_data(stats, "stats.json")
 
 
 def check_presences():
     global users
-    global user_id_list
+    global user_ids
     global user_presences
     global checks_since_start
     global blacklisted_ids
@@ -384,63 +386,65 @@ def check_presences():
 
     clear()
     print(f"{gold}[Times Checked: {checks_since_start}]{end}")
-    for i, user in enumerate(usernames):
-        status = user_presences[user]["status"]
-        place_id = user_presences[user]["place_id"]
-        game_instance_id = user_presences[user]["game_instance_id"]
+    for i, int_user_id in enumerate(user_ids):
+        user_id = str(int_user_id)
+
+        status = user_presences[user_id]["status"]
+        place_id = user_presences[user_id]["place_id"]
+        game_instance_id = user_presences[user_id]["game_instance_id"]
 
         if status in [0, 1]:
             assert old_user_presences is not None
-            if user in old_user_presences.keys():
-                if old_user_presences[user]["status"] == 2 and user not in transfers:
-                    transfers[user] = {
+            if user_id in old_user_presences.keys():
+                if old_user_presences[user_id]["status"] == 2 and user_id not in transfers:
+                    transfers[user_id] = {
                         "start": time.time(),
-                        "old_place_id": old_user_presences[user]["place_id"],
-                        "old_game_instance_id": old_user_presences[user][
+                        "old_place_id": old_user_presences[user_id]["place_id"],
+                        "old_game_instance_id": old_user_presences[user_id][
                             "game_instance_id"
                         ],
-                        "username": user,
+                        "username": usernames[i],
                     }
-                elif user in transfers:
-                    if time.time() - transfers[user]["start"] > 5:
-                        send_leave_message(i, transfers[user]["old_place_id"], "absolute" if status == 0 else "website")
-                        finish_tracking_playtime(user)
-                        del transfers[user]
-            print(f"{user} is {'offline.' if status == 0 else 'on the Roblox website!'}")
+                elif user_id in transfers:
+                    if time.time() - transfers[user_id]["start"] > 5:
+                        send_leave_message(i, transfers[user_id]["old_place_id"], "absolute" if status == 0 else "website")
+                        finish_tracking_playtime(user_id)
+                        del transfers[user_id]
+            print(f"{usernames[i]} is {'offline.' if status == 0 else 'on the Roblox website!'}")
         elif status == 2 and (game_instance_id is None or place_id is None):
-            print(f"{user} has their joins off, or you aren't following them.")
-            print(f"   -> Follow them @ https://roblox.com/users/{user_id_list[i]}/profile")
+            print(f"{usernames[i]} has their joins off, or you aren't following them.")
+            print(f"   -> Follow them @ https://roblox.com/users/{user_ids[i]}/profile")
         elif status == 2:
             assert old_user_presences is not None
             assert stats is not None
-            if user in old_user_presences:
-                if user in transfers:
+            if user_id in old_user_presences:
+                if user_id in transfers:
                     if [
-                        transfers[user]["old_place_id"],
-                        transfers[user]["old_game_instance_id"],
+                        transfers[user_id]["old_place_id"],
+                        transfers[user_id]["old_game_instance_id"],
                     ] == [place_id, game_instance_id]:
-                        del transfers[user]
-                    elif check_root_place_id(transfers[user]["old_place_id"], place_id):
-                        stats[user]["currently_playing"]["game_instance_id"] = game_instance_id
+                        del transfers[user_id]
+                    elif check_root_place_id(transfers[user_id]["old_place_id"], place_id):
+                        stats[user_id]["currently_playing"]["game_instance_id"] = game_instance_id
                         send_invite(i, place_id, game_instance_id, transfer=True)
                     else:
-                        start_tracking_playtime(user, place_id, game_instance_id)
+                        start_tracking_playtime(user_id, place_id, game_instance_id)
                         send_invite(i, place_id, game_instance_id)
                     continue
 
-                if user_presences[user] != old_user_presences[user]:
-                    if check_root_place_id(old_user_presences[user]["place_id"], place_id):
-                        stats[user]["currently_playing"]["game_instance_id"] = (game_instance_id)
+                if user_presences[user_id] != old_user_presences[user_id]:
+                    if check_root_place_id(old_user_presences[user_id]["place_id"], place_id):
+                        stats[user_id]["currently_playing"]["game_instance_id"] = (game_instance_id)
                         send_invite(i, place_id, game_instance_id, transfer=True)
                     else:
-                        start_tracking_playtime(user, place_id, game_instance_id)
+                        start_tracking_playtime(user_id, place_id, game_instance_id)
                         send_invite(i, place_id, game_instance_id)
             else:
-                start_tracking_playtime(user, place_id, game_instance_id)
+                start_tracking_playtime(user_id, place_id, game_instance_id)
                 send_invite(i, place_id, game_instance_id)
-            print(f"{user} is in a game: {underline}roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}{end}")
+            print(f"{usernames[i]} is in a game: {underline}roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}{end}")
         elif status == 3:
-            print(f"{user} is in Roblox Studio.")
+            print(f"{usernames[i]} is in Roblox Studio.")
 
     print(f"\n{gold}[Blacklisted Place IDs]{end}")
     for id in range(len(blacklisted_ids)):
@@ -451,7 +455,7 @@ def check_presences():
 
 def get_user_ids():
     global users
-    global user_id_list
+    global user_ids
 
     new_user_indexes = []
     new_usernames = []
@@ -460,8 +464,8 @@ def get_user_ids():
             new_user_indexes += [i]
             new_usernames += [username["username"]]
 
-    if len(user_id_list) != len(users) and len(new_usernames) == 0:
-        user_id_list = [user["user_id"] for user in users]
+    if len(user_ids) != len(users) and len(new_usernames) == 0:
+        user_ids = [user["user_id"] for user in users]
         return
     elif len(new_usernames) == 0:
         return
@@ -494,7 +498,7 @@ def get_user_ids():
 
         write_to_log("info", f"Added new usernames: {new_usernames}")
         save_data(users, "users.json")
-        user_id_list = [user["user_id"] for user in users]
+        user_ids = [user["user_id"] for user in users]
     except Exception as e:
         err = f"{type(e).__module__}.{type(e).__name__}"
         if err in errors.keys():
@@ -623,7 +627,7 @@ write_to_log("info", "Initalizing Roblox Invites...")
 
 transfers = {}
 user_presences = {}
-user_id_list = []
+user_ids = []
 checks_since_start = 0
 
 cookies = load_data("cookies.json", [], False, "Add a cookie to /server/cookies.json before running Roblox Invites.")
@@ -640,7 +644,7 @@ users = load_data("users.json", [{"username": ""}], False, "At least one user mu
 blacklisted = load_data("blacklisted.json", [])
 old_user_presences = load_data("old_user_presences.json")
 custom_titles = load_data("custom_titles.json")["titles"]
-user_id_list = [user["user_id"] for user in users]
+user_ids = [user["user_id"] for user in users]
 write_to_log("info", f"Loaded server data at {os.path.dirname(__file__)}/server/")
 
 session = requests.Session()
@@ -655,10 +659,10 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "4.4.1"
+version = "5.0.0"
 update_desc = f"""
 **Roblox Invites {version}**
-- Made the code look cleaner
+- Statistics and user presence data are now indexed by user ID instead of username
 """
 
 announcement_webhook = "webhook_url"
@@ -692,7 +696,7 @@ while True:
         displaynames = [user["display_name"] for user in users]
 
         online_data = {"user_presences": []}
-        for batched_ids in batched(user_id_list, 50):
+        for batched_ids in batched(user_ids, 50):
             req = session.post(
                 url="https://presence.roblox.com/v1/presence/users",
                 json={"userIDs": batched_ids},
@@ -703,8 +707,8 @@ while True:
             else:
                 raise requests.exceptions.ConnectionError
 
-        for i, username in enumerate(usernames):
-            user_presences[username] = {
+        for i, user_id in enumerate(user_ids):
+            user_presences[str(user_id)] = {
                 "game_instance_id": online_data["user_presences"][i]["gameId"],
                 "place_id": online_data["user_presences"][i]["placeId"],
                 "status": online_data["user_presences"][i]["userPresenceType"],
