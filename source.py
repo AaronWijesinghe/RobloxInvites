@@ -229,12 +229,15 @@ def send_invite(i, place_id, game_instance_id, transfer=False):
         embed_color = int(custom_titles[str(universe_id)]["color"], 16)
 
     if transfer:
-        embed_title = f"{displaynames[i]} transferred servers!"
+        if str(universe_id) in custom_titles:
+            embed_title = f"{custom_titles[str(universe_id)]["title"].format(displaynames[i])[:-1]} in a new server!"
+        else:
+            embed_title = f"{displaynames[i]} transferred servers!"
         embed_desc = f"{displaynames[i]} (@{usernames[i]}) has transferred to a different server in *{game}*{period}\nTotal playtime for this game: {playtime_str}\n\nOpen the link below, or copy this URL:\n-# {game_url}"
 
     if max_players == 1:
         embed_desc = f"{displaynames[i]} (@{usernames[i]}) is playing *{game}*{exclamation}\nHowever, you can't join them because the max server size is 1 player.\nTotal playtime for this game: {playtime_str}\n\n-# {game_url}"
-        if embed_color == green:
+        if str(universe_id) not in custom_titles:
             embed_color = orange
         use_join_embed = False
 
@@ -670,15 +673,17 @@ update_desc = f"""
 **Roblox Invites {version}**
 - Statistics and user presence data are now indexed by user ID instead of username
 - Attempted to fix an issue where inactive sessions inflated total server playtime
+- A given invite embed's color will only change to orange (case: max server size is 1) if there is no existing custom title for the game
+    - Now, a game with a custom title but a custom color of default green will still retain the default green color in all cases
 
 **Deprecation of --migrate**
 The --migrate flag's functionality has been removed.
 Instances of Roblox Invites that call "robloxinvites.py --migrate" before updating should be manually updated to prevent issues.
 """
 
-announcement_webhook = "webhook_url"
-webhook = "webhook_url"
-ct_webhook = "webhook_url"
+announcement_webhook = "webhook"
+webhook = "webhook"
+ct_webhook = "webhook"
 
 maintenance_info = {
     "reason": "I'll be pushing Roblox Invites version 4.2.0 to the production server.",
