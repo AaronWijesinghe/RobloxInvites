@@ -625,11 +625,16 @@ def check_ct_update():
 # START migration code
 stats = json.loads(open("./server/stats.json", "r").read())
 users = json.loads(open("./server/users.json", "r").read())
+old_user_presences = json.loads(open("./server/old_user_presences.json", "r").read())
 for user in users:
     if user["username"] in stats:
         stats[str(user["user_id"])] = deepcopy(stats[user["username"]])
         del stats[user["username"]]
+    if user["username"] in old_user_presences:
+        old_user_presences[str(user["user_id"])] = deepcopy(old_user_presences[user["username"]])
+        del old_user_presences[user["username"]]
 open("./server/stats.json", "w").write(json.dumps(stats, indent=2))
+open("./server/old_user_presences.json", "w").write(json.dumps(old_user_presences, indent=2))
 
 write_to_log("info", "Initalizing Roblox Invites...")
 # END migration code
