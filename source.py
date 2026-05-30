@@ -16,9 +16,6 @@ from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 
 os.chdir(os.path.dirname(__file__))
-if "--migrate" in sys.argv:
-    exit()
-
 if os.path.exists("session.lock"):
     print("Another instance of Roblox Invites is already running.")
     exit()
@@ -119,20 +116,18 @@ def check_joins(i, place_id, game_instance_id):
     return joined
 
 
-def cache_id(place_id: int) -> None:
-    str_place_id = str(place_id)
-    assert cached_ids is not None
-
+def cache_id(int_place_id: int) -> None:
     for key in ["indexes", "caches"]:
         if key not in cached_ids:
             cached_ids[key] = {}
 
-    if str_place_id not in cached_ids["indexes"]:
+    place_id = str(int_place_id)
+    if place_id not in cached_ids["indexes"]:
         universe_id = session.get(f"https://apis.roblox.com/universes/v1/places/{place_id}/universe").json()["universeId"]
         game_data = session.get(f"https://games.roblox.com/v1/games?universeIds={universe_id}").json()
         game_name = game_data["data"][0]["name"]
         game_root_place_id = game_data["data"][0]["rootPlaceId"]
-        cached_ids["indexes"][str_place_id] = universe_id
+        cached_ids["indexes"][place_id] = universe_id
         cached_ids["caches"][str(universe_id)] = {
             "root_place_id": game_root_place_id,
             "name": game_name,
@@ -340,14 +335,15 @@ def get_playtime_str(i, place_id, playtime_type):
         return f"{seconds}s"
 
 
-def start_tracking_playtime(user_id, place_id, game_instance_id):
+def start_tracking_playtime(int_user_id, place_id, game_instance_id):
+    user_id = str(int_user_id)
     fix_stats(user_id)
-    if stats[str(user_id)]["currently_playing"] != {}:
-        finish_tracking_playtime(str(user_id))
+    if stats[user_id]["currently_playing"] != {}:
+        finish_tracking_playtime(user_id)
     root_place_id = get_root_place_id(place_id)
-    if root_place_id not in stats[str(user_id)]["games_played"]:
-        stats[str(user_id)]["games_played"] += [root_place_id]
-    stats[str(user_id)]["currently_playing"] = {
+    if root_place_id not in stats[user_id]["games_played"]:
+        stats[user_id]["games_played"] += [root_place_id]
+    stats[user_id]["currently_playing"] = {
         "root_place_id": root_place_id,
         "game_instance_id": game_instance_id,
         "start": round(time.time()),
@@ -355,23 +351,24 @@ def start_tracking_playtime(user_id, place_id, game_instance_id):
     save_data(stats, "stats.json")
 
 
-def finish_tracking_playtime(user_id):
+def finish_tracking_playtime(int_user_id):
+    user_id = str(int_user_id)
     fix_stats(user_id)
-    current = stats[str(user_id)]["currently_playing"]
+    current = stats[user_id]["currently_playing"]
     if "start" in current:
         root_place_id = current.get("root_place_id")
         diff = round(time.time()) - current["start"]
-        if str(root_place_id) not in stats[str(user_id)]["games_playtime"]:
-            stats[str(user_id)]["games_playtime"][str(root_place_id)] = {"playtime": diff}
+        if str(root_place_id) not in stats[user_id]["games_playtime"]:
+            stats[user_id]["games_playtime"][str(root_place_id)] = {"playtime": diff}
         else:
-            stats[str(user_id)]["games_playtime"][str(root_place_id)]["playtime"] += diff
-        stats[str(user_id)]["total_playtime"] = sum(
+            stats[user_id]["games_playtime"][str(root_place_id)]["playtime"] += diff
+        stats[user_id]["total_playtime"] = sum(
             [
                 playtime["playtime"]
-                for playtime in stats[str(user_id)]["games_playtime"].values()
+                for playtime in stats[user_id]["games_playtime"].values()
             ]
         )
-        stats[str(user_id)]["currently_playing"] = {}
+        stats[user_id]["currently_playing"] = {}
     save_data(stats, "stats.json")
 
 
@@ -394,7 +391,6 @@ def check_presences():
         game_instance_id = user_presences[user_id]["game_instance_id"]
 
         if status in [0, 1]:
-            assert old_user_presences is not None
             if user_id in old_user_presences.keys():
                 if old_user_presences[user_id]["status"] == 2 and user_id not in transfers:
                     transfers[user_id] = {
@@ -410,13 +406,14 @@ def check_presences():
                         send_leave_message(i, transfers[user_id]["old_place_id"], "absolute" if status == 0 else "website")
                         finish_tracking_playtime(user_id)
                         del transfers[user_id]
+                elif user_id in stats:
+                    if stats[user_id]["currently_playing"] != {}:
+                        finish_tracking_playtime(user_id)
             print(f"{usernames[i]} is {'offline.' if status == 0 else 'on the Roblox website!'}")
         elif status == 2 and (game_instance_id is None or place_id is None):
             print(f"{usernames[i]} has their joins off, or you aren't following them.")
             print(f"   -> Follow them @ https://roblox.com/users/{user_ids[i]}/profile")
         elif status == 2:
-            assert old_user_presences is not None
-            assert stats is not None
             if user_id in old_user_presences:
                 if user_id in transfers:
                     if [
@@ -622,8 +619,17 @@ def check_ct_update():
         send_file(ct_webhook, "./server/custom_titles_delta.json")
         os.remove("./server/custom_titles_delta.json")
 
+# START migration code
+stats = json.loads(open("./server/stats.json", "r").read())
+users = json.loads(open("./server/users.json", "r").read())
+for user in users:
+    if user["username"] in stats:
+        stats[str(user["user_id"])] = deepcopy(stats[user["username"]])
+        del stats[user["username"]]
+open("./server/stats.json", "w").write(json.dumps(stats, indent=2))
 
 write_to_log("info", "Initalizing Roblox Invites...")
+# END migration code
 
 transfers = {}
 user_presences = {}
@@ -663,6 +669,11 @@ version = "5.0.0"
 update_desc = f"""
 **Roblox Invites {version}**
 - Statistics and user presence data are now indexed by user ID instead of username
+- Attempted to fix an issue where inactive sessions inflated total server playtime
+
+**Deprecation of --migrate**
+The --migrate flag's functionality has been removed.
+Instances of Roblox Invites that call "robloxinvites.py --migrate" before updating should be manually updated to prevent issues.
 """
 
 announcement_webhook = "webhook_url"
