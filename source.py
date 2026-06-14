@@ -466,9 +466,9 @@ def get_user_ids():
 
     if len(user_ids) != len(users) and len(new_usernames) == 0:
         user_ids = [user["user_id"] for user in users]
-        return
+        return True
     elif len(new_usernames) == 0:
-        return
+        return False
 
     try:
         data = {"usernames": new_usernames}
@@ -499,6 +499,7 @@ def get_user_ids():
         write_to_log("info", f"Added new usernames: {new_usernames}")
         save_data(users, "users.json")
         user_ids = [user["user_id"] for user in users]
+        return True
     except Exception as e:
         err = f"{type(e).__module__}.{type(e).__name__}"
         if err in errors.keys():
@@ -510,8 +511,8 @@ def get_user_ids():
             time.sleep(1)
 
 
-def announce(operating_mode, webhook):
-    match operating_mode:
+def announce(announcement_type, webhook):
+    match announcement_type:
         case "prod":
             write_to_log("info", f"Sent update changelog embed to {webhook}")
             send_embed("Updates", update_desc, blue, webhook)
@@ -680,6 +681,7 @@ update_desc = f"""
 - Attempted to fix an issue where inactive sessions inflated total server playtime
 - A given invite embed's color will only change to orange (case: max server size is 1) if there is no existing custom title for the game
     - Now, a game with a custom title but a custom color of default green will still retain the default green color in all cases
+- Removing a user actually removes them from /server/stats.json now
 
 **Deprecation of --migrate**
 The --migrate flag's functionality has been removed.
@@ -710,7 +712,14 @@ while True:
         blacklisted = load_data("blacklisted.json", [])
         blacklisted_ids = [b["place_id"] for b in blacklisted]
         blacklisted_games = [b["game"] for b in blacklisted]
-        get_user_ids()
+        
+        if checks_since_start == 0 or get_user_ids():
+            for id in list(stats.keys()):
+                if not id.isdigit():
+                    del stats[id]
+                elif int(id) not in user_ids:
+                    del stats[id]
+        save_data(stats, "stats.json")
 
         checks_since_start += 1
         usernames = [user["username"] for user in users]
