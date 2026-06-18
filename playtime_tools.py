@@ -160,7 +160,7 @@ while True:
     print(f"{gold}{bold}[Playtime Tools] [v2.0.0]{end}")
     print("Generate playtime leaderboards for Roblox Invites easily! More features coming soon™")
     print("Supports Roblox Invites v5.0.0 - v5.0.1")
-    print("Data Version (/server/playtime_tools.json): v2")
+    print("Data Version: v2")
 
     print("\nLatest changes:")
     print("    - Added /game and game-specific leaderboards")
