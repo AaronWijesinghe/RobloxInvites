@@ -81,12 +81,13 @@ def generate_game_stats(game):
         input("This game couldn't be found.")
         return
 
+    total = 0
     playtimes = {}
-    stats = json.loads(open("./server/stats.json").read())
-    total = data["weeks"][len(data["weeks"]) - 1]["game_playtimes"][str(game)]
+    stats = data["weeks"][len(data["weeks"]) - 1]["stats"]
     for user_id, statistics in stats.items():
         if str(game) in statistics["games_playtime"]:
             playtimes[str(user_id)] = statistics["games_playtime"][str(game)]["playtime"]
+            total += statistics["games_playtime"][str(game)]["playtime"]
 
     universe_id = cache["indexes"][str(game)]
     name = cache["caches"][str(universe_id)]["name"]
@@ -119,7 +120,8 @@ def save_playtime_data():
     data["weeks"] += [{
         "total": total,
         "playtimes": playtimes,
-        "game_playtimes": game_playtimes
+        "game_playtimes": game_playtimes,
+        "stats": stats
     }]
     open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
 
@@ -149,7 +151,7 @@ if os.path.exists("./server/playtime_tools.json"):
     data = json.loads(open("./server/playtime_tools.json", "r").read())
 else:
     data = {
-        "version": 2,
+        "version": 3,
         "weeks": []
     }
     open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
@@ -157,18 +159,17 @@ else:
 cache = json.loads(open("./server/cached_ids.json").read())
 while True:
     clear()
-    print(f"{gold}{bold}[Playtime Tools] [v2.0.0]{end}")
+    print(f"{gold}{bold}[Playtime Tools] [v2.1.0]{end}")
     print("Generate playtime leaderboards for Roblox Invites easily! More features coming soon™")
     print("Supports Roblox Invites v5.0.0 - v5.0.1")
-    print("Data Version: v2")
+    print("Data Version: v3")
 
     print("\nLatest changes:")
-    print("    - Added /game and game-specific leaderboards")
-    print("    - Playtime data is now indexed by Universe ID instead of by game name")
+    print("    - stats.json is now stored directly in playtime_tools.json when saving")
 
     print("\nAvailable commands:")
     print("    - /lb - Generates leaderboards for all data (''), for the current week ('weekly'), or for a range of weeks ('range')")
-    print("    - /save - Saves playtime data to /server/playtime_tools.json, and diffs the hours from the previous week (if possible)")
+    print("    - /save - Saves playtime data to /server/playtime_tools.json")
     print("    - /game [GAME_NAME] - Generates leaderboards for a specific game (requires up-to-date stats.json in /server)")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
