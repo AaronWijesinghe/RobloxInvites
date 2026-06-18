@@ -161,7 +161,7 @@ while True:
     print("\nAvailable commands:")
     print("    - /lb - Generates leaderboards for all data (''), for the current week ('weekly'), or for a range of weeks ('range')")
     print("    - /save - Saves playtime data to /server/playtime_tools.json, and diffs the hours from the previous week (if possible)")
-    print("    - [WIP: NOT IMPLEMENTED YET] /game - Generates leaderboards for all playtime regarding a specific universe id")
+    print("    - /game [GAME_NAME] - Generates leaderboards for a specific game (requires up-to-date stats.json in /server)")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
     command = input("Enter a command: ").lower().strip()
