@@ -16,7 +16,7 @@ data = json.loads(open("./server/stats.json").read())
 cache = json.loads(open("./server/cached_ids.json").read())
 users = json.loads(open("./server/users.json").read())
 
-def leaderboard(string, pos):
+def format_leaderboard(string, pos):
     if pos == 1:
         return f"{gold}{string}{end}"
     elif pos == 2:
@@ -53,23 +53,29 @@ for user in users:
         "display_name": user["display_name"]
     }
 
-def generate_stats(playtimes, game_playtimes):
+def generate_stats(lb_type, playtimes={}, game_playtimes={}):
+    total = data["weeks"][len(data["weeks"]) - 1]["total"]
+    if lb_type == "weekly":
+        total = data["weeks"][len(data["weeks"]) - 1]["total_diff"]
+        playtimes = data["weeks"][len(data["weeks"]) - 1]["playtimes_diff"]
+        game_playtimes = data["weeks"][len(data["weeks"]) - 1]["game_playtimes_diff"]
+
     clear()
-    print(f"{gold}{bold}[Server Leaderboard]{end}")
+    print(f"{gold}{bold}[Server Leaderboard] {"[Weekly]" if lb_type == "weekly" else "[All]"}{end}")
     print(f"{bold}{underline}Total Server Playtime:{end} {total / 3600:.2f}h\n")
 
     print(f"{bold}Playtime for Top 20 Users:{end}")
     playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
     for i, (user, playtime) in enumerate(playtimes, start=1):
-        print(leaderboard(f"[#{i}] {user_dict[int(user)]["username"]} ({playtime / 3600:.2f}h)", i))
+        print(format_leaderboard(f"[#{i}] {user_dict[int(user)]["username"]} ({playtime / 3600:.2f}h)", i))
 
     print(f"\n{bold}Playtime for Top 20 Games:{end}")
     game_playtimes = sorted(game_playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
     for i, (game, playtime) in enumerate(game_playtimes, start=1):
-        print(leaderboard(f"[#{i}] {game}: {playtime / 3600:.2f}h", i))
+        print(format_leaderboard(f"[#{i}] {game}: {playtime / 3600:.2f}h", i))
     input("\nPress ENTER to return to the main menu. ")
 
-def save_data(total, playtimes, game_playtimes):
+def save_playtime_data(total, playtimes, game_playtimes):
     playtimes_diff = {}
     game_playtimes_diff = {}
     total_diff = 0
@@ -102,54 +108,37 @@ def save_data(total, playtimes, game_playtimes):
         "playtimes_diff": playtimes_diff,
         "game_playtimes_diff": game_playtimes_diff
     }]
-    open("./server/stat_summarizer.json", "w").write(json.dumps(data, indent=2))
+    open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
 
-def generate_weekly_stats():
-    total = data["weeks"][len(data["weeks"]) - 1]["total_diff"]
-    playtimes = data["weeks"][len(data["weeks"]) - 1]["playtimes_diff"]
-    game_playtimes = data["weeks"][len(data["weeks"]) - 1]["game_playtimes_diff"]
-
-    clear()
-    print(f"{gold}{bold}[Weekly Server Leaderboard]{end}")
-    print(f"{bold}{underline}Total Server Playtime This Week:{end} {total / 3600:.2f}h\n")
-
-    print(f"{bold}Weekly Playtime for Top 20 Users:{end}")
-    playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
-    for i, (user, playtime) in enumerate(playtimes, start=1):
-        print(leaderboard(f"[#{i}] {user_dict[int(user)]["username"]} ({playtime / 3600:.2f}h)", i))
-
-    print(f"\n{bold}Weekly Playtime for Top 20 Games:{end}")
-    game_playtimes = sorted(game_playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
-    for i, (game, playtime) in enumerate(game_playtimes, start=1):
-        print(leaderboard(f"[#{i}] {game}: {playtime / 3600:.2f}h", i))
-    input("\nPress ENTER to return to the main menu. ")
-
-if os.path.exists("./server/stat_summarizer.json"):
-    data = json.loads(open("./server/stat_summarizer.json", "r").read())
+if os.path.exists("./server/playtime_tools.json"):
+    data = json.loads(open("./server/playtime_tools.json", "r").read())
 else:
     data = {
         "version": 1,
         "weeks": []
     }
-    open("./server/stat_summarizer.json", "w").write(json.dumps(data, indent=2))
+    open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
 
 while True:
     clear()
-    print(f"{gold}{bold}[Playtime Stat Generator v4.1.0]{end}")
+    print(f"{gold}{bold}[Playtime Tools] [v1.0.0]{end}")
+    print("Generate playtime leaderboards for Roblox Invites easily! More features to come soon.")
     print("Supports Roblox Invites v5.0.0 - v5.0.1")
+    print("Data Version (/server/playtime_tools.json): v1")
 
-    print("\nCommands:")
+    print("\nAvailable commands:")
     print("    - /lb - Generates leaderboards for all data ('') or for the current week ('weekly')")
-    print("    - /save - Saves playtime data to /server/stat_summarization.json, and diffs the hours from the previous week (if possible)")
+    print("    - /save - Saves playtime data to /server/playtime_tools.json, and diffs the hours from the previous week (if possible)")
 
-    command = input("\nEnter a command ('/lb'): ").lower().strip()
+    print(f"\nWeeks saved: {len(data["weeks"])}")
+    command = input("Enter a command ('/lb'): ").lower().strip()
 
     args = command.split(" ")[1:]
     if command.startswith("/lb"):
         if len(args) == 0:
-            generate_stats(playtimes, game_playtimes)
+            generate_stats("all", playtimes, game_playtimes)
             continue
         if args[0] == "weekly":
-            generate_weekly_stats()
+            generate_stats("weekly")
     elif command == "/save":
-        save_data(total, playtimes, game_playtimes)
+        save_playtime_data(total, playtimes, game_playtimes)
