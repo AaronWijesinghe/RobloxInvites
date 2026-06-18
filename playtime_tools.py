@@ -154,9 +154,8 @@ while True:
     print("Data Version (/server/playtime_tools.json): v2")
 
     print("\nLatest changes:")
-    print("    - Diffs are now dynamically calculated instead of being stored to disk")
-    print("    - You don't need to restart Playtime Tools to import new statistics.")
-    print("    - Added 'range' argument to /lb")
+    print("    - Added /game and game-specific leaderboards")
+    print("    - Playtime data is now indexed by Universe ID instead of by game name")
 
     print("\nAvailable commands:")
     print("    - /lb - Generates leaderboards for all data (''), for the current week ('weekly'), or for a range of weeks ('range')")
