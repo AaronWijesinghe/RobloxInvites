@@ -42,7 +42,10 @@ def game_select(query):
     for game in games:
         if query.lower() in game.lower():
             valid_games += [game]
-    return game_cache[valid_games[0]]
+    if len(valid_games) > 0:
+        return game_cache[valid_games[0]]
+    else:
+        return None
 
 def generate_stats(lb_type, total, playtimes, game_playtimes):
     global cache
@@ -71,6 +74,13 @@ def generate_stats(lb_type, total, playtimes, game_playtimes):
 
 def generate_game_stats(game):
     global cache
+
+    clear()
+    if game == None:
+        print(f"{gold}{bold}[Error]{end}")
+        input("This game couldn't be found.")
+        return
+
     playtimes = {}
     stats = json.loads(open("./server/stats.json").read())
     total = data["weeks"][len(data["weeks"]) - 1]["game_playtimes"][str(game)]
@@ -78,7 +88,6 @@ def generate_game_stats(game):
         if str(game) in statistics["games_playtime"]:
             playtimes[str(user_id)] = statistics["games_playtime"][str(game)]["playtime"]
 
-    clear()
     universe_id = cache["indexes"][str(game)]
     name = cache["caches"][str(universe_id)]["name"]
     print(f"{gold}{bold}[Leaderboard for {name}]{end}")
