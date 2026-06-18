@@ -31,7 +31,21 @@ def format_leaderboard(string, pos):
     else:
         return string
 
+def game_select(query):
+    cache = json.loads(open("./server/cached_ids.json").read())["caches"]
+    game_cache = {}
+    for universe_id in cache.keys():
+        game_cache[cache[universe_id]["name"]] = cache[universe_id]["root_place_id"]
+
+    games = list(game_cache.keys())
+    valid_games = []
+    for game in games:
+        if query.lower() in game.lower():
+            valid_games += [game]
+    return game_cache[valid_games[0]]
+
 def generate_stats(lb_type, total, playtimes, game_playtimes):
+    global cache
     titles = {
         "weekly": "[Weekly]",
         "all": "[All]",
@@ -45,35 +59,51 @@ def generate_stats(lb_type, total, playtimes, game_playtimes):
     print(f"{bold}Playtime for Top 20 Users:{end}")
     playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
     for i, (user, playtime) in enumerate(playtimes, start=1):
-        print(format_leaderboard(f"[#{i}] {user_dict[int(user)]["username"]} ({playtime / 3600:.2f}h)", i))
+        print(format_leaderboard(f"[#{i}] {user_dict[int(user)]["display_name"]} ({playtime / 3600:.2f}h)", i))
 
     print(f"\n{bold}Playtime for Top 20 Games:{end}")
     game_playtimes = sorted(game_playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
     for i, (game, playtime) in enumerate(game_playtimes, start=1):
-        print(format_leaderboard(f"[#{i}] {game}: {playtime / 3600:.2f}h", i))
+        universe_id = cache["indexes"][str(game)]
+        name = cache["caches"][str(universe_id)]["name"]
+        print(format_leaderboard(f"[#{i}] {name}: {playtime / 3600:.2f}h", i))
+    input("\nPress ENTER to return to the main menu. ")
+
+def generate_game_stats(game):
+    global cache
+    playtimes = {}
+    stats = json.loads(open("./server/stats.json").read())
+    total = data["weeks"][len(data["weeks"]) - 1]["game_playtimes"][str(game)]
+    for user_id, statistics in stats.items():
+        if str(game) in statistics["games_playtime"]:
+            playtimes[str(user_id)] = statistics["games_playtime"][str(game)]["playtime"]
+
+    clear()
+    universe_id = cache["indexes"][str(game)]
+    name = cache["caches"][str(universe_id)]["name"]
+    print(f"{gold}{bold}[Leaderboard for {name}]{end}")
+    print(f"{bold}{underline}Total Server Playtime:{end} {total / 3600:.2f}h\n")
+
+    print(f"{bold}Playtime for Top 20 Users:{end}")
+    playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
+    for i, (user, playtime) in enumerate(playtimes, start=1):
+        print(format_leaderboard(f"[#{i}] {user_dict[int(user)]["display_name"]} ({playtime / 3600:.2f}h)", i))
     input("\nPress ENTER to return to the main menu. ")
 
 def save_playtime_data():
+    global cache
+   
     stats = json.loads(open("./server/stats.json").read())
-    cache = json.loads(open("./server/cached_ids.json").read())
-
     total = 0
     playtimes = {}
     game_playtimes = {}
-    id_to_name = {}
-    for c in cache["caches"].items():
-        id_to_name[str(c[1]["root_place_id"])] = c[1]["name"]
     for user in stats:
         playtimes[user] = 0
         for game in stats[user]["games_played"]:
             if str(game) in stats[user]["games_playtime"]:
-                if str(game) not in id_to_name:
-                    id_to_name[str(game)] = str(game)
-                if id_to_name[str(game)] not in game_playtimes:
-                    game_playtimes[id_to_name[str(game)]] = 0
-                game_playtimes[id_to_name[str(game)]] += stats[user]["games_playtime"][
-                    str(game)
-                ]["playtime"]
+                if str(game) not in game_playtimes:
+                    game_playtimes[str(game)] = 0
+                game_playtimes[str(game)] += stats[user]["games_playtime"][str(game)]["playtime"]
                 total += stats[user]["games_playtime"][str(game)]["playtime"]
                 playtimes[user] += stats[user]["games_playtime"][str(game)]["playtime"]
 
@@ -110,17 +140,18 @@ if os.path.exists("./server/playtime_tools.json"):
     data = json.loads(open("./server/playtime_tools.json", "r").read())
 else:
     data = {
-        "version": 1,
+        "version": 2,
         "weeks": []
     }
     open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
 
+cache = json.loads(open("./server/cached_ids.json").read())
 while True:
     clear()
-    print(f"{gold}{bold}[Playtime Tools] [v1.1.0]{end}")
+    print(f"{gold}{bold}[Playtime Tools] [v2.0.0]{end}")
     print("Generate playtime leaderboards for Roblox Invites easily! More features coming soon™")
     print("Supports Roblox Invites v5.0.0 - v5.0.1")
-    print("Data Version (/server/playtime_tools.json): v1")
+    print("Data Version (/server/playtime_tools.json): v2")
 
     print("\nLatest changes:")
     print("    - Diffs are now dynamically calculated instead of being stored to disk")
@@ -149,5 +180,9 @@ while True:
                 continue
             range = get_diff(int(args[1]) - 1, int(args[2]) - 1)
             generate_stats("range", range["total"], range["playtimes"], range["game_playtimes"])
+    elif command.startswith("/game "):
+        if len(args) == 0:
+            continue
+        generate_game_stats(game_select(command.split("/game ")[1]))
     elif command == "/save":
         save_playtime_data()
