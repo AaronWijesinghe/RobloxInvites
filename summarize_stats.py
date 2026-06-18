@@ -135,9 +135,14 @@ else:
 
 while True:
     clear()
-    print(f"{gold}{bold}[Playtime Stat Generator v4.0.0]{end}")
+    print(f"{gold}{bold}[Playtime Stat Generator v4.1.0]{end}")
     print("Supports Roblox Invites v5.0.0 - v5.0.1")
-    command = input("Enter a command ('/lb'): ").lower().strip()
+
+    print("\nCommands:")
+    print("    - /lb - Generates leaderboards for all data ('') or for the current week ('weekly')")
+    print("    - /save - Saves playtime data to /server/stat_summarization.json, and diffs the hours from the previous week (if possible)")
+
+    command = input("\nEnter a command ('/lb'): ").lower().strip()
 
     args = command.split(" ")[1:]
     if command.startswith("/lb"):
