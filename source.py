@@ -299,7 +299,6 @@ def send_leave_message(i, place_id, type):
 def fix_stats(user_id):
     default_stats = {
         "total_playtime": 0,
-        "games_played": [],
         "games_playtime": {},
         "currently_playing": {},
     }
@@ -344,8 +343,6 @@ def start_tracking_playtime(int_user_id, place_id, game_instance_id):
     if stats[user_id]["currently_playing"] != {}:
         finish_tracking_playtime(user_id)
     root_place_id = get_root_place_id(place_id)
-    if root_place_id not in stats[user_id]["games_played"]:
-        stats[user_id]["games_played"] += [root_place_id]
     stats[user_id]["currently_playing"] = {
         "root_place_id": root_place_id,
         "game_instance_id": game_instance_id,
@@ -623,23 +620,6 @@ def check_ct_update():
         send_file(ct_webhook, "./server/custom_titles_delta.json")
         os.remove("./server/custom_titles_delta.json")
 
-# START migration code
-stats = json.loads(open("./server/stats.json", "r").read())
-users = json.loads(open("./server/users.json", "r").read())
-old_user_presences = json.loads(open("./server/old_user_presences.json", "r").read())
-for user in users:
-    if user["username"] in stats:
-        stats[str(user["user_id"])] = deepcopy(stats[user["username"]])
-        del stats[user["username"]]
-    if user["username"] in old_user_presences:
-        old_user_presences[str(user["user_id"])] = deepcopy(old_user_presences[user["username"]])
-        del old_user_presences[user["username"]]
-open("./server/stats.json", "w").write(json.dumps(stats, indent=2))
-open("./server/old_user_presences.json", "w").write(json.dumps(old_user_presences, indent=2))
-
-write_to_log("info", "Initalizing Roblox Invites...")
-# END migration code
-
 transfers = {}
 user_presences = {}
 user_ids = []
@@ -662,6 +642,12 @@ custom_titles = load_data("custom_titles.json")["titles"]
 user_ids = [user["user_id"] for user in users]
 write_to_log("info", f"Loaded server data at {os.path.dirname(__file__)}/server/")
 
+# migration code from v5.0.x
+for user in stats.values():
+    del user["games_played"]
+save_data(stats, "stats.json")
+# end migration code from v5.0.x
+
 session = requests.Session()
 session.headers.update(header)
 retry_strategy = Retry(
@@ -674,23 +660,15 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "5.0.0"
+version = "5.1.0"
 update_desc = f"""
 **Roblox Invites {version}**
-- Statistics and user presence data are now indexed by user ID instead of username
-- Attempted to fix an issue where inactive sessions inflated total server playtime
-- A given invite embed's color will only change to orange (case: max server size is 1) if there is no existing custom title for the game
-    - Now, a game with a custom title but a custom color of default green will still retain the default green color in all cases
-- Removing a user actually removes them from /server/stats.json now
-
-**Deprecation of --migrate**
-The --migrate flag's functionality has been removed.
-Instances of Roblox Invites that call "robloxinvites.py --migrate" before updating should be manually updated to prevent issues.
+- Removed the 'games_played' list for all dictionaries in stats.json
 """
 
-announcement_webhook = "webhook"
-webhook = "webhook"
-ct_webhook = "webhook"
+announcement_webhook = "webhook_url"
+webhook = "webhook_url"
+ct_webhook = "webhook_url"
 
 maintenance_info = {
     "reason": "I'll be pushing Roblox Invites version 4.2.0 to the production server.",

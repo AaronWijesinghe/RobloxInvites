@@ -1,5 +1,7 @@
 import json
 import os
+import time
+from datetime import datetime
 
 gold = "\033[0;33m"
 silver = "\033[38;5;250m"
@@ -30,6 +32,21 @@ def format_leaderboard(string, pos):
         return f"{bronze}{string}{end}"
     else:
         return string
+
+def get_latest_data():
+    total = 0
+    playtimes = {}
+    game_playtimes = {}
+    stats = json.loads(open("./server/stats.json").read())
+    for user in stats:
+        playtimes[user] = 0
+        for game in stats[user]["games_playtime"].keys():
+            if game not in game_playtimes:
+                game_playtimes[game] = 0
+            game_playtimes[game] += stats[user]["games_playtime"][game]["playtime"]
+            total += stats[user]["games_playtime"][game]["playtime"]
+            playtimes[user] += stats[user]["games_playtime"][game]["playtime"]
+    return (total, playtimes, game_playtimes)
 
 def game_select(query):
     cache = json.loads(open("./server/cached_ids.json").read())["caches"]
@@ -101,21 +118,8 @@ def generate_game_stats(game):
     input("\nPress ENTER to return to the main menu. ")
 
 def save_playtime_data():
-    global cache
-   
     stats = json.loads(open("./server/stats.json").read())
-    total = 0
-    playtimes = {}
-    game_playtimes = {}
-    for user in stats:
-        playtimes[user] = 0
-        for game in stats[user]["games_played"]:
-            if str(game) in stats[user]["games_playtime"]:
-                if str(game) not in game_playtimes:
-                    game_playtimes[str(game)] = 0
-                game_playtimes[str(game)] += stats[user]["games_playtime"][str(game)]["playtime"]
-                total += stats[user]["games_playtime"][str(game)]["playtime"]
-                playtimes[user] += stats[user]["games_playtime"][str(game)]["playtime"]
+    total, playtimes, game_playtimes = get_latest_data()
 
     data["weeks"] += [{
         "total": total,
@@ -147,6 +151,65 @@ def get_diff(week_1, week_2):
     
     return {"playtimes": playtimes_diff, "game_playtimes": game_playtimes_diff, "total": total_diff}
 
+def live_stats():
+    global cache
+
+    while True:
+        total, playtimes, game_playtimes = get_latest_data()
+        timestamp_date = datetime.now().strftime("%m-%d-%Y")
+        timestamp_time = datetime.now().strftime("%H:%M:%S")
+
+        clear()
+        print(f"{gold}{bold}[Server Leaderboard] [Live]{end}")
+        print("Your time is only counted after you leave a game.")
+        print(f"Current Date/Time: {timestamp_time} @ {timestamp_date}")
+        print(f"{bold}{underline}Total Server Playtime:{end} {total / 3600:.2f}h\n")
+
+        print(f"{bold}Playtime for Top 20 Users:{end}")
+        playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
+        for i, (user, playtime) in enumerate(playtimes, start=1):
+            print(format_leaderboard(f"[#{i}] {user_dict[int(user)]["display_name"]} ({playtime / 3600:.2f}h)", i))
+
+        print(f"\n{bold}Playtime for Top 20 Games:{end}")
+        game_playtimes = sorted(game_playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
+        for i, (game, playtime) in enumerate(game_playtimes, start=1):
+            universe_id = cache["indexes"][str(game)]
+            name = cache["caches"][str(universe_id)]["name"]
+            print(format_leaderboard(f"[#{i}] {name}: {playtime / 3600:.2f}h", i))
+        time.sleep(5)
+
+def live_game_stats(game):
+    global cache
+
+    if game == None:
+        print(f"{gold}{bold}[Error]{end}")
+        input("This game couldn't be found.")
+        return
+    universe_id = cache["indexes"][str(game)]
+    name = cache["caches"][str(universe_id)]["name"]
+
+    while True:
+        clear()
+        total = 0
+        playtimes = {}
+        stats = json.loads(open("./server/stats.json").read())
+        for user_id, statistics in stats.items():
+            if str(game) in statistics["games_playtime"]:
+                playtimes[str(user_id)] = statistics["games_playtime"][str(game)]["playtime"]
+                total += statistics["games_playtime"][str(game)]["playtime"]
+
+        timestamp_date = datetime.now().strftime("%m-%d-%Y")
+        timestamp_time = datetime.now().strftime("%H:%M:%S")
+        print(f"{gold}{bold}[Leaderboard for {name}] [Live]{end}")
+        print(f"Current Date/Time: {timestamp_time} @ {timestamp_date}")
+        print(f"{bold}{underline}Total Server Playtime:{end} {total / 3600:.2f}h\n")
+
+        print(f"{bold}Playtime for Top 20 Users:{end}")
+        playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
+        for i, (user, playtime) in enumerate(playtimes, start=1):
+            print(format_leaderboard(f"[#{i}] {user_dict[int(user)]["display_name"]} ({playtime / 3600:.2f}h)", i))
+        time.sleep(5)
+
 if os.path.exists("./server/playtime_tools.json"):
     data = json.loads(open("./server/playtime_tools.json", "r").read())
 else:
@@ -159,18 +222,21 @@ else:
 cache = json.loads(open("./server/cached_ids.json").read())
 while True:
     clear()
-    print(f"{gold}{bold}[Playtime Tools] [v2.1.0]{end}")
+    print(f"{gold}{bold}[Playtime Tools] [v2.2.0]{end}")
     print("Generate playtime leaderboards for Roblox Invites easily! More features coming soon™")
-    print("Supports Roblox Invites v5.0.0 - v5.0.1")
+    print("Supports Roblox Invites v5.0.0 - v5.1.0")
     print("Data Version: v3")
 
     print("\nLatest changes:")
-    print("    - stats.json is now stored directly in playtime_tools.json when saving")
+    print("    - As of Roblox Invites v5.1.0, 'games_played' does not exist within a stats dict. This has been accounted for.")
+    print("    - Added live leaderboards")
 
     print("\nAvailable commands:")
     print("    - /lb - Generates leaderboards for all data (''), for the current week ('weekly'), or for a range of weeks ('range')")
     print("    - /save - Saves playtime data to /server/playtime_tools.json")
     print("    - /game [GAME_NAME] - Generates leaderboards for a specific game (requires up-to-date stats.json in /server)")
+    print("    - /live - Generates an up-to-date leaderboard from stats.json (requires up-to-date stats.json in /server)")
+    print("    - /live_game [GAME_NAME] - Generates an up-to-date leaderboard for a game (requires up-to-date stats.json in /server)")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
     command = input("Enter a command: ").lower().strip()
@@ -193,5 +259,11 @@ while True:
         if len(args) == 0:
             continue
         generate_game_stats(game_select(command.split("/game ")[1]))
+    elif command == "/live":
+        live_stats()
+    elif command.startswith("/live_game "):
+        if len(args) == 0:
+            continue
+        live_game_stats(game_select(command.split("/live_game ")[1]))
     elif command == "/save":
         save_playtime_data()
