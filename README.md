@@ -18,8 +18,8 @@ Joining a game (no Custom Title):<br>
 Joining a game (w/ Custom Title):<br>
 <img width="532" height="182" alt="image" src="https://github.com/user-attachments/assets/dc303523-0851-469d-bfd4-5dc70989c93e" />
 
-Joining other server members in a game (other person's username has been redacted for privacy):<br>
-<img width="536" height="226" alt="image" src="https://github.com/user-attachments/assets/21546089-aa0a-484d-813e-656c3b6699ef" />
+Joining other server members in a game (other person's username and display name have been redacted for privacy):<br>
+<img width="537" height="225" alt="image" src="https://github.com/user-attachments/assets/adbaf436-44e1-42a1-9b88-13cb56f8ad56" />
 
 Leaving a game:<br>
 <img width="502" height="120" alt="image" src="https://github.com/user-attachments/assets/8f3eaff4-777b-483b-8c11-7d6191c63a02" />
