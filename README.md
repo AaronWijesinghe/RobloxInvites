@@ -13,7 +13,7 @@ Clone this repository anywhere on your PC, but preferably in a place you can eas
 Replace the webhooks in source.py with your own webhooks (see *Webhooks*).<br>
 Manually input values for the **modifiable** JSON files (see *Modifiable JSON Files*).<br>
 Run source.py using Python 3.14.5+ (older versions can be used) with the modules in requirements.txt. For accurate playtime tracking, keep the bot running for as long as possible!<br>
-The update system scans for new Roblox Invites updates at /users/YOUR_USER_NAME/Downloads/RobloxInvites.py, and Custom Titles updates at /users/YOUR_USER_NAME/Downloads/custom_titles.json.
+The update system scans for new Roblox Invites updates at /users/YOUR_USER_NAME/Downloads/RobloxInvites.py, and Custom Titles updates at /users/YOUR_USER_NAME/Downloads/custom_titles.json.<br>
 Backups are created when an update happens, and are stored at ../RobloxInvitesBackups.
 
 ## Webhooks
