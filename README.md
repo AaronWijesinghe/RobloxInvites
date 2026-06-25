@@ -22,12 +22,12 @@ Leaving a game:<br>
 <img width="502" height="120" alt="image" src="https://github.com/user-attachments/assets/8f3eaff4-777b-483b-8c11-7d6191c63a02" />
 
 ## How to Use
-Clone this repository anywhere on your PC, but preferably in a place you can easily access.<br>
-Replace the webhooks in source.py with your own webhooks (see *Webhooks*).<br>
-Manually input values for the **modifiable** JSON files (see *Modifiable JSON Files*).<br>
-Run source.py using Python 3.14.5+ (older versions can be used) with the modules in requirements.txt. For accurate playtime tracking, keep the bot running for as long as possible!<br>
-The update system scans for new Roblox Invites updates at /users/YOUR_USER_NAME/Downloads/RobloxInvites.py, and Custom Titles updates at /users/YOUR_USER_NAME/Downloads/custom_titles.json.<br>
-Backups are automatically created before an update is installed, and are stored at ../RobloxInvitesBackups.
+1. Clone this repository anywhere on your PC, but preferably in a place you can easily access.
+2. Replace the webhooks in source.py with your own webhooks (see *Webhooks*).
+3. Manually input values for the **modifiable** JSON files (see *Modifiable JSON Files*).
+4. Run source.py using Python 3.14.5+ (older versions can be used) with the modules in requirements.txt. For accurate playtime tracking, keep the bot running for as long as possible!
+5. Put Roblox Invites updates in /users/YOUR_USER_NAME/Downloads/RobloxInvites.py, and Custom Titles updates at /users/YOUR_USER_NAME/Downloads/custom_titles.json. The update system will automatically scan for these.
+6. Backups are automatically created before an update is installed, and are stored at ../RobloxInvitesBackups. Use these if something goes wrong!
 
 ## Webhooks
 Roblox Invites uses webhooks to provide its services to your server. **Here's what each webhook does:**
