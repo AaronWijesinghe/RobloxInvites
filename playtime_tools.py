@@ -33,11 +33,16 @@ def format_leaderboard(string, pos):
     else:
         return string
 
-def get_latest_data():
+def save_playtime_data():
+    data["weeks"] += [json.loads(open("./server/stats.json").read())]
+    open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
+
+def get_data(stats={}):
     total = 0
     playtimes = {}
     game_playtimes = {}
-    stats = json.loads(open("./server/stats.json").read())
+    if stats == {}:
+        stats = json.loads(open("./server/stats.json").read())
     for user in stats:
         playtimes[user] = 0
         for game in stats[user]["games_playtime"].keys():
@@ -48,19 +53,22 @@ def get_latest_data():
             playtimes[user] += stats[user]["games_playtime"][game]["playtime"]
     return (total, playtimes, game_playtimes)
 
-def derive_data_from_stats(stats):
-    total = 0
-    playtimes = {}
-    game_playtimes = {}
-    for user in stats:
-        playtimes[user] = 0
-        for game in stats[user]["games_playtime"].keys():
-            if game not in game_playtimes:
-                game_playtimes[game] = 0
-            game_playtimes[game] += stats[user]["games_playtime"][game]["playtime"]
-            total += stats[user]["games_playtime"][game]["playtime"]
-            playtimes[user] += stats[user]["games_playtime"][game]["playtime"]
-    return (total, playtimes, game_playtimes)
+def get_diff(week_1, week_2):
+    diff = {}
+    new = data["weeks"][week_2]
+    old = data["weeks"][week_1]
+    for user in new.keys():
+        if user not in old:
+            diff[user] = new[user]
+            continue
+        diff[user] = {"games_playtime": {}}
+        diff[user]["total_playtime"] = new[user]["total_playtime"] - old[user]["total_playtime"]
+        for game in new[user]["games_playtime"].keys():
+            if not game in old[user]["games_playtime"]:
+                diff[user]["games_playtime"][game] = new[user]["games_playtime"][game]
+                continue
+            diff[user]["games_playtime"][game] = {"playtime": new[user]["games_playtime"][game]["playtime"] - old[user]["games_playtime"][game]["playtime"]}
+    return diff
 
 def game_select(query):
     cache = json.loads(open("./server/cached_ids.json").read())["caches"]
@@ -152,32 +160,10 @@ def generate_user_stats(user):
 
     return user # wip, gotta rewrite the backend first
 
-def save_playtime_data():
-    data["weeks"] += [json.loads(open("./server/stats.json").read())]
-    open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
-
-def get_diff(week_1, week_2):
-    stats_diff = {}
-    stats_new = data["weeks"][week_2]
-    stats_old = data["weeks"][week_1]
-    for user in stats_new.keys():
-        if user not in stats_old:
-            stats_diff[user] = stats_new[user]
-            continue
-        stats_diff[user] = {"games_playtime": {}}
-        stats_diff[user]["total_playtime"] = stats_new[user]["total_playtime"] - stats_old[user]["total_playtime"]
-        for game in stats_new[user]["games_playtime"].keys():
-            if not game in stats_old[user]["games_playtime"]:
-                stats_diff[user]["games_playtime"][game] = stats_new[user]["games_playtime"][game]
-                continue
-            stats_diff[user]["games_playtime"][game] = {"playtime": stats_new[user]["games_playtime"][game]["playtime"] - stats_old[user]["games_playtime"][game]["playtime"]}
-
-    return stats_diff
-
 def live_stats():
     while True:
         cache = json.loads(open("./server/cached_ids.json").read())
-        total, playtimes, game_playtimes = get_latest_data()
+        total, playtimes, game_playtimes = get_data()
         timestamp_date = datetime.now().strftime("%m-%d-%Y")
         timestamp_time = datetime.now().strftime("%H:%M:%S")
 
@@ -266,19 +252,16 @@ while True:
     args = command.split(" ")[1:]
     if command.startswith("/lb"):
         if len(args) == 0:
-            total, playtimes, game_playtimes = derive_data_from_stats(data["weeks"][len(data["weeks"]) - 1])
-            generate_stats("all", total, playtimes, game_playtimes)
+            generate_stats("all", *get_data(data["weeks"][len(data["weeks"]) - 1]))
             continue
         if args[0] == "weekly":
             last_week = get_diff(len(data["weeks"]) - 2, len(data["weeks"]) - 1)
-            total, playtimes, game_playtimes = derive_data_from_stats(last_week)
-            generate_stats("weekly", total, playtimes, game_playtimes)
+            generate_stats("weekly", *get_data(last_week))
         elif args[0] == "range":
             if len(args) != 3:
                 continue
             range = get_diff(int(args[1]) - 1, int(args[2]) - 1)
-            total, playtimes, game_playtimes = derive_data_from_stats(range)
-            generate_stats("range", total, playtimes, game_playtimes)
+            generate_stats("range", *get_data(range))
     elif command.startswith("/game "):
         if len(args) == 0:
             continue
