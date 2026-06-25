@@ -7,6 +7,7 @@ This isn't a traditional Discord bot, but rather webhook-based server software.
 - Notifies your server if a player transfers servers or leaves a Roblox game
 - Tracks your players' playtimes across Roblox games
 - Create overall/weekly leaderboards for your Discord server
+- Add some personal touches to each game with Custom Titles
 
 ## Images
 **A picture's worth a thousand words after all!**<br>
@@ -63,7 +64,7 @@ Currently, only the cookie at index 0 is used.<br>
 <br>
 
 **/server/custom_titles.json stores Custom Titles.**<br>
-You can add Custom Titles using the Custom Titles Wizard in this repository.<br>
+You can add Custom Titles using the Custom Titles Wizard (CTWizard.py) in this repository.<br>
 ```
 [
     "version": CUSTOM_TITLES_VERSION (int),
