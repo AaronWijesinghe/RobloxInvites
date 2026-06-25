@@ -2,6 +2,16 @@
 Roblox Invites connects your Discord server members to their activity on Roblox.<br>
 This isn't a traditional Discord bot, but rather webhook-based server software.
 
+## Images
+Joining a game:
+<img width="545" height="188" alt="image" src="https://github.com/user-attachments/assets/01095f54-bf67-4e71-9448-53e04f1922cf" />
+
+Joining other server members in a game (other person's username has been redacted for privacy):
+<img width="536" height="226" alt="image" src="https://github.com/user-attachments/assets/21546089-aa0a-484d-813e-656c3b6699ef" />
+
+Leaving a game:
+<img width="502" height="120" alt="image" src="https://github.com/user-attachments/assets/8f3eaff4-777b-483b-8c11-7d6191c63a02" />
+
 ## Features
 - Sends invites when a player joins a Roblox game
 - Notifies your server if a player transfers servers or leaves a Roblox game
