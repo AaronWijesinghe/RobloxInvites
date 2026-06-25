@@ -12,8 +12,11 @@ This isn't a traditional Discord bot, but rather webhook-based server software.
 ## Images
 **A picture's worth a thousand words after all!**<br>
 
-Joining a game:<br>
-<img width="545" height="188" alt="image" src="https://github.com/user-attachments/assets/01095f54-bf67-4e71-9448-53e04f1922cf" />
+Joining a game (no Custom Title):<br>
+<img width="523" height="160" alt="image" src="https://github.com/user-attachments/assets/e577ccdc-e879-43dc-b760-622d76db25a1" />
+
+Joining a game (w/ Custom Title):<br>
+<img width="532" height="182" alt="image" src="https://github.com/user-attachments/assets/dc303523-0851-469d-bfd4-5dc70989c93e" />
 
 Joining other server members in a game (other person's username has been redacted for privacy):<br>
 <img width="536" height="226" alt="image" src="https://github.com/user-attachments/assets/21546089-aa0a-484d-813e-656c3b6699ef" />
