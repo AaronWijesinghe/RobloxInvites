@@ -48,8 +48,38 @@ def get_latest_data():
             playtimes[user] += stats[user]["games_playtime"][game]["playtime"]
     return (total, playtimes, game_playtimes)
 
+def derive_data_from_stats(stats):
+    total = 0
+    playtimes = {}
+    game_playtimes = {}
+    for user in stats:
+        playtimes[user] = 0
+        for game in stats[user]["games_playtime"].keys():
+            if game not in game_playtimes:
+                game_playtimes[game] = 0
+            game_playtimes[game] += stats[user]["games_playtime"][game]["playtime"]
+            total += stats[user]["games_playtime"][game]["playtime"]
+            playtimes[user] += stats[user]["games_playtime"][game]["playtime"]
+    return (total, playtimes, game_playtimes)
+
 def game_select(query):
     cache = json.loads(open("./server/cached_ids.json").read())["caches"]
+    game_cache = {}
+    for universe_id in cache.keys():
+        game_cache[cache[universe_id]["name"]] = cache[universe_id]["root_place_id"]
+
+    games = list(game_cache.keys())
+    valid_games = []
+    for game in games:
+        if query.lower() in game.lower():
+            valid_games += [game]
+    if len(valid_games) > 0:
+        return game_cache[valid_games[0]]
+    else:
+        return None
+
+def user_select(query):
+    users = json.loads(open("./server/users.json").read())
     game_cache = {}
     for universe_id in cache.keys():
         game_cache[cache[universe_id]["name"]] = cache[universe_id]["root_place_id"]
@@ -100,7 +130,7 @@ def generate_game_stats(game):
 
     total = 0
     playtimes = {}
-    stats = data["weeks"][len(data["weeks"]) - 1]["stats"]
+    stats = data["weeks"][len(data["weeks"]) - 1]
     for user_id, statistics in stats.items():
         if str(game) in statistics["games_playtime"]:
             playtimes[str(user_id)] = statistics["games_playtime"][str(game)]["playtime"]
@@ -117,44 +147,36 @@ def generate_game_stats(game):
         print(format_leaderboard(f"[#{i}] {user_dict[int(user)]["display_name"]} ({playtime / 3600:.2f}h)", i))
     input("\nPress ENTER to return to the main menu. ")
 
-def save_playtime_data():
-    stats = json.loads(open("./server/stats.json").read())
-    total, playtimes, game_playtimes = get_latest_data()
+def generate_user_stats(user):
+    global cache
 
-    data["weeks"] += [{
-        "total": total,
-        "playtimes": playtimes,
-        "game_playtimes": game_playtimes,
-        "stats": stats
-    }]
+    return user # wip, gotta rewrite the backend first
+
+def save_playtime_data():
+    data["weeks"] += [json.loads(open("./server/stats.json").read())]
     open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
 
 def get_diff(week_1, week_2):
-    playtimes_diff = {}
-    game_playtimes_diff = {}
+    stats_diff = {}
+    stats_new = data["weeks"][week_2]
+    stats_old = data["weeks"][week_1]
+    for user in stats_new.keys():
+        if user not in stats_old:
+            stats_diff[user] = stats_new[user]
+            continue
+        stats_diff[user] = {"games_playtime": {}}
+        stats_diff[user]["total_playtime"] = stats_new[user]["total_playtime"] - stats_old[user]["total_playtime"]
+        for game in stats_new[user]["games_playtime"].keys():
+            if not game in stats_old[user]["games_playtime"]:
+                stats_diff[user]["games_playtime"][game] = stats_new[user]["games_playtime"][game]
+                continue
+            stats_diff[user]["games_playtime"][game] = {"playtime": stats_new[user]["games_playtime"][game]["playtime"] - stats_old[user]["games_playtime"][game]["playtime"]}
 
-    total_diff = data["weeks"][week_2]["total"] - data["weeks"][week_1]["total"]
-    playtimes_new = data["weeks"][week_2]["playtimes"]
-    playtimes_old = data["weeks"][week_1]["playtimes"]
-    game_playtimes_new = data["weeks"][week_2]["game_playtimes"]
-    game_playtimes_old = data["weeks"][week_1]["game_playtimes"]
-    for name in playtimes_new.keys():
-        if name in playtimes_old:
-            playtimes_diff[name] = playtimes_new[name] - playtimes_old[name]
-        else:
-            playtimes_diff[name] = playtimes_new[name]
-    for name in game_playtimes_new.keys():
-        if name in game_playtimes_old:
-            game_playtimes_diff[name] = game_playtimes_new[name] - game_playtimes_old[name]
-        else:
-            game_playtimes_diff[name] = game_playtimes_new[name]
-    
-    return {"playtimes": playtimes_diff, "game_playtimes": game_playtimes_diff, "total": total_diff}
+    return stats_diff
 
 def live_stats():
-    global cache
-
     while True:
+        cache = json.loads(open("./server/cached_ids.json").read())
         total, playtimes, game_playtimes = get_latest_data()
         timestamp_date = datetime.now().strftime("%m-%d-%Y")
         timestamp_time = datetime.now().strftime("%H:%M:%S")
@@ -180,7 +202,6 @@ def live_stats():
 
 def live_game_stats(game):
     global cache
-
     if game == None:
         print(f"{gold}{bold}[Error]{end}")
         input("This game couldn't be found.")
@@ -190,6 +211,7 @@ def live_game_stats(game):
 
     while True:
         clear()
+        cache = json.loads(open("./server/cached_ids.json").read())
         total = 0
         playtimes = {}
         stats = json.loads(open("./server/stats.json").read())
@@ -214,7 +236,7 @@ if os.path.exists("./server/playtime_tools.json"):
     data = json.loads(open("./server/playtime_tools.json", "r").read())
 else:
     data = {
-        "version": 3,
+        "version": 4,
         "weeks": []
     }
     open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
@@ -222,21 +244,21 @@ else:
 cache = json.loads(open("./server/cached_ids.json").read())
 while True:
     clear()
-    print(f"{gold}{bold}[Playtime Tools] [v2.2.0]{end}")
+    print(f"{gold}{bold}[Playtime Tools] [v3.0.0]{end}")
     print("Generate playtime leaderboards for Roblox Invites easily! More features coming soon™")
     print("Supports Roblox Invites v5.0.0 - v5.1.0")
-    print("Data Version: v3")
+    print("Data Version: v4")
 
     print("\nLatest changes:")
-    print("    - As of Roblox Invites v5.1.0, 'games_played' does not exist within a stats dict. This has been accounted for.")
-    print("    - Added live leaderboards")
+    print("    - Data is now dynamically derived from user stats instead of being stored explictly.")
 
     print("\nAvailable commands:")
     print("    - /lb - Generates leaderboards for all data (''), for the current week ('weekly'), or for a range of weeks ('range')")
-    print("    - /save - Saves playtime data to /server/playtime_tools.json")
-    print("    - /game [GAME_NAME] - Generates leaderboards for a specific game (requires up-to-date stats.json in /server)")
+    print("    - /save - Saves playtime data and statistics to /server/playtime_tools.json")
+    print("    - /game [GAME_NAME] - Generates leaderboards for a specific game (requires at least 1+ week saved)")
     print("    - /live - Generates an up-to-date leaderboard from stats.json (requires up-to-date stats.json in /server)")
     print("    - /live_game [GAME_NAME] - Generates an up-to-date leaderboard for a game (requires up-to-date stats.json in /server)")
+    print("    - (WIP) /user [USERNAME] - Generates a profile card for a given username")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
     command = input("Enter a command: ").lower().strip()
@@ -244,17 +266,19 @@ while True:
     args = command.split(" ")[1:]
     if command.startswith("/lb"):
         if len(args) == 0:
-            this_week = data["weeks"][len(data["weeks"]) - 1]
-            generate_stats("all", this_week["total"], this_week["playtimes"], this_week["game_playtimes"])
+            total, playtimes, game_playtimes = derive_data_from_stats(data["weeks"][len(data["weeks"]) - 1])
+            generate_stats("all", total, playtimes, game_playtimes)
             continue
         if args[0] == "weekly":
             last_week = get_diff(len(data["weeks"]) - 2, len(data["weeks"]) - 1)
-            generate_stats("weekly", last_week["total"], last_week["playtimes"], last_week["game_playtimes"])
+            total, playtimes, game_playtimes = derive_data_from_stats(last_week)
+            generate_stats("weekly", total, playtimes, game_playtimes)
         elif args[0] == "range":
             if len(args) != 3:
                 continue
             range = get_diff(int(args[1]) - 1, int(args[2]) - 1)
-            generate_stats("range", range["total"], range["playtimes"], range["game_playtimes"])
+            total, playtimes, game_playtimes = derive_data_from_stats(range)
+            generate_stats("range", total, playtimes, game_playtimes)
     elif command.startswith("/game "):
         if len(args) == 0:
             continue
@@ -267,3 +291,7 @@ while True:
         live_game_stats(game_select(command.split("/live_game ")[1]))
     elif command == "/save":
         save_playtime_data()
+    elif command == "/user":
+        if len(args) != 1:
+            continue
+        generate_user_stats(user_select(args[0]))
