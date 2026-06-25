@@ -55,13 +55,11 @@ def clear():
     print("\033[2J\033[3J\033[H", end="")
 
 
-def send_embed(title, desc, color, webhook, join_embed_data=None):
+def send_embed(title, desc, color, webhook):
     data = {
         "embeds": [{"title": title, "description": desc, "color": color}],
         "components": [],
     }
-    if join_embed_data is not None:
-        data["embeds"] += [{"title": join_embed_data[0], "url": join_embed_data[1]}]
     session.post(webhook, json=data)
 
 
@@ -167,6 +165,10 @@ def get_game_data(universe_id, key):
         game_data = session.get(f"https://games.roblox.com/v1/games?universeIds={universe_id}").json()["data"][0][key]
         if type(game_data) is str:
             return game_data.strip()
+        elif game_data == None:
+            if str(universe_id) in cached_ids["caches"]:
+                if key in cached_ids["caches"][str(universe_id)]:
+                    return cached_ids["caches"][str(universe_id)][key]
         else:
             return game_data
     except:
@@ -215,14 +217,13 @@ def send_invite(i, place_id, game_instance_id, transfer=False):
     exclamation = "" if game_ends_in_punctuation(game) else "!"
     period = "" if game_ends_in_punctuation(game) else "."
 
-    game_url = f"roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}"
-    embed_title = f"{displaynames[i]} has joined a game!"
-    embed_desc = f"**Join {displaynames[i]} (@{usernames[i]}) in** *{game}*{exclamation}\nTotal playtime for this game: {playtime_str}\n\nOpen the link below, or copy this URL:\n-# {game_url}"
-    embed_color = green
-
-    use_join_embed = True
     join_embed_title = f"Join {displaynames[i]}"
     join_embed_url = f"https://join.rblxevnts.co/?placeId={place_id}&gameInstanceId={game_instance_id}"
+
+    game_url = f"roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}"
+    embed_title = f"{displaynames[i]} has joined a game!"
+    embed_desc = f"**Join {displaynames[i]} (@{usernames[i]}) in** *{game}*{exclamation}\nTotal playtime for this game: {playtime_str}\n\nClick [this link]({join_embed_url}) to join, or copy the URL below:\n-# {game_url}"
+    embed_color = green
 
     if str(universe_id) in custom_titles:
         embed_title = custom_titles[str(universe_id)]["title"].format(displaynames[i])
@@ -233,13 +234,12 @@ def send_invite(i, place_id, game_instance_id, transfer=False):
             embed_title = f"{custom_titles[str(universe_id)]["title"].format(displaynames[i])[:-1]} in a new server!"
         else:
             embed_title = f"{displaynames[i]} transferred servers!"
-        embed_desc = f"{displaynames[i]} (@{usernames[i]}) has transferred to a different server in *{game}*{period}\nTotal playtime for this game: {playtime_str}\n\nOpen the link below, or copy this URL:\n-# {game_url}"
+        embed_desc = f"{displaynames[i]} (@{usernames[i]}) has transferred to a different server in *{game}*{period}\nTotal playtime for this game: {playtime_str}\n\nClick [this link]({join_embed_url}) to join, or copy the URL below:\n-# {game_url}"
 
     if max_players == 1:
         embed_desc = f"{displaynames[i]} (@{usernames[i]}) is playing *{game}*{exclamation}\nHowever, you can't join them because the max server size is 1 player.\nTotal playtime for this game: {playtime_str}\n\n-# {game_url}"
         if str(universe_id) not in custom_titles:
             embed_color = orange
-        use_join_embed = False
 
     joined = check_joins(i, place_id, game_instance_id)
     if len(joined) > 0:
@@ -258,8 +258,7 @@ def send_invite(i, place_id, game_instance_id, transfer=False):
         embed_title,
         embed_desc,
         embed_color,
-        webhook,
-        (join_embed_title, join_embed_url) if use_join_embed else None,
+        webhook
     )
 
 
@@ -642,12 +641,6 @@ custom_titles = load_data("custom_titles.json")["titles"]
 user_ids = [user["user_id"] for user in users]
 write_to_log("info", f"Loaded server data at {os.path.dirname(__file__)}/server/")
 
-# migration code from v5.0.x
-for user in stats.values():
-    del user["games_played"]
-save_data(stats, "stats.json")
-# end migration code from v5.0.x
-
 session = requests.Session()
 session.headers.update(header)
 retry_strategy = Retry(
@@ -660,10 +653,11 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "5.1.0"
+version = "5.3.0"
 update_desc = f"""
 **Roblox Invites {version}**
-- Removed the 'games_played' list for all dictionaries in stats.json
+- Removed the dedicated embed for join links
+- Merged the join link into the main join embed
 """
 
 announcement_webhook = "webhook_url"
