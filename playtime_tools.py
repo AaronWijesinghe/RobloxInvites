@@ -77,30 +77,15 @@ def game_select(query):
         game_cache[cache[universe_id]["name"]] = cache[universe_id]["root_place_id"]
 
     games = list(game_cache.keys())
-    valid_games = []
     for game in games:
         if query.lower() in game.lower():
-            valid_games += [game]
-    if len(valid_games) > 0:
-        return game_cache[valid_games[0]]
-    else:
-        return None
+            return game
 
 def user_select(query):
     users = json.loads(open("./server/users.json").read())
-    game_cache = {}
-    for universe_id in cache.keys():
-        game_cache[cache[universe_id]["name"]] = cache[universe_id]["root_place_id"]
-
-    games = list(game_cache.keys())
-    valid_games = []
-    for game in games:
-        if query.lower() in game.lower():
-            valid_games += [game]
-    if len(valid_games) > 0:
-        return game_cache[valid_games[0]]
-    else:
-        return None
+    for user in users:
+        if query.lower() in user["username"].lower():
+            return (user["user_id"], user["username"], user["display_name"])
 
 def generate_stats(lb_type, total, playtimes, game_playtimes):
     global cache
@@ -155,10 +140,53 @@ def generate_game_stats(game):
         print(format_leaderboard(f"[#{i}] {user_dict[int(user)]["display_name"]} ({playtime / 3600:.2f}h)", i))
     input("\nPress ENTER to return to the main menu. ")
 
-def generate_user_stats(user):
+def generate_user_stats(user_id, user_name, display_name):
     global cache
 
-    return user # wip, gotta rewrite the backend first
+    clear()
+    if user_id == None:
+        print(f"{gold}{bold}[Error]{end}")
+        input("This user couldn't be found.")
+        return
+
+    creation_date = datetime.now().strftime("%m-%d-%Y")
+    creation_time = datetime.now().strftime("%H:%M:%S")
+
+    total, playtimes, game_playtimes = get_data({"user_id": data["weeks"][len(data["weeks"]) - 1][str(user_id)]})
+    total_server, playtimes_server, game_playtimes_server = get_data(data["weeks"][len(data["weeks"]) - 1])
+    playtimes_server = sorted(playtimes_server.items(), key=lambda item: item[1], reverse=True)
+    game_playtimes_server = sorted(game_playtimes_server.items(), key=lambda item: item[1], reverse=True)
+    
+    total_weekly, playtimes_weekly, game_playtimes_weekly = get_data({"user_id": get_diff(len(data["weeks"]) - 2, len(data["weeks"]) - 1)[str(user_id)]})
+    total_server_weekly, playtimes_server_weekly, game_playtimes_server_weekly = get_data(get_diff(len(data["weeks"]) - 2, len(data["weeks"]) - 1))
+    playtimes_server_weekly = sorted(playtimes_server_weekly.items(), key=lambda item: item[1], reverse=True)
+    game_playtimes_server_weekly = sorted(game_playtimes_server_weekly.items(), key=lambda item: item[1], reverse=True)
+
+    print(f"{gold}{bold}[{display_name}'s usercard]{end}")
+    print(f"Created on {creation_date} @ {creation_time} EST\n")
+
+    print(f"{bold}Your Playtimes:{end}")
+    print(f"Overall Playtime:{end} {total / 3600:.2f}h")
+    print(f"Weekly Playtime:{end} {total_weekly / 3600:.2f}h\n")
+    
+    print(f"{bold}Your Standings:{end}")
+    print(f"Overall Leaderboard Position:{end} #{playtimes_server.index((str(user_id), total)) + 1}")
+    print(f"Weekly Leaderboard Position:{end} #{playtimes_server_weekly.index((str(user_id), total_weekly)) + 1}\n")
+
+    print(f"{bold}Your Top 5 Games Overall:{end}")
+    game_playtimes = sorted(game_playtimes.items(), key=lambda item: item[1], reverse=True)[:5]
+    for i, (game, playtime) in enumerate(game_playtimes, start=1):
+        universe_id = cache["indexes"][str(game)]
+        name = cache["caches"][str(universe_id)]["name"]
+        print(format_leaderboard(f"[#{i}] {name}: {playtime / 3600:.2f}h", i))
+
+    print(f"\n{bold}Your Top 5 Games This Week:{end}")
+    game_playtimes_weekly = sorted(game_playtimes_weekly.items(), key=lambda item: item[1], reverse=True)[:5]
+    for i, (game, playtime) in enumerate(game_playtimes_weekly, start=1):
+        universe_id = cache["indexes"][str(game)]
+        name = cache["caches"][str(universe_id)]["name"]
+        print(format_leaderboard(f"[#{i}] {name}: {playtime / 3600:.2f}h", i))
+    input("\nPress ENTER to return to the main menu. ")
 
 def live_stats():
     while True:
@@ -230,13 +258,13 @@ else:
 cache = json.loads(open("./server/cached_ids.json").read())
 while True:
     clear()
-    print(f"{gold}{bold}[Playtime Tools] [v3.0.0]{end}")
+    print(f"{gold}{bold}[Playtime Tools] [v3.1.0]{end}")
     print("Generate playtime leaderboards for Roblox Invites easily! More features coming soon™")
-    print("Supports Roblox Invites v5.0.0 - v5.1.0")
+    print("Supports Roblox Invites v5.0.0 - v5.3.0")
     print("Data Version: v4")
 
     print("\nLatest changes:")
-    print("    - Data is now dynamically derived from user stats instead of being stored explictly.")
+    print("    - Added support for creating usercards! These show the rankings of individual users and their top overall/weekly games.")
 
     print("\nAvailable commands:")
     print("    - /lb - Generates leaderboards for all data (''), for the current week ('weekly'), or for a range of weeks ('range')")
@@ -274,7 +302,11 @@ while True:
         live_game_stats(game_select(command.split("/live_game ")[1]))
     elif command == "/save":
         save_playtime_data()
-    elif command == "/user":
+    elif command.startswith("/user "):
         if len(args) != 1:
             continue
-        generate_user_stats(user_select(args[0]))
+        generate_user_stats(*user_select(args[0]))
+    elif command == "/user_all":
+        users = json.loads(open("./server/users.json").read())
+        for user in users:
+            generate_user_stats(user["user_id"], user["username"], user["display_name"])
