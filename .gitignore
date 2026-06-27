@@ -1,6 +1,7 @@
 *.app
 *.DS_Store
 *.spec
+build_app/
 logs/
 server/
 robloxinvites.py
