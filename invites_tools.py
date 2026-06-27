@@ -288,6 +288,26 @@ def add_custom_title():
         if input("\nDone! Add another custom title (y/N)? ") != "y":
             break
 
+def add_user(username=None):
+    clear()
+    print(f"{gold}[Add User]{end}")
+    if username is None:
+        username = input("Enter the username of the player you want to add: ")
+        print("")
+
+    print(f"You are trying to add @{username} to your Roblox Invites instance.")
+    if input("Type 'y' to confirm this. ") != "y":
+        return
+
+    users_path = "./server/users.json"
+    users = json.loads(open(users_path).read())
+    users += [{
+        "username": username
+    }]
+    open(users_path, "w").write(json.dumps(users, indent=4))
+
+    input("\nDone! Press ENTER to return to the main menu. ")
+
 if os.path.exists("./server/invites_tools.json"):
     data = json.loads(open("./server/invites_tools.json", "r").read())
 else:
@@ -311,13 +331,14 @@ while True:
     print("    - Renamed playtime_tools.json to invites_tools.json")
 
     print("\nAvailable commands:")
-    print("    - /lb - Generates leaderboards for all data (''), for the current week ('weekly'), or for a range of weeks ('range')")
+    print("    - /lb ['' | 'weekly | 'range']- Generates leaderboards for all data, for the current week, or for a range of weeks")
     print("    - /save - Saves playtime data and statistics to /server/invites_tools.json")
     print("    - /game [GAME_NAME] - Generates leaderboards for a specific game (requires at least 1+ week saved)")
-    print("    - /live - Generates an up-to-date leaderboard from stats.json (requires up-to-date stats.json in /server)")
-    print("    - /live_game [GAME_NAME] - Generates an up-to-date leaderboard for a game (requires up-to-date stats.json in /server)")
+    print("    - /live - Generates up-to-date leaderboards from stats.json (requires up-to-date stats.json in /server)")
+    print("    - /live_game [GAME_NAME] - Generates up-to-date leaderboards for a game (requires up-to-date stats.json in /server)")
     print("    - /user [USERNAME] - Generates a profile card for a given username")
     print("    - /add_ct - Opens a wizard that lets you add custom titles")
+    print("    - /add_user ['' | USER]- Adds a new user to your Roblox Invites instance")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
     print(f"Roblox Invites Server Root Path: {os.getcwd()}")
@@ -358,3 +379,8 @@ while True:
             generate_user_stats(user["user_id"], user["username"], user["display_name"])
     elif command == "/add_ct":
         add_custom_title()
+    elif command.startswith("/add_user"):
+        if len(args) == 0:
+            add_user()
+        else:
+            add_user(args[0])
