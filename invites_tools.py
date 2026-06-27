@@ -17,12 +17,18 @@ end = "\033[0m"
 os.chdir(os.path.dirname(__file__))
 users = json.loads(open("./server/users.json").read())
 
-user_dict = {}
-for user in users:
-    user_dict[user["user_id"]] = {
-        "username": user["username"],
-        "display_name": user["display_name"]
-    }
+def build_user_dict():
+    global user_dict
+    user_dict = {}
+    for user in users:
+        try:
+            user_dict[user["user_id"]] = {
+                "username": user["username"],
+                "display_name": user["display_name"]
+            }
+        except:
+            pass
+build_user_dict()
 
 def clear():
     print("\033[2J\033[3J\033[H", end="")
@@ -288,22 +294,35 @@ def add_custom_title():
         if input("\nDone! Add another custom title (y/N)? ") != "y":
             break
 
-def add_user(username=None):
+def modify_users(username=None, mode="add"):
     clear()
-    print(f"{gold}[Add User]{end}")
+    print(f"{gold}[{mode.capitalize()} User]{end}")
     if username is None:
-        username = input("Enter the username of the player you want to add: ")
+        username = input(f"Enter the username of the player you want to {mode}: ")
         print("")
 
-    print(f"You are trying to add @{username} to your Roblox Invites instance.")
+    print(f"You are trying to {mode} @{username} {"to" if mode == "add" else "from"} your Roblox Invites instance.")
     if input("Type 'y' to confirm this. ") != "y":
         return
 
     users_path = "./server/users.json"
     users = json.loads(open(users_path).read())
-    users += [{
-        "username": username
-    }]
+    if mode == "add":
+        req = requests.post("https://users.roblox.com/v1/usernames/users", json={"usernames": [username]}).json()
+        if len(req["data"]) == 0:
+            input("\nThis user doesn't exist. ")
+            return
+
+        users += [{
+            "username": req["data"][0]["name"],
+            "user_id": req["data"][0]["id"],
+            "display_name": req["data"][0]["displayName"]
+        }]
+    elif mode == "remove":
+        for i, user in enumerate(list(users)):
+            if user["username"].lower() == username.lower():
+                del users[i]
+
     open(users_path, "w").write(json.dumps(users, indent=4))
 
     input("\nDone! Press ENTER to return to the main menu. ")
@@ -331,7 +350,7 @@ while True:
     print("    - Renamed playtime_tools.json to invites_tools.json")
 
     print("\nAvailable commands:")
-    print("    - /lb ['' | 'weekly | 'range']- Generates leaderboards for all data, for the current week, or for a range of weeks")
+    print("    - /lb ['' | 'weekly | 'range'] - Generates leaderboards for all data, for the current week, or for a range of weeks")
     print("    - /save - Saves playtime data and statistics to /server/invites_tools.json")
     print("    - /game [GAME_NAME] - Generates leaderboards for a specific game (requires at least 1+ week saved)")
     print("    - /live - Generates up-to-date leaderboards from stats.json (requires up-to-date stats.json in /server)")
@@ -339,6 +358,7 @@ while True:
     print("    - /user [USERNAME] - Generates a profile card for a given username")
     print("    - /add_ct - Opens a wizard that lets you add custom titles")
     print("    - /add_user ['' | USER]- Adds a new user to your Roblox Invites instance")
+    print("    - /remove_user ['' | USER]- Removes a user from your Roblox Invites instance")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
     print(f"Roblox Invites Server Root Path: {os.getcwd()}")
@@ -381,6 +401,11 @@ while True:
         add_custom_title()
     elif command.startswith("/add_user"):
         if len(args) == 0:
-            add_user()
+            modify_users(None, "add")
         else:
-            add_user(args[0])
+            modify_users(args[0], "add")
+    elif command.startswith("/remove_user"):
+        if len(args) == 0:
+            modify_users(None, "remove")
+        else:
+            modify_users(args[0], "remove")
