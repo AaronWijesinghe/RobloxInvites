@@ -1,6 +1,7 @@
-import json
 import os
+import json
 import time
+import requests
 from datetime import datetime
 
 gold = "\033[0;33m"
@@ -10,6 +11,9 @@ bold = "\033[1m"
 underline = "\033[4m"
 end = "\033[0m"
 
+# this should chdir to the Roblox Invites root directory.
+# ideally, you're running the source code within the Roblox Invites root directory,
+# but if you compile this into an app this should still work
 os.chdir(os.path.dirname(__file__))
 users = json.loads(open("./server/users.json").read())
 
@@ -23,6 +27,19 @@ for user in users:
 def clear():
     print("\033[2J\033[3J\033[H", end="")
 
+def get_number(string):
+    new_string = ""
+    scanning_place_id = False
+    for char in string:
+        if char.isdigit() and not scanning_place_id:
+            scanning_place_id = True
+            new_string += char
+        elif char.isdigit() and scanning_place_id:
+            new_string += char
+        elif not char.isdigit() and scanning_place_id:
+            break
+    return new_string
+
 def format_leaderboard(string, pos):
     if pos == 1:
         return f"{gold}{string}{end}"
@@ -35,7 +52,7 @@ def format_leaderboard(string, pos):
 
 def save_playtime_data():
     data["weeks"] += [json.loads(open("./server/stats.json").read())]
-    open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
+    open("./server/invites_tools.json", "w").write(json.dumps(data, indent=2))
 
 def get_data(stats={}):
     total = 0
@@ -246,35 +263,64 @@ def live_game_stats(game):
             print(format_leaderboard(f"[#{i}] {user_dict[int(user)]["display_name"]} ({playtime / 3600:.2f}h)", i))
         time.sleep(5)
 
-if os.path.exists("./server/playtime_tools.json"):
-    data = json.loads(open("./server/playtime_tools.json", "r").read())
+def add_custom_title():
+    while True:
+        clear()
+        print(f"{gold}[Add Custom Title]{end}")
+        place_id = get_number(input("Enter the place ID or the link of a Roblox game: "))
+        message = input("Enter the custom title ({0} represents the display name of a user): ")
+        hex_color = input("Enter the hex code of the color: ").lower()
+        name = input("Enter game name: ")
+        universe_id = requests.get(
+            f"https://apis.roblox.com/universes/v1/places/{place_id}/universe"
+        ).json()["universeId"]
+
+        ct_path = "./server/custom_titles.json"
+        ct = json.loads(open(ct_path).read())
+        ct["titles"][str(universe_id)] = {
+            "title": message,
+            "color": hex_color,
+            "game": name,
+            "place_id": place_id,
+        }
+        open(ct_path, "w").write(json.dumps(ct, indent=4))
+
+        if input("\nDone! Add another custom title (y/N)? ") != "y":
+            break
+
+if os.path.exists("./server/invites_tools.json"):
+    data = json.loads(open("./server/invites_tools.json", "r").read())
 else:
     data = {
         "version": 4,
         "weeks": []
     }
-    open("./server/playtime_tools.json", "w").write(json.dumps(data, indent=2))
+    open("./server/invites_tools.json", "w").write(json.dumps(data, indent=2))
 
+version = "4.0.0"
 cache = json.loads(open("./server/cached_ids.json").read())
 while True:
     clear()
-    print(f"{gold}{bold}[Playtime Tools] [v3.1.0]{end}")
-    print("Generate playtime leaderboards for Roblox Invites easily! More features coming soon™")
+    print(f"{gold}{bold}[Invites Tools] [v{version}]{end}")
+    print("A set of useful tools for Roblox Invites!")
     print("Supports Roblox Invites v5.0.0 - v5.3.0")
     print("Data Version: v4")
 
     print("\nLatest changes:")
-    print("    - Added support for creating usercards! These show the rankings of individual users and their top overall/weekly games.")
+    print("    - Merged the Custom Title Wizard into Invites Tools!")
+    print("    - Renamed playtime_tools.json to invites_tools.json")
 
     print("\nAvailable commands:")
     print("    - /lb - Generates leaderboards for all data (''), for the current week ('weekly'), or for a range of weeks ('range')")
-    print("    - /save - Saves playtime data and statistics to /server/playtime_tools.json")
+    print("    - /save - Saves playtime data and statistics to /server/invites_tools.json")
     print("    - /game [GAME_NAME] - Generates leaderboards for a specific game (requires at least 1+ week saved)")
     print("    - /live - Generates an up-to-date leaderboard from stats.json (requires up-to-date stats.json in /server)")
     print("    - /live_game [GAME_NAME] - Generates an up-to-date leaderboard for a game (requires up-to-date stats.json in /server)")
-    print("    - (WIP) /user [USERNAME] - Generates a profile card for a given username")
+    print("    - /user [USERNAME] - Generates a profile card for a given username")
+    print("    - /add_ct - Opens a wizard that lets you add custom titles")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
+    print(f"Roblox Invites Server Root Path: {os.getcwd()}")
     command = input("Enter a command: ").lower().strip()
 
     args = command.split(" ")[1:]
@@ -310,3 +356,5 @@ while True:
         users = json.loads(open("./server/users.json").read())
         for user in users:
             generate_user_stats(user["user_id"], user["username"], user["display_name"])
+    elif command == "/add_ct":
+        add_custom_title()
