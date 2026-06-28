@@ -26,7 +26,7 @@ Leaving a game:<br>
 
 ## How to Use
 1. Clone this repository anywhere on your PC, but preferably in a place you can easily access.
-2. Replace the webhooks in source.py with your own webhooks (see *Webhooks*).
+2. Add your own webhooks in /server/webhooks.json (see *Webhooks*).
 3. Manually input values for the **modifiable** JSON files (see *Modifiable JSON Files*).
 4. Run source.py using Python 3.14.5+ (older versions can be used) with the modules in requirements.txt. For accurate playtime tracking, keep the bot running for as long as possible!
 5. Put Roblox Invites updates in /users/YOUR_USER_NAME/Downloads/RobloxInvites.py, and Custom Titles updates at /users/YOUR_USER_NAME/Downloads/custom_titles.json. The update system will automatically scan for these.
@@ -74,7 +74,7 @@ Currently, only the cookie at index 0 is used.<br>
 <br>
 
 **/server/custom_titles.json stores Custom Titles.**<br>
-You can add Custom Titles using the Custom Titles Wizard (CTWizard.py) in this repository.<br>
+You can add Custom Titles using Invites Tools (formerly CTWizard before it got merged).<br>
 ```
 [
     "version": CUSTOM_TITLES_VERSION (int),
@@ -92,6 +92,7 @@ You can add Custom Titles using the Custom Titles Wizard (CTWizard.py) in this r
 
 **/server/users.json stores the users who will participate in your hosting of the bot.**<br>
 When you modify this file while the bot is running, you only need to include a value for the `username` key. The bot will automatically add the other information.<br>
+Alternatively, you can add users through Invites Tools.<br>
 ```
 [
     {

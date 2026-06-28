@@ -87,7 +87,7 @@ def load_data(
     elif no_exist_ok:
         write_to_log("info", f"Created file './server/{file}' with data '{no_exist_data}'")
         save_data(no_exist_data, file)
-        return {}
+        return no_exist_data
     elif not no_exist_ok and no_exist_message != "":
         write_to_log("fatal", no_exist_message)
         save_data(no_exist_data, file)
@@ -634,11 +634,13 @@ else:
 
 stats = load_data("stats.json")
 cached_ids = load_data("cached_ids.json", {"indexes": [], "caches": {}})
-users = load_data("users.json", [{"username": ""}], False, "At least one user must be present in /server/users.json.",)
+users = load_data("users.json", [{"username": ""}], False, "At least one user must be present in /server/users.json.")
 blacklisted = load_data("blacklisted.json", [])
 old_user_presences = load_data("old_user_presences.json")
 custom_titles = load_data("custom_titles.json")["titles"]
 user_ids = [user["user_id"] for user in users]
+webhooks = load_data("webhooks.json", {"announcement_webhook": "", "webhook": "", "ct_webhook": ""}, False, "Set your webhooks in /server/webhooks.json.")
+webhooks_testing = load_data("webhooks_testing.json", {"announcement_webhook": "", "webhook": "", "ct_webhook": ""})
 write_to_log("info", f"Loaded server data at {os.path.dirname(__file__)}/server/")
 
 session = requests.Session()
@@ -653,16 +655,25 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "5.3.0"
+version = "5.4.0"
 update_desc = f"""
 **Roblox Invites {version}**
-- Removed the dedicated embed for join links
-- Merged the join link into the main join embed
+- Webhooks are now stored in /server/webhooks.json.
+    - I no longer have to hide my own instance of the code!! This is a LONG overdue change!
+- Testing webhooks are now stored in /server/webhooks_testing.json.
+    - Running robloxinvites.py with the "-t" argument will use your testing webhooks.
+- Custom Titles can now be updated directly on the server while Roblox Invites is running.
+Invites Tools is slowly but surely becoming a must-have toolset for Roblox Invites!
 """
 
-announcement_webhook = "webhook_url"
-webhook = "webhook_url"
-ct_webhook = "webhook_url"
+if "-t" not in sys.argv:
+    announcement_webhook = webhooks["announcement_webhook"]
+    webhook = webhooks["webhook"]
+    ct_webhook = webhooks["ct_webhook"]
+else:
+    announcement_webhook = webhooks_testing["announcement_webhook"]
+    webhook = webhooks_testing["webhook"]
+    ct_webhook = webhooks_testing["ct_webhook"]
 
 maintenance_info = {
     "reason": "I'll be pushing Roblox Invites version 4.2.0 to the production server.",
@@ -680,6 +691,7 @@ while True:
         check_ri_update()
         check_ct_update()
 
+        custom_titles = load_data("custom_titles.json")["titles"]
         users = load_data("users.json", [{"username": ""}], False, "At least one user must be present in /server/users.json.")
         blacklisted = load_data("blacklisted.json", [])
         blacklisted_ids = [b["place_id"] for b in blacklisted]
