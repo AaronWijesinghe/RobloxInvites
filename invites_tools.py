@@ -306,10 +306,38 @@ def add_custom_title():
             "game": name,
             "place_id": place_id,
         }
-        open(ct_path, "w").write(json.dumps(ct, indent=4))
+        open(ct_path, "w").write(json.dumps(ct, indent=2))
 
         if input("\nDone! Add another custom title (y/N)? ") != "y":
             break
+
+def modify_blacklist(place_id=None, mode="add"):
+    clear()
+    print(f"{gold}[{mode.capitalize()} User]{end}")
+    if place_id is None:
+        place_id = input(f"Enter the place ID you want to {mode}: ")
+    else:
+        print(f"You are {"adding" if mode == "add" else "removing"} \"{place_id}\" {"to" if mode == "add" else "from"} the blacklist.")
+    place_id = int(place_id)
+
+    blacklist_path = "./server/blacklisted.json"
+    if os.path.exists(blacklist_path):
+        blacklist = json.loads(open(blacklist_path).read())
+    else:
+        blacklist = []
+    if mode == "add":
+        game = input(f"Enter the name of the game you want to {mode}: ")
+        blacklist += [{
+            "place_id": place_id,
+            "game": game,
+        }]
+    elif mode == "remove":
+        for i, game in enumerate(list(blacklist)):
+            if game["place_id"] == place_id:
+                del blacklist[i]
+
+    open(blacklist_path, "w").write(json.dumps(blacklist, indent=2))
+    input(f"{"\n" if mode == "add" else ""}Done! Press ENTER to return to the main menu. ")
 
 def modify_users(username=None, mode="add"):
     clear()
@@ -343,7 +371,7 @@ def modify_users(username=None, mode="add"):
             if user["username"].lower() == username.lower():
                 del users[i]
 
-    open(users_path, "w").write(json.dumps(users, indent=4))
+    open(users_path, "w").write(json.dumps(users, indent=2))
     input("\nDone! Press ENTER to return to the main menu. ")
 
 def shutdown_server():
@@ -404,8 +432,8 @@ while True:
     print("    - /add_ct - Opens a wizard that lets you add custom titles")
     print("    - /add_user ['' | USER] - Adds a new user to your Roblox Invites instance")
     print("    - /remove_user ['' | USER] - Removes a user from your Roblox Invites instance")
-    print("    - (WIP) /add_blacklist - Adds a game ID to the blacklist")
-    print("    - (WIP) /remove_blacklist - Removes a game ID from the blacklist")
+    print("    - /add_blacklist - Adds a game ID to the blacklist")
+    print("    - /remove_blacklist - Removes a game ID from the blacklist")
     print("    - (WIP) /cookie - Sets the .ROBLOSECURITY cookie in ./server/cookies.json")
 
     print(f"\n{bold}Other commands:{end}")
@@ -468,5 +496,15 @@ while True:
                 modify_users(args[0], "remove")
         elif command == "/shutdown":
             shutdown_server()
+        elif command.startswith("/add_blacklist"):
+            if len(args) == 0:
+                modify_blacklist(None, "add")
+            else:
+                modify_blacklist(args[0], "add")
+        elif command.startswith("/remove_blacklist"):
+            if len(args) == 0:
+                modify_blacklist(None, "remove")
+            else:
+                modify_blacklist(args[0], "remove")
     except:
         pass
