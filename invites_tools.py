@@ -109,10 +109,10 @@ def game_select(query):
     for universe_id in cache.keys():
         game_cache[cache[universe_id]["name"]] = cache[universe_id]["root_place_id"]
 
-    games = list(game_cache.keys())
-    for game in games:
+    games = list(game_cache.items())
+    for (game, id) in games:
         if query.lower() in game.lower():
-            return game
+            return id
 
 def user_select(query):
     users = json.loads(open("./server/users.json").read())
