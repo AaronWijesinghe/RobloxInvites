@@ -2,6 +2,7 @@ import os
 import json
 import time
 import requests
+import pyperclip
 from sys import exit
 from datetime import datetime
 
@@ -313,7 +314,7 @@ def add_custom_title():
 
 def modify_blacklist(place_id=None, mode="add"):
     clear()
-    print(f"{gold}[{mode.capitalize()} User]{end}")
+    print(f"{gold}[{mode.capitalize()} User (Blacklist)]{end}")
     if place_id is None:
         place_id = input(f"Enter the place ID you want to {mode}: ")
     else:
@@ -373,6 +374,17 @@ def modify_users(username=None, mode="add"):
 
     open(users_path, "w").write(json.dumps(users, indent=2))
     input("\nDone! Press ENTER to return to the main menu. ")
+
+def set_cookie():
+    clear()
+    print(f"{gold}[Set Cookie]{end}")
+    print("Copy your .ROBLOSECURITY cookie.")
+    while not pyperclip.paste().startswith("_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items."):
+        time.sleep(1)
+    cookies = [pyperclip.paste()]
+    pyperclip.copy("")
+    open("./server/cookies.json", "w").write(json.dumps(cookies, indent=2))
+    input("Set cookie! Press ENTER to return to the main menu. ")
 
 def shutdown_server():
     clear()
@@ -434,7 +446,7 @@ while True:
     print("    - /remove_user ['' | USER] - Removes a user from your Roblox Invites instance")
     print("    - /add_blacklist - Adds a game ID to the blacklist")
     print("    - /remove_blacklist - Removes a game ID from the blacklist")
-    print("    - (WIP) /cookie - Sets the .ROBLOSECURITY cookie in ./server/cookies.json")
+    print("    - /cookie - Sets the .ROBLOSECURITY cookie in ./server/cookies.json")
 
     print(f"\n{bold}Other commands:{end}")
     print("    - /shutdown - Waits for Roblox Invites to stop, calculates running playtimes, and shuts down the server")
@@ -506,5 +518,9 @@ while True:
                 modify_blacklist(None, "remove")
             else:
                 modify_blacklist(args[0], "remove")
+        elif command == "/cookie":
+            set_cookie()
+        elif command.startswith("/announce"):
+            input("\nThis command will be coming when a future version of Roblox Invites releases (v5.4.0).\nThis version is still undergoing testing.")
     except:
         pass
