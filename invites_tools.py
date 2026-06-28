@@ -14,8 +14,7 @@ end = "\033[0m"
 # this should chdir to the Roblox Invites root directory.
 # ideally, you're running the source code within the Roblox Invites root directory,
 # but if you compile this into an app this should still work
-#os.chdir(os.path.dirname(__file__))
-os.chdir("/Users/aaron/Desktop/Projects/RobloxInvites")
+os.chdir(os.path.dirname(__file__))
 users = json.loads(open("./server/users.json").read())
 
 def build_user_dict():
