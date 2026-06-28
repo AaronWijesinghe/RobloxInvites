@@ -14,7 +14,8 @@ end = "\033[0m"
 # this should chdir to the Roblox Invites root directory.
 # ideally, you're running the source code within the Roblox Invites root directory,
 # but if you compile this into an app this should still work
-os.chdir(os.path.dirname(__file__))
+#os.chdir(os.path.dirname(__file__))
+os.chdir("/Users/aaron/Desktop/Projects/RobloxInvites")
 users = json.loads(open("./server/users.json").read())
 
 def build_user_dict():
@@ -74,7 +75,11 @@ def get_data(stats={}):
     for user in stats:
         if stats[user]["currently_playing"] != {}:
             currently_playing = stats[user]["currently_playing"]
-            stats[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
+            if str(currently_playing["root_place_id"]) in stats[user]["games_playtime"]:
+                stats[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
+            else:
+                stats[user]["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
+            stats[user]["currently_playing"] = {}
 
         playtimes[user] = 0
         for game in stats[user]["games_playtime"].keys():
@@ -318,7 +323,10 @@ def modify_users(username=None, mode="add"):
         return
 
     users_path = "./server/users.json"
-    users = json.loads(open(users_path).read())
+    if os.path.exists(users_path):
+        users = json.loads(open(users_path).read())
+    else:
+        users = []
     if mode == "add":
         req = requests.post("https://users.roblox.com/v1/usernames/users", json={"usernames": [username]}).json()
         if len(req["data"]) == 0:
@@ -336,40 +344,74 @@ def modify_users(username=None, mode="add"):
                 del users[i]
 
     open(users_path, "w").write(json.dumps(users, indent=4))
-
     input("\nDone! Press ENTER to return to the main menu. ")
 
+def shutdown_server():
+    clear()
+    print(f"{gold}[Shutdown Server]{end}")
+    print("Waiting for Roblox Invites to stop...")
+    while os.path.exists("session.lock"):
+        time.sleep(1)
+    
+    print("Roblox Invites has stopped. Calculating playtime data...")
+    stats = json.loads(open("./server/stats.json").read())
+    for user in stats:
+        if stats[user]["currently_playing"] != {}:
+            currently_playing = stats[user]["currently_playing"]
+            if str(currently_playing["root_place_id"]) in stats[user]["games_playtime"]:
+                stats[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
+            else:
+                stats[user]["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
+        stats[user]["currently_playing"] = {}
+    open("./server/stats.json", "w").write(json.dumps(stats, indent=2))
+    if os.path.exists("./server/old_user_presences.json"):
+        os.remove("./server/old_user_presences.json")
+    
+    print("\nAttempting to shut down server (requires password)...")
+    os.system("sudo shutdown -h now")
+    exit()
+
+version = "4.2.0"
+data_version = 4
+cache = json.loads(open("./server/cached_ids.json").read())
 if os.path.exists("./server/invites_tools.json"):
     data = json.loads(open("./server/invites_tools.json", "r").read())
 else:
     data = {
-        "version": 4,
+        "version": data_version,
         "weeks": []
     }
     open("./server/invites_tools.json", "w").write(json.dumps(data, indent=2))
-
-version = "4.1.0"
-cache = json.loads(open("./server/cached_ids.json").read())
 while True:
     clear()
     print(f"{gold}{bold}[Invites Tools] [v{version}]{end}")
     print("A set of useful tools for Roblox Invites!")
     print("Supports Roblox Invites v5.0.0 - v5.3.0")
-    print("Data Version: v4")
+    print(f"Data Version: v{data_version}")
 
-    print("\nLatest changes:")
-    print("    - The user dictionary now gets rebuilt every time is is needed, so you don't need to refresh the app when a user is added/removed")
+    print(f"\n{bold}Latest changes:{end}")
+    print("    - Added a command that shuts down the machine when Roblox Invites exits")
+    print("    - Adding a new user without /server/users.json being present works now")
+    print("    - Current playtime calculations now work if the user has played a game for the first time")
 
-    print("\nAvailable commands:")
-    print("    - /lb ['' | 'weekly | 'range'] - Generates leaderboards for all data, for the current week, or for a range of weeks (requires at least 1+ week saved)")
+    print(f"\n{bold}Leaderboard commands:{end}")
     print("    - /save - Saves a period of player statistics to /server/invites_tools.json")
+    print("    - /lb ['' | 'weekly | 'range'] - Generates leaderboards for all data, for the current week, or for a range of weeks (requires at least 1+ week saved)")
     print("    - /game [GAME_NAME] - Generates leaderboards for a specific game (requires at least 1+ week saved)")
     print("    - /live - Generates up-to-date leaderboards from stats.json (requires up-to-date stats.json in /server)")
     print("    - /live_game [GAME_NAME] - Generates up-to-date leaderboards for a game (requires up-to-date stats.json in /server)")
     print("    - /user [USERNAME] - Generates a profile card for a given username")
+
+    print(f"\n{bold}Utility commands:{end}")
     print("    - /add_ct - Opens a wizard that lets you add custom titles")
     print("    - /add_user ['' | USER] - Adds a new user to your Roblox Invites instance")
     print("    - /remove_user ['' | USER] - Removes a user from your Roblox Invites instance")
+    print("    - (WIP) /add_blacklist - Adds a game ID to the blacklist")
+    print("    - (WIP) /remove_blacklist - Removes a game ID from the blacklist")
+    print("    - (WIP) /cookie - Sets the .ROBLOSECURITY cookie in ./server/cookies.json")
+
+    print(f"\n{bold}Other commands:{end}")
+    print("    - /shutdown - Waits for Roblox Invites to stop, calculates running playtimes, and shuts down the server")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
     print(f"Roblox Invites Server Root Path: {os.getcwd()}")
@@ -420,3 +462,5 @@ while True:
             modify_users(None, "remove")
         else:
             modify_users(args[0], "remove")
+    elif command == "/shutdown":
+        shutdown_server()
