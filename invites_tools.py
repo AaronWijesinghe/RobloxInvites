@@ -2,6 +2,7 @@ import os
 import json
 import time
 import requests
+from sys import exit
 from datetime import datetime
 
 gold = "\033[0;33m"
@@ -370,7 +371,7 @@ def shutdown_server():
     os.system("sudo shutdown -h now")
     exit()
 
-version = "4.2.1"
+version = "4.3.0"
 data_version = 4
 cache = json.loads(open("./server/cached_ids.json").read())
 if os.path.exists("./server/invites_tools.json"):
@@ -389,7 +390,7 @@ while True:
     print(f"Data Version: v{data_version}")
 
     print(f"\n{bold}Latest changes:{end}")
-    print("    - Fixed an issue where user card creation wasn't working")
+    print("    - Added clean exit on CTRL+C")
 
     print(f"\n{bold}Leaderboard commands:{end}")
     print("    - /save - Saves a period of player statistics to /server/invites_tools.json")
@@ -412,52 +413,59 @@ while True:
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
     print(f"Roblox Invites Server Root Path: {os.getcwd()}")
-    command = input("Enter a command: ").lower().strip()
 
-    args = command.split(" ")[1:]
-    if command.startswith("/lb"):
-        if len(args) == 0:
-            generate_stats("all", *get_data(data["weeks"][len(data["weeks"]) - 1]))
-            continue
-        if args[0] == "weekly":
-            last_week = get_diff(len(data["weeks"]) - 2, len(data["weeks"]) - 1)
-            generate_stats("weekly", *get_data(last_week))
-        elif args[0] == "range":
-            if len(args) != 3:
+    try:
+        command = input("Enter a command: ").lower().strip()
+    except:
+        exit()
+
+    try:
+        args = command.split(" ")[1:]
+        if command.startswith("/lb"):
+            if len(args) == 0:
+                generate_stats("all", *get_data(data["weeks"][len(data["weeks"]) - 1]))
                 continue
-            range = get_diff(int(args[1]) - 1, int(args[2]) - 1)
-            generate_stats("range", *get_data(range))
-    elif command.startswith("/game "):
-        if len(args) == 0:
-            continue
-        generate_game_stats(game_select(command.split("/game ")[1]))
-    elif command == "/live":
-        live_stats()
-    elif command.startswith("/live_game "):
-        if len(args) == 0:
-            continue
-        live_game_stats(game_select(command.split("/live_game ")[1]))
-    elif command == "/save":
-        save_playtime_data()
-    elif command.startswith("/user "):
-        if len(args) != 1:
-            continue
-        generate_user_stats(*user_select(args[0]))
-    elif command == "/user_all":
-        users = json.loads(open("./server/users.json").read())
-        for user in users:
-            generate_user_stats(user["user_id"], user["username"], user["display_name"])
-    elif command == "/add_ct":
-        add_custom_title()
-    elif command.startswith("/add_user"):
-        if len(args) == 0:
-            modify_users(None, "add")
-        else:
-            modify_users(args[0], "add")
-    elif command.startswith("/remove_user"):
-        if len(args) == 0:
-            modify_users(None, "remove")
-        else:
-            modify_users(args[0], "remove")
-    elif command == "/shutdown":
-        shutdown_server()
+            if args[0] == "weekly":
+                last_week = get_diff(len(data["weeks"]) - 2, len(data["weeks"]) - 1)
+                generate_stats("weekly", *get_data(last_week))
+            elif args[0] == "range":
+                if len(args) != 3:
+                    continue
+                range = get_diff(int(args[1]) - 1, int(args[2]) - 1)
+                generate_stats("range", *get_data(range))
+        elif command.startswith("/game "):
+            if len(args) == 0:
+                continue
+            generate_game_stats(game_select(command.split("/game ")[1]))
+        elif command == "/live":
+            live_stats()
+        elif command.startswith("/live_game "):
+            if len(args) == 0:
+                continue
+            live_game_stats(game_select(command.split("/live_game ")[1]))
+        elif command == "/save":
+            save_playtime_data()
+        elif command.startswith("/user "):
+            if len(args) != 1:
+                continue
+            generate_user_stats(*user_select(args[0]))
+        elif command == "/user_all":
+            users = json.loads(open("./server/users.json").read())
+            for user in users:
+                generate_user_stats(user["user_id"], user["username"], user["display_name"])
+        elif command == "/add_ct":
+            add_custom_title()
+        elif command.startswith("/add_user"):
+            if len(args) == 0:
+                modify_users(None, "add")
+            else:
+                modify_users(args[0], "add")
+        elif command.startswith("/remove_user"):
+            if len(args) == 0:
+                modify_users(None, "remove")
+            else:
+                modify_users(args[0], "remove")
+        elif command == "/shutdown":
+            shutdown_server()
+    except:
+        pass
