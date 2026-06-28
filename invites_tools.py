@@ -348,7 +348,7 @@ else:
     }
     open("./server/invites_tools.json", "w").write(json.dumps(data, indent=2))
 
-version = "4.0.0"
+version = "4.1.0"
 cache = json.loads(open("./server/cached_ids.json").read())
 while True:
     clear()
@@ -358,9 +358,7 @@ while True:
     print("Data Version: v4")
 
     print("\nLatest changes:")
-    print("    - Merged the Custom Title Wizard into Invites Tools!")
-    print("    - Renamed playtime_tools.json to invites_tools.json")
-    print("    - Current playtimes are now accounted for when saving stats and in live leaderboards")
+    print("    - The user dictionary now gets rebuilt every time is is needed, so you don't need to refresh the app when a user is added/removed")
 
     print("\nAvailable commands:")
     print("    - /lb ['' | 'weekly | 'range'] - Generates leaderboards for all data, for the current week, or for a range of weeks (requires at least 1+ week saved)")
