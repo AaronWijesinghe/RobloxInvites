@@ -400,7 +400,7 @@ while True:
     print("    - /live_game [GAME_NAME] - Generates up-to-date leaderboards for a game (requires up-to-date stats.json in /server)")
     print("    - /user [USERNAME] - Generates a profile card for a given username")
 
-    print(f"\n{bold}Utility commands:{end}")
+    print(f"\n{bold}Server commands:{end}")
     print("    - /add_ct - Opens a wizard that lets you add custom titles")
     print("    - /add_user ['' | USER] - Adds a new user to your Roblox Invites instance")
     print("    - /remove_user ['' | USER] - Removes a user from your Roblox Invites instance")
@@ -410,6 +410,7 @@ while True:
 
     print(f"\n{bold}Other commands:{end}")
     print("    - /shutdown - Waits for Roblox Invites to stop, calculates running playtimes, and shuts down the server")
+    print("    - (WIP) /announce - Opens a wizard that sends announcements to your Announcements webhook")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
     print(f"Roblox Invites Server Root Path: {os.getcwd()}")
