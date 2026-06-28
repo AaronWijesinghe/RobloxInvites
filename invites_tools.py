@@ -360,8 +360,8 @@ while True:
     print("    - Current playtimes are now accounted for when saving stats and in live leaderboards")
 
     print("\nAvailable commands:")
-    print("    - /lb ['' | 'weekly | 'range'] - Generates leaderboards for all data, for the current week, or for a range of weeks")
-    print("    - /save - Saves playtime data and statistics to /server/invites_tools.json")
+    print("    - /lb ['' | 'weekly | 'range'] - Generates leaderboards for all data, for the current week, or for a range of weeks (requires at least 1+ week saved)")
+    print("    - /save - Saves a period of player statistics to /server/invites_tools.json")
     print("    - /game [GAME_NAME] - Generates leaderboards for a specific game (requires at least 1+ week saved)")
     print("    - /live - Generates up-to-date leaderboards from stats.json (requires up-to-date stats.json in /server)")
     print("    - /live_game [GAME_NAME] - Generates up-to-date leaderboards for a game (requires up-to-date stats.json in /server)")
