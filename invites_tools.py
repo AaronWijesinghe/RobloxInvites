@@ -98,7 +98,7 @@ def get_diff(week_1, week_2):
         if user not in old:
             diff[user] = new[user]
             continue
-        diff[user] = {"games_playtime": {}}
+        diff[user] = {"games_playtime": {}, "currently_playing": {}}
         diff[user]["total_playtime"] = new[user]["total_playtime"] - old[user]["total_playtime"]
         for game in new[user]["games_playtime"].keys():
             if not game in old[user]["games_playtime"]:
@@ -191,12 +191,12 @@ def generate_user_stats(user_id, user_name, display_name):
     creation_date = datetime.now().strftime("%m-%d-%Y")
     creation_time = datetime.now().strftime("%H:%M:%S")
 
-    total, playtimes, game_playtimes = get_data({"user_id": data["weeks"][len(data["weeks"]) - 1][str(user_id)]})
+    total, playtimes, game_playtimes = get_data({str(user_id): data["weeks"][len(data["weeks"]) - 1][str(user_id)]})
     total_server, playtimes_server, game_playtimes_server = get_data(data["weeks"][len(data["weeks"]) - 1])
     playtimes_server = sorted(playtimes_server.items(), key=lambda item: item[1], reverse=True)
     game_playtimes_server = sorted(game_playtimes_server.items(), key=lambda item: item[1], reverse=True)
     
-    total_weekly, playtimes_weekly, game_playtimes_weekly = get_data({"user_id": get_diff(len(data["weeks"]) - 2, len(data["weeks"]) - 1)[str(user_id)]})
+    total_weekly, playtimes_weekly, game_playtimes_weekly = get_data({str(user_id): get_diff(len(data["weeks"]) - 2, len(data["weeks"]) - 1)[str(user_id)]})
     total_server_weekly, playtimes_server_weekly, game_playtimes_server_weekly = get_data(get_diff(len(data["weeks"]) - 2, len(data["weeks"]) - 1))
     playtimes_server_weekly = sorted(playtimes_server_weekly.items(), key=lambda item: item[1], reverse=True)
     game_playtimes_server_weekly = sorted(game_playtimes_server_weekly.items(), key=lambda item: item[1], reverse=True)
@@ -370,7 +370,7 @@ def shutdown_server():
     os.system("sudo shutdown -h now")
     exit()
 
-version = "4.2.0"
+version = "4.2.1"
 data_version = 4
 cache = json.loads(open("./server/cached_ids.json").read())
 if os.path.exists("./server/invites_tools.json"):
@@ -389,9 +389,7 @@ while True:
     print(f"Data Version: v{data_version}")
 
     print(f"\n{bold}Latest changes:{end}")
-    print("    - Added a command that shuts down the machine when Roblox Invites exits")
-    print("    - Adding a new user without /server/users.json being present works now")
-    print("    - Current playtime calculations now work if the user has played a game for the first time")
+    print("    - Fixed an issue where user card creation wasn't working")
 
     print(f"\n{bold}Leaderboard commands:{end}")
     print("    - /save - Saves a period of player statistics to /server/invites_tools.json")
