@@ -57,7 +57,12 @@ def format_leaderboard(string, pos):
         return string
 
 def save_playtime_data():
-    data["weeks"] += [json.loads(open("./server/stats.json").read())]
+    stats = json.loads(open("./server/stats.json").read())
+    for user in stats:
+        if stats[user]["currently_playing"] != {}:
+            currently_playing = stats[user]["currently_playing"]
+            stats[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
+    data["weeks"] += [stats]
     open("./server/invites_tools.json", "w").write(json.dumps(data, indent=2))
 
 def get_data(stats={}):
@@ -67,6 +72,10 @@ def get_data(stats={}):
     if stats == {}:
         stats = json.loads(open("./server/stats.json").read())
     for user in stats:
+        if stats[user]["currently_playing"] != {}:
+            currently_playing = stats[user]["currently_playing"]
+            stats[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
+
         playtimes[user] = 0
         for game in stats[user]["games_playtime"].keys():
             if game not in game_playtimes:
@@ -74,6 +83,7 @@ def get_data(stats={}):
             game_playtimes[game] += stats[user]["games_playtime"][game]["playtime"]
             total += stats[user]["games_playtime"][game]["playtime"]
             playtimes[user] += stats[user]["games_playtime"][game]["playtime"]
+        
     return (total, playtimes, game_playtimes)
 
 def get_diff(week_1, week_2):
@@ -220,7 +230,6 @@ def live_stats():
 
         clear()
         print(f"{gold}{bold}[Server Leaderboard] [Live]{end}")
-        print("Your time is only counted after you leave a game.")
         print(f"Current Date/Time: {timestamp_time} @ {timestamp_date}")
         print(f"{bold}{underline}Total Server Playtime:{end} {total / 3600:.2f}h\n")
 
@@ -348,6 +357,7 @@ while True:
     print("\nLatest changes:")
     print("    - Merged the Custom Title Wizard into Invites Tools!")
     print("    - Renamed playtime_tools.json to invites_tools.json")
+    print("    - Current playtimes are now accounted for when saving stats and in live leaderboards")
 
     print("\nAvailable commands:")
     print("    - /lb ['' | 'weekly | 'range'] - Generates leaderboards for all data, for the current week, or for a range of weeks")
