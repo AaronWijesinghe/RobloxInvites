@@ -129,6 +129,7 @@ def generate_stats(lb_type, total, playtimes, game_playtimes):
     }
 
     clear()
+    build_user_dict()
     print(f"{gold}{bold}[Server Leaderboard] {titles[lb_type]}{end}")
     print(f"{bold}{underline}Total Server Playtime:{end} {total / 3600:.2f}h\n")
 
@@ -149,6 +150,7 @@ def generate_game_stats(game):
     global cache
 
     clear()
+    build_user_dict()
     if game == None:
         print(f"{gold}{bold}[Error]{end}")
         input("This game couldn't be found.")
@@ -223,6 +225,7 @@ def generate_user_stats(user_id, user_name, display_name):
 
 def live_stats():
     while True:
+        build_user_dict()
         cache = json.loads(open("./server/cached_ids.json").read())
         total, playtimes, game_playtimes = get_data()
         timestamp_date = datetime.now().strftime("%m-%d-%Y")
@@ -367,8 +370,8 @@ while True:
     print("    - /live_game [GAME_NAME] - Generates up-to-date leaderboards for a game (requires up-to-date stats.json in /server)")
     print("    - /user [USERNAME] - Generates a profile card for a given username")
     print("    - /add_ct - Opens a wizard that lets you add custom titles")
-    print("    - /add_user ['' | USER]- Adds a new user to your Roblox Invites instance")
-    print("    - /remove_user ['' | USER]- Removes a user from your Roblox Invites instance")
+    print("    - /add_user ['' | USER] - Adds a new user to your Roblox Invites instance")
+    print("    - /remove_user ['' | USER] - Removes a user from your Roblox Invites instance")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
     print(f"Roblox Invites Server Root Path: {os.getcwd()}")
