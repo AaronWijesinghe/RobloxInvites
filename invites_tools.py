@@ -13,11 +13,27 @@ bold = "\033[1m"
 underline = "\033[4m"
 end = "\033[0m"
 
+red = 12127505
+orange = 16742912
+yellow = 13220620
+green = 2206732
+blue = 3447003
+purple = 7419530
+gray = 7303282
+
 # this should chdir to the Roblox Invites root directory.
 # ideally, you're running the source code within the Roblox Invites root directory,
 # but if you compile this into an app this should still work
 os.chdir(os.path.dirname(__file__))
+#os.chdir("/Users/aaron/Desktop/Projects/RobloxInvites")
 users = json.loads(open("./server/users.json").read())
+
+def send_embed(title, desc, color, webhook):
+    data = {
+        "embeds": [{"title": title, "description": desc, "color": color}],
+        "components": [],
+    }
+    requests.post(webhook, json=data)
 
 def build_user_dict():
     global user_dict
@@ -411,6 +427,20 @@ def shutdown_server():
     os.system("sudo shutdown -h now")
     exit()
 
+def announce():
+    clear()
+    print(f"{gold}[Send Announcement]{end}")
+    if not os.path.exists("./server/webhooks.json"):
+        input("Couldn't find webhooks.json. Make sure you're running Roblox Invites v5.4.0 or higher. ")
+        return
+    
+    webhooks = json.loads(open("./server/webhooks.json").read())
+    announcement_webhook = webhooks["announcement_webhook"]
+
+    title = input("Enter announcement title: ")
+    message = input("Enter announcement message: ")
+    send_embed(title, message, blue, announcement_webhook)
+            
 version = "4.3.0"
 data_version = 4
 cache = json.loads(open("./server/cached_ids.json").read())
@@ -426,7 +456,7 @@ while True:
     clear()
     print(f"{gold}{bold}[Invites Tools] [v{version}]{end}")
     print("A set of useful tools for Roblox Invites!")
-    print("Supports Roblox Invites v5.0.0 - v5.3.0")
+    print("Supports Roblox Invites v5.0.0 - v5.4.0")
     print(f"Data Version: v{data_version}")
 
     print(f"\n{bold}Latest changes:{end}")
@@ -450,7 +480,7 @@ while True:
 
     print(f"\n{bold}Other commands:{end}")
     print("    - /shutdown - Waits for Roblox Invites to stop, calculates running playtimes, and shuts down the server")
-    print("    - (WIP) /announce - Opens a wizard that sends announcements to your Announcements webhook")
+    print("    - /announce - Opens a wizard that sends announcements to your Announcements webhook (requires Roblox Invites v5.4.0+)")
 
     print(f"\nWeeks saved: {len(data["weeks"])}")
     print(f"Roblox Invites Server Root Path: {os.getcwd()}")
@@ -521,6 +551,6 @@ while True:
         elif command == "/cookie":
             set_cookie()
         elif command.startswith("/announce"):
-            input("\nThis command will be coming when a future version of Roblox Invites releases (v5.4.0).\nThis version is still undergoing testing.")
+            announce()
     except:
         pass

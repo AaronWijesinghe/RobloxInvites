@@ -655,15 +655,11 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "5.4.0"
+version = "5.5.0"
 update_desc = f"""
 **Roblox Invites {version}**
-- Webhooks are now stored in /server/webhooks.json.
-    - I no longer have to hide my own instance of the code!! This is a LONG overdue change!
-- Testing webhooks are now stored in /server/webhooks_testing.json.
-    - Running robloxinvites.py with the "-t" argument will use your testing webhooks.
-- Custom Titles can now be updated directly on the server while Roblox Invites is running.
-Invites Tools is slowly but surely becoming a must-have toolset for Roblox Invites!
+- The announce() function has been removed.
+    - Use Invites Tools to send announcements instead.
 """
 
 if "-t" not in sys.argv:
@@ -683,7 +679,8 @@ incoming_upd_info = {
     "previous_version": "4.1.0",
     "estimated_release_timeframe": "10-20 minutes",
 }
-announce("prod", announcement_webhook)  # "prod" announces updates, "" announces nothing
+send_embed("Updates", update_desc, blue, webhook)
+write_to_log("info", f"Sent update changelog embed to {webhook}")
 write_to_log("info", f"Successfully initalized Roblox Invites {version}!")
 
 while True:
