@@ -434,7 +434,7 @@ def announce():
         input("Couldn't find webhooks.json. Make sure you're running Roblox Invites v5.4.0 or higher. ")
         return
     
-    webhooks = json.loads(open("./server/webhooks_testing.json").read())
+    webhooks = json.loads(open("./server/webhooks.json").read())
     announcement_webhook = webhooks["announcement_webhook"]
 
     title = input("Enter announcement title: ")
