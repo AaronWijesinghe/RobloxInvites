@@ -434,14 +434,21 @@ def announce():
         input("Couldn't find webhooks.json. Make sure you're running Roblox Invites v5.4.0 or higher. ")
         return
     
-    webhooks = json.loads(open("./server/webhooks.json").read())
+    webhooks = json.loads(open("./server/webhooks_testing.json").read())
     announcement_webhook = webhooks["announcement_webhook"]
 
     title = input("Enter announcement title: ")
-    message = input("Enter announcement message: ")
+    message = ""
+    print("Enter announcement message (type EXIT [case-sensitive] when finished, ENTER for newline):")
+    while True:
+        new = input("> ")
+        if new == "EXIT":
+            break
+        message += new+"\n"
+    message = message[:-1]
     send_embed(title, message, blue, announcement_webhook)
             
-version = "4.3.0"
+version = "4.4.0"
 data_version = 4
 cache = json.loads(open("./server/cached_ids.json").read())
 if os.path.exists("./server/invites_tools.json"):
