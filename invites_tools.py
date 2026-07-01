@@ -467,7 +467,7 @@ while True:
     clear()
     print(f"{gold}{bold}[Invites Tools] [v{version}]{end}")
     print("A set of useful tools for Roblox Invites!")
-    print("Supports Roblox Invites v5.0.0 - v5.4.0")
+    print("Supports Roblox Invites v5.0.0 - v5.5.1")
     print(f"Data Version: v{data_version}")
 
     print(f"\n{bold}Latest changes:{end}")

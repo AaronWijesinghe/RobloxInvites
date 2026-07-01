@@ -222,7 +222,7 @@ def send_invite(i, place_id, game_instance_id, transfer=False):
 
     game_url = f"roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}"
     embed_title = f"{displaynames[i]} has joined a game!"
-    embed_desc = f"**Join {displaynames[i]} (@{usernames[i]}) in** *{game}*{exclamation}\nTotal playtime for this game: {playtime_str}\n\nClick [this link]({join_embed_url}) to join, or copy the URL below:\n-# {game_url}"
+    embed_desc = f"**Join {displaynames[i]} (@{usernames[i]}) in** *{game}*{exclamation}\nTotal playtime for this game: {playtime_str}\n\nClick [this link]({join_embed_url}) to join, or copy + paste the URL below in your browser:\n-# {game_url}"
     embed_color = green
 
     if str(universe_id) in custom_titles:
@@ -234,7 +234,7 @@ def send_invite(i, place_id, game_instance_id, transfer=False):
             embed_title = f"{custom_titles[str(universe_id)]["title"].format(displaynames[i])[:-1]} in a new server!"
         else:
             embed_title = f"{displaynames[i]} transferred servers!"
-        embed_desc = f"{displaynames[i]} (@{usernames[i]}) has transferred to a different server in *{game}*{period}\nTotal playtime for this game: {playtime_str}\n\nClick [this link]({join_embed_url}) to join, or copy the URL below:\n-# {game_url}"
+        embed_desc = f"{displaynames[i]} (@{usernames[i]}) has transferred to a different server in *{game}*{period}\nTotal playtime for this game: {playtime_str}\n\nClick [this link]({join_embed_url}) to join, or copy + paste the URL below in your browser:\n-# {game_url}"
 
     if max_players == 1:
         embed_desc = f"{displaynames[i]} (@{usernames[i]}) is playing *{game}*{exclamation}\nHowever, you can't join them because the max server size is 1 player.\nTotal playtime for this game: {playtime_str}\n\n-# {game_url}"
@@ -655,11 +655,10 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "5.5.0"
+version = "5.5.1"
 update_desc = f"""
 **Roblox Invites {version}**
-- The announce() function has been removed.
-    - Use Invites Tools to send announcements instead.
+- Reworded the join message relating to roblox:// URLs
 """
 
 if "-t" not in sys.argv:
