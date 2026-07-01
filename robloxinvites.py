@@ -655,10 +655,11 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "5.5.1"
+version = "5.5.2"
 update_desc = f"""
 **Roblox Invites {version}**
-- Reworded the join message relating to roblox:// URLs
+- Update changelogs are now sent through the announcement webhook
+    - This fixes a regression from an earlier version
 """
 
 if "-t" not in sys.argv:
@@ -678,7 +679,7 @@ incoming_upd_info = {
     "previous_version": "4.1.0",
     "estimated_release_timeframe": "10-20 minutes",
 }
-send_embed("Updates", update_desc, blue, webhook)
+send_embed("Updates", update_desc, blue, announcement_webhook)
 write_to_log("info", f"Sent update changelog embed to {webhook}")
 write_to_log("info", f"Successfully initalized Roblox Invites {version}!")
 
