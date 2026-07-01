@@ -79,7 +79,11 @@ def save_playtime_data():
     for user in stats:
         if stats[user]["currently_playing"] != {}:
             currently_playing = stats[user]["currently_playing"]
-            stats[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
+            if str(currently_playing["root_place_id"]) in stats[user]["games_playtime"]:
+                stats[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
+            else:
+                stats[user]["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
+            stats[user]["currently_playing"] = {}
     data["weeks"] += [stats]
     open("./server/invites_tools.json", "w").write(json.dumps(data, indent=2))
 
@@ -448,7 +452,7 @@ def announce():
     message = message[:-1]
     send_embed(title, message, blue, announcement_webhook)
             
-version = "4.4.1"
+version = "4.4.2"
 data_version = 4
 cache = json.loads(open("./server/cached_ids.json").read())
 if os.path.exists("./server/invites_tools.json"):
@@ -467,8 +471,7 @@ while True:
     print(f"Data Version: v{data_version}")
 
     print(f"\n{bold}Latest changes:{end}")
-    print("    - Added announcements")
-    print("    - You can now leave a hashtag in hex colors and still have the input be accepted")
+    print("    - Saving player statistics is now more resilient")
 
     print(f"\n{bold}Leaderboard commands:{end}")
     print("    - /save - Saves a period of player statistics to /server/invites_tools.json")
