@@ -309,7 +309,7 @@ def add_custom_title():
         print(f"{gold}[Add Custom Title]{end}")
         place_id = get_number(input("Enter the place ID or the link of a Roblox game: "))
         message = input("Enter the custom title ({0} represents the display name of a user): ")
-        hex_color = input("Enter the hex code of the color: ").lower()
+        hex_color = input("Enter the hex code of the color: ").lower().replace("#", "")
         name = input("Enter game name: ")
         universe_id = requests.get(
             f"https://apis.roblox.com/universes/v1/places/{place_id}/universe"
@@ -448,7 +448,7 @@ def announce():
     message = message[:-1]
     send_embed(title, message, blue, announcement_webhook)
             
-version = "4.4.0"
+version = "4.4.1"
 data_version = 4
 cache = json.loads(open("./server/cached_ids.json").read())
 if os.path.exists("./server/invites_tools.json"):
@@ -467,7 +467,8 @@ while True:
     print(f"Data Version: v{data_version}")
 
     print(f"\n{bold}Latest changes:{end}")
-    print("    - Added clean exit on CTRL+C")
+    print("    - Added announcements")
+    print("    - You can now leave a hashtag in hex colors and still have the input be accepted")
 
     print(f"\n{bold}Leaderboard commands:{end}")
     print("    - /save - Saves a period of player statistics to /server/invites_tools.json")
