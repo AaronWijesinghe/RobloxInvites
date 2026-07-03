@@ -3,6 +3,7 @@ import json
 import time
 import requests
 import pyperclip
+import emoji
 from sys import exit
 from datetime import datetime
 
@@ -63,6 +64,31 @@ def get_number(string):
         elif not char.isdigit() and scanning_place_id:
             break
     return new_string
+
+def strip_string(string):
+    return string.replace(gold, "").replace(silver, "").replace(bronze, "").replace(bold, "").replace(end, "").replace("\uFE0F", "")
+
+def get_string_without_parentheticals(string):
+    waiting_for_end = False
+    char_list = list(string)
+    for i, char in enumerate(char_list):
+        if waiting_for_end:
+            if char == "]" or char == ")":
+                waiting_for_end = False
+                char_list[i] = ""
+            else:
+                char_list[i] = ""
+        elif char == "[" or char == "(":
+            char_list[i] = ""
+            waiting_for_end = True
+    return "".join(char_list).strip()
+
+def remove_emojis(string):
+    char_list = list(string)
+    for i, char in enumerate(char_list):
+        if emoji.is_emoji(char):
+            char_list[i] = ""
+    return "".join(char_list).strip()
 
 def format_leaderboard(string, pos):
     if pos == 1:
@@ -223,30 +249,52 @@ def generate_user_stats(user_id, user_name, display_name):
     playtimes_server_weekly = sorted(playtimes_server_weekly.items(), key=lambda item: item[1], reverse=True)
     game_playtimes_server_weekly = sorted(game_playtimes_server_weekly.items(), key=lambda item: item[1], reverse=True)
 
-    print(f"{gold}{bold}[{display_name}'s usercard]{end}")
-    print(f"Created on {creation_date} @ {creation_time} EST\n")
+    usercard_data = []
 
-    print(f"{bold}Your Playtimes:{end}")
-    print(f"Overall Playtime:{end} {total / 3600:.2f}h")
-    print(f"Weekly Playtime:{end} {total_weekly / 3600:.2f}h\n")
+    usercard_data += [f"{gold}{bold}[{display_name}'s usercard]{end}"]
+    usercard_data += [f"Created on {creation_date} @ {creation_time} EST"]
+
+    usercard_data += ["",
+                      f"{bold}Your Playtimes:{end}",
+                      f"{bold}Overall Playtime:{end} {total / 3600:.2f}h",
+                      f"{bold}Weekly Playtime:{end} {total_weekly / 3600:.2f}h"]
     
-    print(f"{bold}Your Standings:{end}")
-    print(f"Overall Leaderboard Position:{end} #{playtimes_server.index((str(user_id), total)) + 1}")
-    print(f"Weekly Leaderboard Position:{end} #{playtimes_server_weekly.index((str(user_id), total_weekly)) + 1}\n")
+    usercard_data += ["",
+                      f"{bold}Your Playtimes:{end}",
+                      f"{bold}Overall Playtime:{end} {total / 3600:.2f}h",
+                      f"{bold}Weekly Playtime:{end} {total_weekly / 3600:.2f}h"]
+    
+    usercard_data += ["",
+                      f"{bold}Your Standings:{end}",
+                      f"Overall Leaderboard Position:{end} #{playtimes_server.index((str(user_id), total)) + 1}",
+                      f"Weekly Leaderboard Position:{end} #{playtimes_server_weekly.index((str(user_id), total_weekly)) + 1}"]
 
-    print(f"{bold}Your Top 5 Games Overall:{end}")
+    usercard_data += ["", f"{bold}Your Top 5 Games Overall:{end}"]
     game_playtimes = sorted(game_playtimes.items(), key=lambda item: item[1], reverse=True)[:5]
     for i, (game, playtime) in enumerate(game_playtimes, start=1):
         universe_id = cache["indexes"][str(game)]
         name = cache["caches"][str(universe_id)]["name"]
-        print(format_leaderboard(f"[#{i}] {name}: {playtime / 3600:.2f}h", i))
+        usercard_data += [format_leaderboard(f"[#{i}] {remove_emojis(get_string_without_parentheticals(name))}: {playtime / 3600:.2f}h", i)]
 
-    print(f"\n{bold}Your Top 5 Games This Week:{end}")
+    usercard_data += ["", f"{bold}Your Top 5 Games This Week:{end}"]
     game_playtimes_weekly = sorted(game_playtimes_weekly.items(), key=lambda item: item[1], reverse=True)[:5]
     for i, (game, playtime) in enumerate(game_playtimes_weekly, start=1):
         universe_id = cache["indexes"][str(game)]
         name = cache["caches"][str(universe_id)]["name"]
-        print(format_leaderboard(f"[#{i}] {name}: {playtime / 3600:.2f}h", i))
+        usercard_data += [format_leaderboard(f"[#{i}] {remove_emojis(get_string_without_parentheticals(name))}: {playtime / 3600:.2f}h", i)]
+    
+    longest_str_length = 0
+    for string in usercard_data:
+        proc_string = strip_string(string)
+        if len(proc_string) > longest_str_length:
+            longest_str_length = len(proc_string)
+
+    longest_str_length += 2
+    print("(" + "=" * (longest_str_length + 2) + ")")
+    for string in usercard_data:
+        proc_string = strip_string(string)
+        print("| " + string + " " * (longest_str_length - len(proc_string)) + " |")
+    print("(" + "=" * (longest_str_length + 2) + ")")
     input("\nPress ENTER to return to the main menu. ")
 
 def live_stats():
@@ -452,7 +500,7 @@ def announce():
     message = message[:-1]
     send_embed(title, message, blue, announcement_webhook)
             
-version = "4.4.2"
+version = "4.5.0"
 data_version = 4
 cache = json.loads(open("./server/cached_ids.json").read())
 if os.path.exists("./server/invites_tools.json"):
@@ -471,7 +519,7 @@ while True:
     print(f"Data Version: v{data_version}")
 
     print(f"\n{bold}Latest changes:{end}")
-    print("    - Saving player statistics is now more resilient")
+    print("    - Revamped the default design of usercards")
 
     print(f"\n{bold}Leaderboard commands:{end}")
     print("    - /save - Saves a period of player statistics to /server/invites_tools.json")
@@ -501,7 +549,8 @@ while True:
     except:
         exit()
 
-    try:
+    #try:
+    if True:
         args = command.split(" ")[1:]
         if command.startswith("/lb"):
             if len(args) == 0:
@@ -563,5 +612,5 @@ while True:
             set_cookie()
         elif command.startswith("/announce"):
             announce()
-    except:
-        pass
+    #except:
+    #    pass
