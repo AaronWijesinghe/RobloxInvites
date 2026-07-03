@@ -507,31 +507,6 @@ def get_user_ids():
             time.sleep(1)
 
 
-def announce(announcement_type, webhook):
-    match announcement_type:
-        case "prod":
-            write_to_log("info", f"Sent update changelog embed to {webhook}")
-            send_embed("Updates", update_desc, blue, webhook)
-        case "maintenance":
-            write_to_log("info", f"Sent maintenance embed to {webhook}")
-            send_embed(
-                "Maintenance",
-                f"The Roblox Invites server will be undergoing maintenance.\n\n**Reason:** {maintenance_info['reason']}\n**Timeframe:** {maintenance_info['timeframe']}",
-                gray,
-                webhook,
-            )
-            exit()
-        case "incoming_upd":
-            write_to_log("info", f"Sent update notice embed to {webhook}")
-            send_embed(
-                "Update Notice",
-                f"An update is coming soon™ to a production server near you!\n\n**Version:** v{incoming_upd_info['previous_version']} -> v{version}\n**Estimated Release Time:** {incoming_upd_info['estimated_release_timeframe']}",
-                yellow,
-                webhook,
-            )
-            exit()
-
-
 def check_ri_update():
     global version
 
@@ -655,11 +630,11 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "5.5.2"
+version = "5.5.3"
 update_desc = f"""
 **Roblox Invites {version}**
-- Update changelogs are now sent through the announcement webhook
-    - This fixes a regression from an earlier version
+- Removed maintenance/incoming update dicts as they are no longer used
+- Removed announce() from code entirely
 """
 
 if "-t" not in sys.argv:
@@ -671,14 +646,6 @@ else:
     webhook = webhooks_testing["webhook"]
     ct_webhook = webhooks_testing["ct_webhook"]
 
-maintenance_info = {
-    "reason": "I'll be pushing Roblox Invites version 4.2.0 to the production server.",
-    "timeframe": "10-20 minutes",
-}
-incoming_upd_info = {
-    "previous_version": "4.1.0",
-    "estimated_release_timeframe": "10-20 minutes",
-}
 send_embed("Updates", update_desc, blue, announcement_webhook)
 write_to_log("info", f"Sent update changelog embed to {webhook}")
 write_to_log("info", f"Successfully initalized Roblox Invites {version}!")
