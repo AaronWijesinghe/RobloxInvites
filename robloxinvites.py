@@ -634,13 +634,12 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "5.6.0"
+version = "6.0.0b1"
 update_desc = f"""
 Updated from __v{saved_version["version"]}__ to __v{version}__
 
 **Changes:**
-- Added server start/stop notifications
-- Once an update changelog has been sent, that same update changelog won't be shown on server start
+- Show the current session playtime when a player transfers servers
 """
 
 if "-t" not in sys.argv:
