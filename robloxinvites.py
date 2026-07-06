@@ -215,6 +215,7 @@ def send_invite(i, place_id, game_instance_id, transfer=False):
     except:
         return
     playtime_str = get_playtime_str(i, place_id, "both")
+    playtime_str_current = get_playtime_str(i, place_id, "current")
 
     exclamation = "" if game_ends_in_punctuation(game) else "!"
     period = "" if game_ends_in_punctuation(game) else "."
@@ -236,7 +237,7 @@ def send_invite(i, place_id, game_instance_id, transfer=False):
             embed_title = f"{custom_titles[str(universe_id)]["title"].format(displaynames[i])[:-1]} in a new server!"
         else:
             embed_title = f"{displaynames[i]} transferred servers!"
-        embed_desc = f"{displaynames[i]} (@{usernames[i]}) has transferred to a different server in *{game}*{period}\nTotal playtime for this game: {playtime_str}\n\nClick [this link]({join_embed_url}) to join, or copy + paste the URL below in your browser:\n-# {game_url}"
+        embed_desc = f"{displaynames[i]} (@{usernames[i]}) has transferred to a different server in *{game}*{period}\nSession playtime: {playtime_str_current}\nTotal playtime for this game: {playtime_str}\n\nClick [this link]({join_embed_url}) to join, or copy + paste the URL below in your browser:\n-# {game_url}"
 
     if max_players == 1:
         embed_desc = f"{displaynames[i]} (@{usernames[i]}) is playing *{game}*{exclamation}\nHowever, you can't join them because the max server size is 1 player.\nTotal playtime for this game: {playtime_str}\n\n-# {game_url}"
