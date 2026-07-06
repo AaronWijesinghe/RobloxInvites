@@ -549,8 +549,7 @@ while True:
     except:
         exit()
 
-    #try:
-    if True:
+    try:
         args = command.split(" ")[1:]
         if command.startswith("/lb"):
             if len(args) == 0:
@@ -612,5 +611,5 @@ while True:
             set_cookie()
         elif command.startswith("/announce"):
             announce()
-    #except:
-    #    pass
+    except:
+        pass
