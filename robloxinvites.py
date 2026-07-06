@@ -634,7 +634,7 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 write_to_log("info", "Initalized network session")
 
-version = "6.0.0b1"
+version = "5.7.0"
 update_desc = f"""
 Updated from __v{saved_version["version"]}__ to __v{version}__
 
