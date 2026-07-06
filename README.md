@@ -112,3 +112,4 @@ Alternatively, you can add users through Invites Tools.<br>
 - /server/invites_tools.json stores snapshots of user statistics. Statistics must be saved manually by running `/save` within Invites Tools.
 - /server/webhooks_testing.json stores testing webhooks for a testing instance of Roblox Invites.
     - Testing instances of Roblox Invites can be activated by passing the argument `-t`.
+- /server/version.json stores the last used Roblox Invites version.

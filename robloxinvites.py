@@ -24,10 +24,10 @@ else:
 
 
 def cleanup():
-    send_embed("Server Stopped", "Roblox Invites has been stopped.", red, announcement_webhook)
-    write_to_log("info", f"Sent server stop embed to {announcement_webhook}")
     if os.path.exists("session.lock"):
         os.remove("session.lock")
+    send_embed("Roblox Invites has been stopped.", "", red, announcement_webhook)
+    write_to_log("info", f"Sent server stop embed to {announcement_webhook}")
 
 
 atexit.register(cleanup)
@@ -609,7 +609,7 @@ else:
     print(f"{underline}Add a cookie to /server/cookies.json before running the program.{end}")
     exit()
 
-saved_version = load_data("version.json")
+saved_version = load_data("version.json", {"version": "5.5.3"})
 stats = load_data("stats.json")
 cached_ids = load_data("cached_ids.json", {"indexes": [], "caches": {}})
 users = load_data("users.json", [{"username": ""}], False, "At least one user must be present in /server/users.json.")
@@ -635,7 +635,9 @@ write_to_log("info", "Initalized network session")
 
 version = "5.6.0"
 update_desc = f"""
-**Roblox Invites {version}**
+Updated from __v{saved_version["version"]}__ to __v{version}__
+
+**Changes:**
 - Added server start/stop notifications
 - Once an update changelog has been sent, that same update changelog won't be shown on server start
 """
@@ -649,13 +651,13 @@ else:
     webhook = webhooks_testing["webhook"]
     ct_webhook = webhooks_testing["ct_webhook"]
 
-if saved_version == {} or saved_version["version"] != version:
-    send_embed("Updates", update_desc, blue, announcement_webhook)
+if saved_version["version"] != version:
+    send_embed("Roblox Invites has been updated!", update_desc, blue, announcement_webhook)
     write_to_log("info", f"Sent update changelog embed to {announcement_webhook}")
     saved_version["version"] = version
     save_data(saved_version, "version.json")
 else:
-    send_embed("Server Started", "Roblox Invites has been started!", blue, announcement_webhook)
+    send_embed("Roblox Invites has been started!", "", blue, announcement_webhook)
     write_to_log("info", f"Sent server start embed to {announcement_webhook}")
 write_to_log("info", f"Successfully initalized Roblox Invites {version}!")
 
