@@ -1,7 +1,8 @@
 *.app
 *.DS_Store
 *.spec
+.*/
 build_app/
-build_tools/
 logs/
-server*/
+data/
+__pycache__*

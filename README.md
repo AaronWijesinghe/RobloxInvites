@@ -1,3 +1,5 @@
+# NOTE: Roblox Invites is currently undergoing a code rewrite. Not everything on here will be accurate, but most of the information should still be useful.
+
 # Roblox Invites
 Roblox Invites connects your Discord server members to their activity on Roblox.<br>
 This isn't a traditional Discord bot, but rather a webhook-based program.

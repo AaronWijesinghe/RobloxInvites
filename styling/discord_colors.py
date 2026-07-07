@@ -1,0 +1,7 @@
+red = 12127505
+orange = 16742912
+yellow = 13220620
+green = 2206732
+blue = 3447003
+purple = 7419530
+gray = 7303282
