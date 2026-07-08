@@ -52,23 +52,23 @@ You can generate playtime leaderboards (weekly/overall), game leaderboards, and 
 <img width="493" height="355" alt="image" src="https://github.com/user-attachments/assets/ab19d2df-febf-417f-97f4-cfa21c5950ff" />
 
 ### Managing Users
-[USER_ID] is autocompleted in these commands.
-- /user add [USER] - Adds a user with username [USER]
-- /user remove [USER_ID] - Removes a user with ID [USER_ID]
-- /user stats [USER_ID] - Generates a user statistics card for user [USER_ID]
+`user_id` is autocompleted in these commands.
+- /user add `username` - Adds a user with username `username`
+- /user remove `user_id` - Removes a user with ID `user_id`
+- /user stats `user_id` - Generates a user statistics card for user `user_id`
 
 ### Managing Custom Titles
-[PLACE_ID] is autocompleted in these commands.
-- /custom_title add [TITLE] [PLACE_ID] [HEX_COLOR] - Adds a Custom Title for place ID [PLACE_ID] with message [TITLE] and embed color [EMBED_COLOR]  
-- /custom_title remove [PLACE_ID] - Removes a Custom Title with place ID [PLACE_ID]
+`place_id` is autocompleted in these commands.
+- /custom_title add `title` `place_id` `hex_color` - Adds a Custom Title for place ID `place_id` with message `title` and embed color `hex_color`
+- /custom_title remove `place_id` - Removes a Custom Title with place ID `place_id`
 
 ### Managing Blacklisted IDs
-[BLACKLISTED_ID] is autocompleted in these commands. 
-- /blacklist add [PLACE_ID] [GAME_NAME] - Adds place ID [PLACE_ID] with game name [GAME_NAME] to the blacklist.
-- /blacklist remove [BLACKLISTED_ID] - Removes blacklisted place ID [BLACKLISTED_ID] from the blacklist.
+`blacklisted_id` is autocompleted in these commands. 
+- /blacklist add `place_id` `game_name` - Adds place ID `place_id` with game name `game_name` to the blacklist.
+- /blacklist remove `blacklisted_id` - Removes blacklisted place ID `blacklisted_id` from the blacklist.
 
 ### Sending Invite Cards
-- /invite_user [USER_ID] - Sends an invite card in the context of ID [USER_ID]
+- /invite_user `user_id` - Sends an invite card in the context of ID `user_id`
 
 ## JSON Files
 Roblox Invites stores JSON files in /data to store configuration data, user data, Custom Titles, cookies, and more.<br>
