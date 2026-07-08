@@ -1,9 +1,12 @@
-import asyncio
-import roblox
-import storage
-import bot
-from styling.ansi import *
+import os
 import aiohttp
+import asyncio
+import discord
+import notifier
+import storage
+from styling.ansi import *
+from dotenv import load_dotenv
+from discord.ext import commands
 
 cookies = storage.load_data("cookies.json", None, False, "A cookie is required to use Roblox Invites.")
 headers = {
@@ -15,39 +18,74 @@ def clear():
     print("\033[2J\033[3J\033[H", end="")
 
 
-async def loop():
-    global api
-
-    api = roblox.RobloxAPI()
-    await api.start()
+async def presence_tracker(bot):
+    await bot.wait_until_ready()
 
     times_checked = 1
-    users = storage.UserManager(api)
-    stats = bot.StatManager(api)
-    notifier = bot.Notifier(api, users.users, stats)
-    try:
-        while True:
-            try:
-                clear()
-                print(f"{gold}[Roblox Invites] [1.0.0b] [{times_checked}]{end}")
-                user_ids = await users.get_user_ids()
-                await notifier.process_updates(user_ids, headers)
-                await asyncio.sleep(3)
-                times_checked += 1
-            except aiohttp.ClientResponseError as e:
-                print(f"You've been rate limited! Status code: {e.status}")
-                await asyncio.sleep(10)
-    except asyncio.exceptions.CancelledError:
-        await api.close()
-    except KeyboardInterrupt:
-        await api.close()
-    finally:
-        await api.close()
+    tracker = notifier.Notifier(bot)
+    while True:
+        try:
+            clear()
+            print(f"{gold}[Roblox Invites] [1.0.0b] [{times_checked}]{end}")
+            user_ids = await bot.user_manager.get_user_ids()
+            await tracker.process_updates(user_ids, headers)
+            await asyncio.sleep(3)
+            times_checked += 1
+        except aiohttp.ClientResponseError as e:
+            clear()
+            print(f"{gold}[Roblox Invites] [1.0.0b] [{times_checked}]{end}")
+            print(f"There's been a client response error! Status code: {e.status}")
+            await asyncio.sleep(10)
+        except asyncio.exceptions.CancelledError:
+            return
+        except KeyboardInterrupt:
+            return
+
+
+class RobloxInvitesBot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        intents.message_content = True
+        super().__init__(command_prefix="!", intents=intents)
+
+    async def setup_hook(self):
+        self.api = notifier.RobloxAPI()
+        await self.api.start()
+
+        self.user_manager = storage.UserManager(self.api)
+        self.stat_manager = storage.StatManager(self.api, self.user_manager)
+        self.cgt_manager = storage.CGTManager(self.api)
+        self.blacklist_manager = storage.BlacklistManager()
+
+        await self.load_extension("cogs.cgt_cog")
+        await self.load_extension("cogs.user_cog")
+        await self.load_extension("cogs.leaderboard_cog")
+        await self.load_extension("cogs.blacklist_cog")
+        
+        self.tree.copy_global_to(guild=MY_GUILD)
+        await self.tree.sync(guild=MY_GUILD)
+
+
+bot = RobloxInvitesBot()
+MY_GUILD = discord.Object(id=1490748199760302152)
+
+@bot.event
+async def on_ready():
+    print(f"{bot.user} is online and ready!")
 
 
 async def main():
-    await loop()
-        
+    load_dotenv()
+
+    try:
+        await asyncio.gather(
+            bot.start(os.environ["token"]),
+            presence_tracker(bot)
+        )
+    finally:
+        await bot.api.close()
+        await bot.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -9,7 +9,7 @@ class UserManager:
         user_ids = list(self.users.keys())
 
         new_user_ids = []
-        for id, data in self.users.values():
+        for (id, data) in self.users.items():
             if data == {}:
                 new_user_ids += [id]
 
@@ -44,3 +44,25 @@ class UserManager:
         save_data(self.users, "users.json")
         user_ids = [user["user_id"] for user in self.users]
         return user_ids
+
+    async def add_user(self, username):
+        req = await self.api.post_misc("https://users.roblox.com/v1/usernames/users", json={"usernames": [username]})
+        if "data" not in req:
+            return False
+        if len(req["data"]) == 0:
+            return False
+
+        self.users[str(req["data"][0]["id"])] = {
+            "username": req["data"][0]["name"],
+            "display_name": req["data"][0]["displayName"]
+        }
+        save_data(self.users, "users.json")
+        return True
+
+    async def remove_user(self, user_id):
+        if user_id in self.users:
+            self.users[user_id]["delete"] = True
+            save_data(self.users, "users.json")
+            return True
+        else:
+            return False

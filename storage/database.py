@@ -3,6 +3,14 @@ import json
 from styling.ansi import *
 from storage.logging import write_to_log
 
+"""
+# maybe add async storage later?
+async def save_json_file(data):
+    json_string = json.dumps(data, indent=4)
+    async with aiofiles.open("data.json", mode="w") as f:
+        await f.write(json_string)
+"""
+
 def load_data(
     file: str,
     no_exist_data: dict | list | None = {},

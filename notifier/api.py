@@ -52,7 +52,10 @@ class RobloxAPI:
         place_id = str(int_place_id)
         universe_id = self.cache["indexes"][place_id]
         game_data = await self.get_misc(f"https://games.roblox.com/v1/games/{place_id}/servers/0?sortOrder=2&excludeFullGames=false&limit=10")
-        max_players = game_data["data"][0]["maxPlayers"]
+        if len(game_data["data"]) > 0:
+            max_players = game_data["data"][0]["maxPlayers"]
+        else:
+            max_players = 2
         self.cache["caches"][str(universe_id)]["max_players"][place_id] = max_players
         save_data(self.cache, "cached_ids.json")
 
@@ -62,7 +65,16 @@ class RobloxAPI:
             data = await response.json()
             return data
 
+    async def post_misc(self, url, json):
+        async with self.retry_client.post(url, json=json) as response:
+            response.raise_for_status()
+            data = await response.json()
+            return data
+
     async def get_universe_id(self, place_id):
+        if place_id == None:
+            return None
+
         if place_id not in self.cache["indexes"]:
             await self.cache_id(place_id)
         if str(place_id) in self.cache["indexes"]:
@@ -90,6 +102,9 @@ class RobloxAPI:
             return await response.json()
     
     async def get_game_name(self, place_id):
+        if place_id == None:
+            return None
+
         if place_id not in self.cache["indexes"]:
             await self.cache_id(place_id)
         if str(place_id) in self.cache["indexes"]:
@@ -104,6 +119,9 @@ class RobloxAPI:
         return None
     
     async def get_max_players(self, place_id):
+        if place_id == None:
+            return None
+
         if place_id not in self.cache["indexes"]:
             await self.cache_id(place_id)
         if str(place_id) in self.cache["indexes"]:

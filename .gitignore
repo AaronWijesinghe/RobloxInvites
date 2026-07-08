@@ -6,3 +6,4 @@ build_app/
 logs/
 data/
 __pycache__*
+.env
