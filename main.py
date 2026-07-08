@@ -69,7 +69,7 @@ class RobloxInvitesBot(commands.Bot):
 
 
 bot = RobloxInvitesBot()
-MY_GUILD = discord.Object(id=1490748199760302152)
+MY_GUILD = discord.Object(id=os.environ["guild"])
 
 @bot.event
 async def on_ready():
