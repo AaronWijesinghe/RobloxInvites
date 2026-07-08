@@ -1,6 +1,4 @@
-import aiohttp
-import asyncio
-from styling.discord_colors import *
+from styling.ri_colors import *
 from styling.formatting import *
 from storage.database import *
 from notifier.send_embed import send_embed
@@ -140,6 +138,7 @@ class Notifier:
             embed_desc = f"{display_name} (@{username}) has transferred to a different server in *{game}*{period}\nSession playtime: {playtime_str_current}\nTotal playtime for this game: {playtime_str}\n-# Place ID: {place_id}"
 
         if max_players == 1:
+            join_embed_url = None
             embed_desc = f"{display_name} (@{username}) is playing *{game}*{exclamation}\nHowever, you can't join them because the max server size is 1 player.\nTotal playtime for this game: {playtime_str}\n\n-# {game_url}"
             if str(universe_id) not in self.bot.cgt_manager.custom_titles["titles"]:
                 embed_color = orange
@@ -202,5 +201,5 @@ class Notifier:
                 embed_desc = embed_desc.replace("is currently", f"has left *{game}*{period} They are")
             else:
                 embed_desc = f"{display_name} (@{username}) has left *{game}*{period}\n" + embed_desc
-        
+
         await send_embed(self.bot, embed_title, embed_desc, red)

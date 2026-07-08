@@ -3,7 +3,6 @@ from discord import app_commands
 from discord.ext import commands
 from storage.database import *
 from storage.custom import *
-from styling.discord_colors import *
 
 class CGTCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
