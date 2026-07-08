@@ -1,4 +1,9 @@
 # Roblox Invites
+
+![GitHub Release](https://img.shields.io/github/v/release/AaronWijesinghe/RobloxInvites)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/AaronWijesinghe/RobloxInvites)
+![GitHub License](https://img.shields.io/github/license/AaronWijesinghe/RobloxInvites)
+
 Roblox Invites is a bot that connects your Discord server members to their activity on Roblox.<br>
 
 ## Features
