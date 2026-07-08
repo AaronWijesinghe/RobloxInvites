@@ -152,8 +152,23 @@ class Notifier:
                 embed_desc += f"\n- {user[0]} (@{user[1]})"
             embed_desc += f"\n\nTotal playtime for this game: {playtime_str}\n**Join them** in *{game}* with the button below!\n-# Place ID: {place_id}"
 
-        display_name = self.bot.user_manager.users[user_id]["display_name"]
         await send_embed(self.bot, embed_title, embed_desc, embed_color, join_embed_url)
+
+    async def create_invite_card(self, user_id):
+        username = self.bot.user_manager.users[user_id]["username"]
+        display_name = self.bot.user_manager.users[user_id]["display_name"]
+        place_id = self.user_presences[user_id]["place_id"]
+        game_instance_id = self.user_presences[user_id]["game_instance_id"]
+
+        if place_id == None:
+            return ("Invite Card", f"{display_name} (@{username}) isn't playing anything right now.", "https://roblox.com/home")
+
+        game = await self.bot.api.get_game_name(place_id)
+        embed_title = f"Invite Card"
+        embed_desc = f"**{display_name} (@{username}) has invited you** to play *{game}* with them!\n**Join them** with the button below."
+        join_embed_url = f"https://join.rblxevnts.co/?placeId={place_id}&gameInstanceId={game_instance_id}"
+
+        return (embed_title, embed_desc, join_embed_url)
 
     async def send_leave_message(self, user_id, place_id, type):
         if str(place_id) in self.bot.blacklist_manager.blacklist:

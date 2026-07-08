@@ -19,7 +19,9 @@ class UserCog(commands.Cog):
             if query.lower() in user["username"].lower()
         ][:25]
 
-    @app_commands.command(name="add_user", description="Adds a new user to Roblox Invites")
+    user = app_commands.Group(name="user", description="User commands")
+
+    @user.command(name="add", description="Adds a new user to Roblox Invites")
     async def add_user(
         self, 
         interaction: discord.Interaction, 
@@ -31,11 +33,12 @@ class UserCog(commands.Cog):
                 ephemeral=True,
             )
             return
+
         await interaction.response.defer()
-        await self.bot.user_manager.add_user(username)
+        await interaction.client.user_manager.add_user(username)
         await interaction.followup.send(f"Added user @{username} to Roblox Invites!")
 
-    @app_commands.command(name="remove_user", description="Removes a user from Roblox Invites")
+    @user.command(name="remove", description="Removes a user from Roblox Invites")
     @app_commands.autocomplete(user_id=user_autocomplete)
     async def remove_user(
         self, 
@@ -48,11 +51,12 @@ class UserCog(commands.Cog):
                 ephemeral=True,
             )
             return
+
         await interaction.response.defer()
-        await self.bot.user_manager.remove_user(user_id)
+        await interaction.client.user_manager.remove_user(user_id)
         await interaction.followup.send(f"Removed user @{interaction.client.user_manager.users[user_id]["username"]} from Roblox Invites. Hope you had a great time!")
 
-    @app_commands.command(name="user_card", description="Gets a user's stat card")
+    @user.command(name="stats", description="Gets a user's stat card")
     @app_commands.autocomplete(user_id=user_autocomplete)
     async def get_user_card(
         self, 
@@ -60,8 +64,13 @@ class UserCog(commands.Cog):
         user_id: str
     ):
         await interaction.response.defer()
-        message_content = await self.bot.stat_manager.get_user_stats(user_id)
-        await interaction.followup.send(message_content)
+        message_title, message_content = await self.bot.stat_manager.get_user_stats(user_id)
+        embed = discord.Embed(
+            title=message_title,
+            description=message_content,
+            color=discord.Color.dark_gold()
+        )
+        await interaction.followup.send(embed=embed)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(UserCog(bot))

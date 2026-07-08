@@ -9,7 +9,9 @@ class CGTCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="add_custom_title", description="Adds a Custom Title!")
+    cgt = app_commands.Group(name="custom_title", description="Custom game title commands")
+
+    @cgt.command(name="add", description="Adds a Custom Title!")
     async def add_custom_title(
         self, 
         interaction: discord.Interaction, 
@@ -20,7 +22,7 @@ class CGTCog(commands.Cog):
         await self.bot.cgt_manager.add_custom_title(place_id, title, hex_color)
         await interaction.response.send_message(f"**Added custom title!**\nPlace ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color}")
 
-    @app_commands.command(name="remove_custom_title", description="Removes a Custom Title!")
+    @cgt.command(name="remove", description="Removes a Custom Title!")
     async def remove_custom_title(
         self, 
         interaction: discord.Interaction, 

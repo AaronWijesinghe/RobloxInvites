@@ -23,6 +23,7 @@ async def presence_tracker(bot):
 
     times_checked = 1
     tracker = notifier.Notifier(bot)
+    bot.notifier = tracker
     while True:
         try:
             clear()
@@ -61,6 +62,7 @@ class RobloxInvitesBot(commands.Bot):
         await self.load_extension("cogs.user_cog")
         await self.load_extension("cogs.leaderboard_cog")
         await self.load_extension("cogs.blacklist_cog")
+        await self.load_extension("cogs.invite_cog")
         
         self.tree.copy_global_to(guild=MY_GUILD)
         await self.tree.sync(guild=MY_GUILD)
