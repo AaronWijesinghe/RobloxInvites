@@ -30,7 +30,7 @@ Leaving a game:<br>
 
 ## How to Use
 1. Clone this repository anywhere on your PC, but preferably in a place you can easily access.
-2. Manually input a cookie for `cookies.json` (see *JSON Files*)
+2. Manually input a cookie in `/data/cookies.json` (see *JSON Files*)
 3. Run main.py using Python 3.14+ (older versions can be used) with the modules in requirements.txt. For accurate playtime tracking, keep the bot running for as long as possible!
 
 ## Commands
