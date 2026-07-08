@@ -30,8 +30,8 @@ Leaving a game:<br>
 
 ## How to Use
 1. Clone this repository anywhere on your PC, but preferably in a place you can easily access.
-2. Manually input values for the **modifiable** JSON files (see *Modifiable JSON Files*).
-3. Run source.py using Python 3.14+ (older versions can be used) with the modules in requirements.txt. For accurate playtime tracking, keep the bot running for as long as possible!
+2. Manually input a cookie for `cookies.json` (see *JSON Files*)
+3. Run main.py using Python 3.14+ (older versions can be used) with the modules in requirements.txt. For accurate playtime tracking, keep the bot running for as long as possible!
 
 ## Commands
 Roblox Invites offers a variety of commands!<br>
@@ -62,67 +62,47 @@ You can generate playtime leaderboards (weekly/overall), game leaderboards, and 
 - /custom_title add [TITLE] [PLACE_ID] [HEX_COLOR] - Adds a Custom Title for place ID [PLACE_ID] with message [TITLE] and embed color [EMBED_COLOR]  
 - /custom_title remove [PLACE_ID] - Removes a Custom Title with place ID [PLACE_ID]
 
+### Managing Blacklisted IDs
+[BLACKLISTED_ID] is autocompleted in these commands. 
+- /blacklist add [PLACE_ID] [GAME_NAME] - Adds place ID [PLACE_ID] with game name [GAME_NAME] to the blacklist.
+- /blacklist remove [BLACKLISTED_ID] - Removes blacklisted place ID [BLACKLISTED_ID] from the blacklist.
+
 ### Sending Invite Cards
 - /invite_user [USER_ID] - Sends an invite card in the context of ID [USER_ID]
 
-## Modifiable JSON Files
-Roblox Invites uses JSON files in /server to store configuration data, user data, Custom Titles, cookies, and more.<br>
-**You will need to modify some of these files manually.** The purpose and formatting of each modifiable file can be seen below.<br>
+## JSON Files
+Roblox Invites stores JSON files in /data to store configuration data, user data, Custom Titles, cookies, and more.<br>
+The purpose of each file can be seen below.<br>
 
-**/server/blacklisted.json stores blacklisted Place IDs.**<br>
+**/data/cookies.json stores Roblox cookies.**<br>
+Currently, only the cookie at index 0 is used. For now, this must be manually edited.<br>
+Do not include `.ROBLOSECURITY=` when saving your cookie to this JSON file.<br>
 ```
 [
-    "PLACE_ID (int)": {
-        "game": "GAME_NAME (str)"
-    }
+    "ROBLOSECURITY_COOKIE"
 ]
 ```
 <br>
 
-**/server/cookies.json stores Roblox cookies.**<br>
-Currently, only the cookie at index 0 is used.<br>
-```
-[
-    "ROBLOSECURITY_COOKIE (str)"
-]
-```
-<br>
+**/data/blacklisted.json stores blacklisted Place IDs.**<br>
+You can add Place IDs to the blacklist using the command `/blacklist add` and remove blacklisted IDs using the command `/blacklist remove`.<br>
+See *Commands* for more information.<br>
 
-**/server/custom_titles.json stores Custom Titles.**<br>
-You can add Custom Titles using Invites Tools (formerly CTWizard before it got merged).<br>
-```
-[
-    "version": CUSTOM_TITLES_VERSION (int),
-    "titles": {
-        "UNIVERSE_ID (str)": {
-            "title": "CUSTOM_TITLE (str)",
-            "color": "COLOR_IN_HEX (str)",
-            "game": "GAME_NAME (str)",
-            "place_id": ROOT_PLACE_ID (int)
-        }
-    }
-]
-```
-<br>
+**/data/custom_titles.json stores Custom Titles.**<br>
+You can add Custom Titles using the command `/custom_title add` and remove Custom Titles using the command `/custom_title remove`.<br>
+See *Commands* for more information.<br>
 
-**/server/users.json stores the users who will participate in your hosting of the bot.**<br>
-Alternatively, you can add users through Invites Tools.<br>
-```
-[
-    "USER_ID (str)": {
-        "username": "USERNAME (str)",
-        "display_name": "DISPLAY_NAME (str)"
-    },
-]
-```
-<br>
+**/data/users.json stores the users who will participate in your hosting of the bot.**<br>
+You can add users using the command `/user add` and remove users using the command `/user remove`.<br>
+See *Commands* for more information.<br>
 
-## Other JSON Files
-**You won't need to modify these files yourself.**
-- /server/cached_ids.json stores cached Root Place IDs, universe IDs, and game names. None of this data is updated once it is cached.
-- /server/old_user_presences.json stores the current presence data of all users. This is loaded at startup.
-- /server/stats.json stores user playtimes and the games a given user plays.
-- /server/invites_tools.json stores snapshots of user statistics. Statistics must be saved manually by running `/save` within Invites Tools.
-- /server/webhooks_testing.json stores testing webhooks for a testing instance of Roblox Invites.
-    - Testing instances of Roblox Invites can be activated by passing the argument `-t`.
-- /server/version.json stores the last used Roblox Invites version.
+**/data/cached_ids.json** stores cached Root Place IDs, universe IDs, game names, and the maximum amount of players in a server.<br>
+Cached game names are only updated *once a day*. Other cached data is *never updated*.<br>
+
+**/data/old_user_presences.json stores the current presence data of all users.**<br>
+This data is loaded at startup.<br>
+
+**/data/stats.json stores user playtimes and the games a given user plays.**<br>
+
+**/data/extended_stats.json stores snapshots of user statistics.**<br>
+Statistics must be saved manually by running the `/leaderboard save` command.

@@ -21,7 +21,7 @@ class BlacklistCog(commands.Cog):
             if query.lower() in game_name["game"].lower()
         ][:25]
 
-    @blacklist.command(name="add_blacklist", description="Adds a game to the blacklist")
+    @blacklist.command(name="add", description="Adds a game to the blacklist")
     async def add_blacklist(
         self, 
         interaction: discord.Interaction, 
@@ -42,7 +42,7 @@ class BlacklistCog(commands.Cog):
         else:
             await interaction.followup.send(f"Place ID {place_id} is already in the blacklist!")
 
-    @blacklist.command(name="remove_blacklist", description="Removes a game from the blacklist")
+    @blacklist.command(name="remove", description="Removes a game from the blacklist")
     @app_commands.autocomplete(place_id=blacklisted_games_autocomplete)
     async def remove_blacklist(
         self, 
