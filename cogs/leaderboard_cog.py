@@ -32,7 +32,7 @@ class LeaderboardCog(commands.Cog):
         self, 
         interaction: discord.Interaction
     ):
-        (message_title, message_content) = await self.bot.stat_manager.get_alltime_user_leaderboard()
+        (message_title, message_content) = await interaction.client.stat_manager.get_alltime_user_leaderboard()
         embed = discord.Embed(
             title=message_title,
             description=message_content,
@@ -45,7 +45,7 @@ class LeaderboardCog(commands.Cog):
         self,
         interaction: discord.Interaction
     ):
-        (message_title, message_content) = await self.bot.stat_manager.get_weekly_user_leaderboard()
+        (message_title, message_content) = await interaction.client.stat_manager.get_weekly_user_leaderboard()
         embed = discord.Embed(
             title=message_title,
             description=message_content,
@@ -60,7 +60,7 @@ class LeaderboardCog(commands.Cog):
         interaction: discord.Interaction,
         place_id: str
     ):
-        (message_title, message_content) = await self.bot.stat_manager.get_game_leaderboard(place_id)
+        (message_title, message_content) = await interaction.client.stat_manager.get_game_leaderboard(place_id)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
@@ -81,7 +81,7 @@ class LeaderboardCog(commands.Cog):
             return
 
         await interaction.response.defer()
-        await self.bot.stat_manager.save_period()
+        await interaction.client.stat_manager.save_period()
         await interaction.followup.send("Saved the current data to a snapshot!")
 
     @leaderboard.command(name="remove", description="Removes the last saved user snapshot")
@@ -97,7 +97,7 @@ class LeaderboardCog(commands.Cog):
             return
 
         await interaction.response.defer()
-        await self.bot.stat_manager.remove_last_period()
+        await interaction.client.stat_manager.remove_last_period()
         await interaction.followup.send("Removed the last saved snapshot.")
 
 async def setup(bot: commands.Bot):
