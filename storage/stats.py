@@ -222,14 +222,20 @@ class StatManager:
             name = self.api.cache["caches"][str(universe_id)]["name"]
             message_content += f"\n[#{i}] {name}: {playtime / 3600:.2f}h"
         
+        weekly_games = 0
         message_content += f"\n\n**Your Top 5 Games This Week:**"
         game_playtimes_weekly = sorted(game_playtimes_weekly.items(), key=lambda item: item[1], reverse=True)[:5]
         for i, (game, playtime) in enumerate(game_playtimes_weekly, start=1):
+            if playtime == 0:
+                continue
             if str(game) not in self.api.cache["indexes"]:
                 await self.api.cache_id(game)
             universe_id = self.api.cache["indexes"][str(game)]
             name = self.api.cache["caches"][str(universe_id)]["name"]
             message_content += f"\n[#{i}] {name}: {playtime / 3600:.2f}h"
+            weekly_games += 1
+        if weekly_games == 0:
+            message_content += f"\nThis user hasn't played any games this week."
 
         return (message_title, message_content)
 
