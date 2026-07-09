@@ -122,7 +122,6 @@ class Notifier:
         period = "" if game_ends_in_punctuation(game) else "."
 
         join_embed_url = f"https://join.rblxevnts.co/?placeId={place_id}&gameInstanceId={game_instance_id}"
-        game_url = f"roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}"
         embed_title = f"{display_name} has joined a game!"
         embed_desc = f"**Join {display_name} (@{username}) in** *{game}*{exclamation}\nTotal playtime for this game: {playtime_str}\n-# Place ID: {place_id}"
         embed_color = green
@@ -140,7 +139,7 @@ class Notifier:
 
         if max_players == 1:
             join_embed_url = None
-            embed_desc = f"{display_name} (@{username}) is playing *{game}*{exclamation}\nHowever, you can't join them because the max server size is 1 player.\nTotal playtime for this game: {playtime_str}\n\n-# {game_url}"
+            embed_desc = f"{display_name} (@{username}) is playing *{game}*{exclamation}\nHowever, you can't join them because the max server size is 1 player.\nTotal playtime for this game: {playtime_str}\n\n-# Place ID: {place_id}\n-# Game Instance ID: {game_instance_id}"
             if str(universe_id) not in self.bot.cgt_manager.custom_titles["titles"]:
                 embed_color = orange
 
