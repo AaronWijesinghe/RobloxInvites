@@ -235,7 +235,7 @@ class StatManager:
             message_content += f"\n[#{i}] {name}: {playtime / 3600:.2f}h"
             weekly_games += 1
         if weekly_games == 0:
-            message_content += f"\nThis user hasn't played any games this week."
+            message_content += f"\nYou haven't played any games this week."
 
         return (message_title, message_content)
 
