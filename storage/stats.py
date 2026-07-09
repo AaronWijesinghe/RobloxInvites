@@ -38,12 +38,12 @@ class StatManager:
                     stats_temp[user]["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
                 stats_temp[user]["currently_playing"] = {}
         self.extended_stats["periods"] += [stats_temp]
-        open("./server/extended_stats.json", "w").write(json.dumps(self.extended_stats, indent=2))
+        save_data(self.extended_stats, "extended_stats.json")
 
     async def remove_last_period(self):
         if len(self.extended_stats) > 1:
             del self.extended_stats[-1]
-            open("./server/extended_stats.json", "w").write(json.dumps(self.extended_stats, indent=2))
+            save_data(self.extended_stats, "extended_stats.json")
             return True
         else:
             return False
