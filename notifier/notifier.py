@@ -79,10 +79,11 @@ class Notifier:
                 print(f"{self.bot.user_manager.users[user_id]["display_name"]} is in Roblox Studio.")
 
             if "delete" in self.bot.user_manager.users[user_id]:
-                del self.user_presences[user_id]
                 del self.bot.user_manager.users[user_id]
-                del self.bot.stat_manager.stats[user_id]
-                save_data(self.bot.stat_manager.stats, "stats.json")
+                del self.user_presences[user_id]
+                if user_id in self.bot.stat_manager.stats:
+                    del self.bot.stat_manager.stats[user_id]
+                    save_data(self.bot.stat_manager.stats, "stats.json")
                 save_data(self.bot.user_manager.users, "users.json")
         self.old_user_presences = deepcopy(self.user_presences)
         save_data(self.old_user_presences, "old_user_presences.json")
