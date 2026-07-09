@@ -33,6 +33,8 @@ async def presence_tracker(bot):
             await tracker.process_updates(user_ids, headers)
             await asyncio.sleep(3)
             times_checked += 1
+        except aiohttp.client_exceptions.ClientOSError:
+            pass
         except aiohttp.ClientResponseError as e:
             clear()
             print(f"{gold}[Roblox Invites] [1.0.0b] [{times_checked}]{end}")
