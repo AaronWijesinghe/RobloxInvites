@@ -28,7 +28,7 @@ async def presence_tracker(bot):
     while True:
         try:
             clear()
-            print(f"{gold}[Roblox Invites] [1.0.0b] [{times_checked}]{end}")
+            print(f"{gold}[Roblox Invites] [1.0.0] [{times_checked}]{end}")
             user_ids = await bot.user_manager.get_user_ids()
             await tracker.process_updates(user_ids, headers)
             await asyncio.sleep(3)
@@ -37,7 +37,7 @@ async def presence_tracker(bot):
             pass
         except aiohttp.ClientResponseError as e:
             clear()
-            print(f"{gold}[Roblox Invites] [1.0.0b] [{times_checked}]{end}")
+            print(f"{gold}[Roblox Invites] [1.0.0] [{times_checked}]{end}")
             print(f"There's been a client response error! Status code: {e.status}")
             await asyncio.sleep(10)
 
