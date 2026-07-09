@@ -68,6 +68,10 @@ You can generate playtime leaderboards (weekly/overall), game leaderboards, and 
 - /blacklist add `place_id` `game_name` - Adds place ID `place_id` with game name `game_name` to the blacklist.
 - /blacklist remove `blacklisted_id` - Removes blacklisted place ID `blacklisted_id` from the blacklist.
 
+### Managing Channels
+- /channel invites `channel_id` - Sets the invites channel to `channel_id`
+- /channel announcements `channel_id` - Sets the announcements channel to `channel_id`
+
 ### Sending Invite Cards
 - /invite_user `user_id` - Sends an invite card in the context of ID `user_id`
 
