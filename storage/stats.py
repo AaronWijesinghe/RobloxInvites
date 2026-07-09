@@ -42,7 +42,7 @@ class StatManager:
 
     async def remove_last_period(self):
         if len(self.extended_stats) > 1:
-            del self.extended_stats[-1]
+            del self.extended_stats["periods"][-1]
             save_data(self.extended_stats, "extended_stats.json")
             return True
         else:
