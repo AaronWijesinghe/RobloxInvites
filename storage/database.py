@@ -27,7 +27,7 @@ def load_data(
         write_to_log("fatal", no_exist_message)
         save_data(no_exist_data, file)
         print(f"{underline}{no_exist_message}{end}")
-        exit()
+        raise SystemExit
     return {}
 
 

@@ -151,7 +151,7 @@ class Notifier:
                 embed_desc += f"\n- {user[0]} (@{user[1]})"
             embed_desc += f"\n\nTotal playtime for this game: {playtime_str}\n**Join them** in *{game}* with the button below!\n-# Place ID: {place_id}"
 
-        await send_embed(self.bot, embed_title, embed_desc, embed_color, join_embed_url)
+        await send_embed(self.bot, embed_title, embed_desc, embed_color, self.bot.channel_manager.channels["invite_channel"], join_embed_url)
 
     async def create_invite_card(self, user_id):
         username = self.bot.user_manager.users[user_id]["username"]
@@ -202,4 +202,4 @@ class Notifier:
             else:
                 embed_desc = f"{display_name} (@{username}) has left *{game}*{period}\n" + embed_desc
 
-        await send_embed(self.bot, embed_title, embed_desc, red)
+        await send_embed(self.bot, embed_title, embed_desc, red, self.bot.channel_manager.channels["invite_channel"])

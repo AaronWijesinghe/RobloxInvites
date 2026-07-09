@@ -8,6 +8,7 @@ from styling.ansi import *
 from dotenv import load_dotenv
 from discord.ext import commands
 
+load_dotenv()
 cookies = storage.load_data("cookies.json", None, False, "A cookie is required to use Roblox Invites.")
 headers = {
     "Cookie": f".ROBLOSECURITY={cookies[0]}"
@@ -37,10 +38,6 @@ async def presence_tracker(bot):
             print(f"{gold}[Roblox Invites] [1.0.0b] [{times_checked}]{end}")
             print(f"There's been a client response error! Status code: {e.status}")
             await asyncio.sleep(10)
-        except asyncio.exceptions.CancelledError:
-            return
-        except KeyboardInterrupt:
-            return
 
 
 class RobloxInvitesBot(commands.Bot):
@@ -57,6 +54,7 @@ class RobloxInvitesBot(commands.Bot):
         self.stat_manager = storage.StatManager(self.api, self.user_manager)
         self.cgt_manager = storage.CGTManager(self.api)
         self.blacklist_manager = storage.BlacklistManager()
+        self.channel_manager = storage.ChannelManager()
 
         await self.load_extension("cogs.cgt_cog")
         await self.load_extension("cogs.user_cog")
@@ -77,13 +75,15 @@ async def on_ready():
 
 
 async def main():
-    load_dotenv()
-
     try:
         await asyncio.gather(
             bot.start(os.environ["token"]),
             presence_tracker(bot)
         )
+    except KeyboardInterrupt:
+        pass
+    except asyncio.exceptions.CancelledError:
+        pass
     finally:
         await bot.api.close()
         await bot.close()

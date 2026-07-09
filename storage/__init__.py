@@ -4,3 +4,4 @@ from .logging import *
 from .custom import *
 from .stats import *
 from .blacklist import *
+from .channels import *
