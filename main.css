@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
+:root {
+    --ri: #96D4D9;
+    --code: rgb(32, 102, 148);
+    --background: black;
+}
+
+body {
+    color: white;
+	min-height: 100vh;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-color: var(--background);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    opacity: 0.8;
+}
+
+p, ul, ol {
+    font-family: 'Roboto';
+    color: white;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+}
+
+a {
+    font-family: 'Roboto';
+}
+
+code {
+    font-family: 'Roboto Mono', monospace;
+    font-size: small;
+    background-color: var(--code);
+    padding: 1px;
+    border-radius: 4px;
+}
+code::before {
+    opacity: 0.8;
+}
+
+ul::before {
+    content: "•";
+    font-size: large;
+    text-align: left;
+    padding-right: 8px;
+}
+
+.usage {
+    padding-right: 4px;
+}
+
+h1, h2, h3, h4, h5, h6, dt {
+    font-family: 'Montserrat';
+}
+
+h1 {
+    margin-top: 2em!important; 
+}
+
+html {
+    scrollbar-width: auto !important;
+    scrollbar-color: var(--ri) transparent !important;
+}
+
+/* this code is from https://tagging.wiki */
+::-webkit-scrollbar, ::-webkit-scrollbar:vertical, ::-webkit-scrollbar:horizontal { 
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb { 
+    background: var(--code); 
+    border-radius: 16px;
+	border: 3.14px solid transparent; 
+	background-clip: content-box;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* header stuff, code from https://indierobloxwikis.org/ */
+.site-header::after {
+    opacity: 0;
+    backdrop-filter: blur(0);
+    transition: 0.5s backdrop-filter, 0.5s opacity;
+}
+.site-header::before, .site-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    mask-image: linear-gradient(to bottom, black 75%, transparent);
+    z-index: -1;
+}
+.site-header::before {
+    opacity: 0.1;
+    transition: 0.5s background, 0.5s opacity;
+}
+
+.site-header {
+    align-items: center;
+    display: flex;
+    height: 50px;
+    position: fixed;
+    top: 0px;
+    background: oklch(from var(--ri) l c h / 0.96);
+    border-bottom: 2px solid #0a2246;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+    width: 100%;
+    z-index: 999;
+}
+
+.logo {
+    order: 1;
+    font-family: 'Montserrat', sans-serif;
+    font-variation-settings: "wght" 700;
+    font-size: 1.42382813rem;
+    line-height: 1;
+    margin-right: auto;
+    white-space: nowrap;
+    height: 60%;
+    aspect-ratio: 1;
+}
+
+.navbar .navbar__menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+@media (min-width: 56.25em) {
+    .navbar .navbar__toggle {
+        display: none;
+    }
+}
+.navbar .navbar__toggle {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #fff;
+    cursor: pointer;
+    display: block;
+    font-family: var(--font-menu);
+    font-variation-settings: "wght" var(--font-weight-bold);
+    line-height: 1;
+    overflow: visible;
+    text-transform: none;
+    z-index: 2004;
+    height: 100%;
+}
+
+.site-header ul::before {
+    content: "" !important;
+}
+
+.site-header a {
+    color: black !important;
+    text-decoration: none;
+    transition: all 0.12s linear;
+}
+
+.navbar .navbar__menu > li {
+    line-height: 4rem;
+}
+.navbar .navbar__menu li {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: 'Roboto', sans-serif;
+    padding: 0;
+    position: relative;
+    white-space: nowrap;
+}
+
+ul > li { 
+    list-style: inherit;
+}
+
+
+.github {
+    opacity: 0.967;
+}
+
+/* pre customization */
+pre {
+    font-family: monospace, monospace;
+    color: black;
+}
+
+#json {
+    background: white;
+    border: 1px solid grey;
+}
