@@ -53,14 +53,29 @@ class LeaderboardCog(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
-    @leaderboard.command(name="game", description="Sends this server's all-time playtime leaderboard for a game")
+    @leaderboard.command(name="game_alltime", description="Sends this server's all-time playtime leaderboard for a game")
     @app_commands.autocomplete(place_id=all_games_autocomplete)
     async def all_time_game_leaderboard(
         self, 
         interaction: discord.Interaction,
         place_id: str
     ):
-        (message_title, message_content) = await interaction.client.stat_manager.get_game_leaderboard(place_id)
+        (message_title, message_content) = await interaction.client.stat_manager.get_alltime_game_leaderboard(place_id)
+        embed = discord.Embed(
+            title=message_title,
+            description=message_content,
+            color=discord.Color.dark_gold()
+        )
+        await interaction.response.send_message(embed=embed)
+
+    @leaderboard.command(name="game_weekly", description="Sends this server's weekly playtime leaderboard for a game")
+    @app_commands.autocomplete(place_id=all_games_autocomplete)
+    async def weekly_game_leaderboard(
+        self, 
+        interaction: discord.Interaction,
+        place_id: str
+    ):
+        (message_title, message_content) = await interaction.client.stat_manager.get_weekly_game_leaderboard(place_id)
         embed = discord.Embed(
             title=message_title,
             description=message_content,

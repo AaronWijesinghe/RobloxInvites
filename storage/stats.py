@@ -12,20 +12,18 @@ class StatManager:
     def refresh_stats(self):
         self.stats = load_data("stats.json")
 
-    async def get_diff(self, old, new):
-        diff = {}
-        for user in new.keys():
-            if user not in old:
-                diff[user] = new[user]
-                continue
-            diff[user] = {"games_playtime": {}, "currently_playing": {}}
-            diff[user]["total_playtime"] = new[user]["total_playtime"] - old[user]["total_playtime"]
-            for game in new[user]["games_playtime"].keys():
-                if not game in old[user]["games_playtime"]:
-                    diff[user]["games_playtime"][game] = new[user]["games_playtime"][game]
-                    continue
-                diff[user]["games_playtime"][game] = {"playtime": new[user]["games_playtime"][game]["playtime"] - old[user]["games_playtime"][game]["playtime"]}
-        return diff
+    def fix_stats(self, user_id):
+        default_stats = {
+            "total_playtime": 0,
+            "games_playtime": {},
+            "currently_playing": {},
+        }
+        if str(user_id) not in self.stats:
+            self.stats[str(user_id)] = {}
+        for key in default_stats.keys():
+            if key not in self.stats[str(user_id)]:
+                self.stats[str(user_id)][key] = default_stats[key]
+        save_data(self.stats, "stats.json")
 
     async def save_period(self):
         stats_temp = self.stats
@@ -48,32 +46,7 @@ class StatManager:
         else:
             return False
 
-    async def get_data(self, stats_temp={}):
-        total = 0
-        playtimes = {}
-        game_playtimes = {}
-        if stats_temp == {}:
-            stats_temp = self.stats
-        for user in stats_temp:
-            if stats_temp[user]["currently_playing"] != {}:
-                currently_playing = stats_temp[user]["currently_playing"]
-                if str(currently_playing["root_place_id"]) in stats_temp[user]["games_playtime"]:
-                    stats_temp[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
-                else:
-                    stats_temp[user]["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
-                stats_temp[user]["currently_playing"] = {}
-
-            playtimes[user] = 0
-            for game in stats_temp[user]["games_playtime"].keys():
-                if game not in game_playtimes:
-                    game_playtimes[game] = 0
-                game_playtimes[game] += stats_temp[user]["games_playtime"][game]["playtime"]
-                total += stats_temp[user]["games_playtime"][game]["playtime"]
-                playtimes[user] += stats_temp[user]["games_playtime"][game]["playtime"]
-            
-        return (total, playtimes, game_playtimes)
-
-    async def get_playtime_str(self, user_id, place_id, playtime_type):
+    async def get_playtime(self, user_id, place_id, playtime_type):
         playtime = 0
         rpid = await self.api.get_root_place_id(place_id)
         self.fix_stats(user_id)
@@ -86,6 +59,10 @@ class StatManager:
         ):
             if self.stats[user_id]["currently_playing"]["root_place_id"] == rpid:
                 playtime += (round(time.time()) - self.stats[user_id]["currently_playing"]["start"])
+        return playtime
+
+    async def get_playtime_str(self, user_id, place_id, playtime_type):
+        playtime = await self.get_playtime(user_id, place_id, playtime_type)
 
         hours = round(playtime // 3600)
         minutes = round((playtime % 3600) // 60)
@@ -131,19 +108,46 @@ class StatManager:
             self.stats[user_id]["currently_playing"] = {}
         save_data(self.stats, "stats.json")
 
-    def fix_stats(self, user_id):
-        default_stats = {
-            "total_playtime": 0,
-            "games_playtime": {},
-            "currently_playing": {},
-        }
-        if str(user_id) not in self.stats:
-            self.stats[str(user_id)] = {}
-        for key in default_stats.keys():
-            if key not in self.stats[str(user_id)]:
-                self.stats[str(user_id)][key] = default_stats[key]
-        save_data(self.stats, "stats.json")
-    
+    async def get_data(self, stats_temp={}):
+        total = 0
+        playtimes = {}
+        game_playtimes = {}
+        if stats_temp == {}:
+            stats_temp = self.stats
+        for user in stats_temp:
+            if stats_temp[user]["currently_playing"] != {}:
+                currently_playing = stats_temp[user]["currently_playing"]
+                if str(currently_playing["root_place_id"]) in stats_temp[user]["games_playtime"]:
+                    stats_temp[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
+                else:
+                    stats_temp[user]["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
+                stats_temp[user]["currently_playing"] = {}
+
+            playtimes[user] = 0
+            for game in stats_temp[user]["games_playtime"].keys():
+                if game not in game_playtimes:
+                    game_playtimes[game] = 0
+                game_playtimes[game] += stats_temp[user]["games_playtime"][game]["playtime"]
+                total += stats_temp[user]["games_playtime"][game]["playtime"]
+                playtimes[user] += stats_temp[user]["games_playtime"][game]["playtime"]
+            
+        return (total, playtimes, game_playtimes)
+
+    async def get_diff(self, old, new):
+        diff = {}
+        for user in new.keys():
+            if user not in old:
+                diff[user] = new[user]
+                continue
+            diff[user] = {"games_playtime": {}, "currently_playing": {}}
+            diff[user]["total_playtime"] = new[user]["total_playtime"] - old[user]["total_playtime"]
+            for game in new[user]["games_playtime"].keys():
+                if not game in old[user]["games_playtime"]:
+                    diff[user]["games_playtime"][game] = new[user]["games_playtime"][game]
+                    continue
+                diff[user]["games_playtime"][game] = {"playtime": new[user]["games_playtime"][game]["playtime"] - old[user]["games_playtime"][game]["playtime"]}
+        return diff
+
     async def get_user_leaderboard(self, total, playtimes, game_playtimes):
         message_content = f"\n**Total Server Playtime:** {total / 3600:.2f}h"
 
@@ -163,14 +167,19 @@ class StatManager:
         
         return message_content
 
-    async def get_game_leaderboard(self, place_id):
+    async def get_game_leaderboard(self, stats, place_id):
         total = 0
         playtimes = {}
-        stats_temp = self.stats
-        for user_id, statistics in stats_temp.items():
+        for user_id, statistics in stats.items():
+            current_playtime = 0
+            stored_playtime = 0
+            if statistics["currently_playing"] != {}:
+                if str(statistics["currently_playing"]["root_place_id"]) == str(place_id):
+                    current_playtime = round(time.time() - statistics["currently_playing"]["start"])
             if str(place_id) in statistics["games_playtime"]:
-                playtimes[str(user_id)] = statistics["games_playtime"][str(place_id)]["playtime"]
+                stored_playtime = statistics["games_playtime"][str(place_id)]["playtime"]
                 total += statistics["games_playtime"][str(place_id)]["playtime"]
+            playtimes[str(user_id)] = current_playtime + stored_playtime
 
         if str(place_id) not in self.api.cache["indexes"]:
             await self.api.cache_id(place_id)
@@ -250,4 +259,13 @@ class StatManager:
         weekly_data = await self.get_data(weekly_diff)
         message_title = "Weekly Playtime Leaderboard"
         message_content = await self.get_user_leaderboard(*weekly_data)
+        return (message_title, message_content)
+
+    async def get_alltime_game_leaderboard(self, place_id):
+        (message_title, message_content) = await self.get_game_leaderboard(self.stats, place_id)
+        return (message_title, message_content)
+
+    async def get_weekly_game_leaderboard(self, place_id):
+        weekly_diff = await self.get_diff(self.extended_stats["periods"][-1], self.stats)
+        (message_title, message_content) = await self.get_game_leaderboard(weekly_diff, place_id)
         return (message_title, message_content)
