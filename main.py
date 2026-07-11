@@ -49,7 +49,7 @@ class RobloxInvitesBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents)
 
     async def setup_hook(self):
-        self.api = notifier.RobloxAPI()
+        self.api = notifier.RobloxAPI(headers)
         await self.api.start()
 
         self.user_manager = storage.UserManager(self.api)

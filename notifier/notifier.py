@@ -12,8 +12,8 @@ class Notifier:
         self.old_user_presences = load_data("old_user_presences.json")
         self.transfers = {}
 
-    async def process_updates(self, user_ids, headers):
-        new_presences = await self.bot.api.get_presences(user_ids, headers)
+    async def process_updates(self, user_ids):
+        new_presences = await self.bot.api.get_presences(user_ids)
         for i, user_id in enumerate(user_ids):
             self.user_presences[str(user_id)] = {
                 "game_instance_id": new_presences["userPresences"][i]["gameId"],

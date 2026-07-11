@@ -5,9 +5,10 @@ from storage.database import *
 from aiohttp_retry import RetryClient, ExponentialRetry
 
 class RobloxAPI:
-    def __init__(self):
+    def __init__(self, headers):
         self.session = None
         self.retry_client = None
+        self.headers = headers
         self.cache = load_data("cached_ids.json", {"indexes": [], "caches": {}})
     
     async def start(self):
@@ -66,7 +67,7 @@ class RobloxAPI:
             return data
 
     async def post_misc(self, url, json):
-        async with self.retry_client.post(url, json=json) as response:
+        async with self.retry_client.post(url, json=json, headers=self.headers) as response:
             response.raise_for_status()
             data = await response.json()
             return data
@@ -96,8 +97,8 @@ class RobloxAPI:
         rpid_2 = await self.get_root_place_id(place_id_2)
         return rpid_1 == rpid_2
 
-    async def get_presences(self, user_ids, headers):
-        async with self.retry_client.post("https://presence.roblox.com/v1/presence/users/", data={"userIDs": user_ids}, headers=headers) as response:
+    async def get_presences(self, user_ids):
+        async with self.retry_client.post("https://presence.roblox.com/v1/presence/users/", data={"userIDs": user_ids}, headers=self.headers) as response:
             response.raise_for_status()
             return await response.json()
     
@@ -135,7 +136,7 @@ class RobloxAPI:
         return 2
 
     async def get_user_data(self, usernames):
-        async with self.retry_client.post("https://users.roblox.com/v1/usernames/users", json={"usernames": usernames}) as response:
+        async with self.retry_client.post("https://users.roblox.com/v1/usernames/users", json={"usernames": usernames}, headers=self.headers) as response:
             response.raise_for_status()
             user_data = await response.json()
             return user_data
