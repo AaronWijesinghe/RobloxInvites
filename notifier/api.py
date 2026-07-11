@@ -61,7 +61,7 @@ class RobloxAPI:
         save_data(self.cache, "cached_ids.json")
 
     async def get_misc(self, url):
-        async with self.retry_client.get(url) as response:
+        async with self.retry_client.get(url, headers=self.headers) as response:
             response.raise_for_status()
             data = await response.json()
             return data
