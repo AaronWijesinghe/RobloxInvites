@@ -139,7 +139,7 @@ class StatManager:
             if user not in old:
                 diff[user] = new[user]
                 continue
-            diff[user] = {"games_playtime": {}, "currently_playing": {}}
+            diff[user] = {"games_playtime": {}, "currently_playing": new["currently_playing"]}
             diff[user]["total_playtime"] = new[user]["total_playtime"] - old[user]["total_playtime"]
             for game in new[user]["games_playtime"].keys():
                 if not game in old[user]["games_playtime"]:
@@ -170,7 +170,6 @@ class StatManager:
     async def get_game_leaderboard(self, stats, place_id):
         total = 0
         playtimes = {}
-        no_players = True
         for user_id, statistics in stats.items():
             current_playtime = 0
             stored_playtime = 0
@@ -180,9 +179,8 @@ class StatManager:
             if str(place_id) in statistics["games_playtime"]:
                 stored_playtime = statistics["games_playtime"][str(place_id)]["playtime"]
                 total += statistics["games_playtime"][str(place_id)]["playtime"]
-            playtimes[str(user_id)] = current_playtime + stored_playtime
-            if playtimes[str(user_id)] != 0:
-                no_players = False
+            if (current_playtime + stored_playtime) > 0:
+                playtimes[str(user_id)] = current_playtime + stored_playtime
 
         if str(place_id) not in self.api.cache["indexes"]:
             await self.api.cache_id(place_id)
@@ -192,13 +190,12 @@ class StatManager:
         message_content = f"\n**Total Server Playtime:** {total / 3600:.2f}h"
 
         message_content += f"\n**Playtime for Top 20 Users:**"
-        playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
-        if not no_players:
-            for i, (user, playtime) in enumerate(playtimes, start=1):
-                if playtime != 0:
-                    message_content += f"\n[#{i}] {self.user_manager.users[str(user)]["display_name"]} ({playtime / 3600:.2f}h)"
-        else:
+        if len(list(playtimes.keys())) == 0:
             message_content += f"\nNo one has played this game yet."
+        else:
+            playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
+            for i, (user, playtime) in enumerate(playtimes, start=1):
+                message_content += f"\n[#{i}] {self.user_manager.users[str(user)]["display_name"]} ({playtime / 3600:.2f}h)"
         
         return (message_title, message_content)
 
