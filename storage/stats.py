@@ -12,7 +12,7 @@ class StatManager:
     def refresh_stats(self):
         self.stats = load_data("stats.json")
 
-    def fix_stats(self, user_id):
+    async def fix_stats(self, user_id):
         default_stats = {
             "total_playtime": 0,
             "games_playtime": {},
@@ -49,7 +49,7 @@ class StatManager:
     async def get_playtime(self, user_id, place_id, playtime_type):
         playtime = 0
         rpid = await self.api.get_root_place_id(place_id)
-        self.fix_stats(user_id)
+        await self.fix_stats(user_id)
 
         if playtime_type == "both" and str(rpid) in self.stats[user_id]["games_playtime"]:
             playtime += self.stats[user_id]["games_playtime"][str(rpid)]["playtime"]
@@ -76,9 +76,9 @@ class StatManager:
 
     async def start_tracking_playtime(self, int_user_id, place_id, game_instance_id):
         user_id = str(int_user_id)
-        self.fix_stats(user_id)
+        await self.fix_stats(user_id)
         if self.stats[user_id]["currently_playing"] != {}:
-            self.finish_tracking_playtime(user_id)
+            await self.finish_tracking_playtime(user_id)
         root_place_id = await self.api.get_root_place_id(place_id)
         self.stats[user_id]["currently_playing"] = {
             "root_place_id": root_place_id,
@@ -88,9 +88,9 @@ class StatManager:
         save_data(self.stats, "stats.json")
 
 
-    def finish_tracking_playtime(self, int_user_id):
+    async def finish_tracking_playtime(self, int_user_id):
         user_id = str(int_user_id)
-        self.fix_stats(user_id)
+        await self.fix_stats(user_id)
         current = self.stats[user_id]["currently_playing"]
         if "start" in current:
             root_place_id = current.get("root_place_id")

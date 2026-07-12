@@ -10,7 +10,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-version = "1.2.0"
+version = "1.2.1"
 cookies = storage.load_data("cookies.json", None, False, "A cookie is required to use Roblox Invites.")
 headers = {
     "Cookie": f".ROBLOSECURITY={cookies[0]}"
@@ -22,7 +22,7 @@ patch_notes = f"""
 Updated from __v{saved_version["version"]}__ to __v{version}__
 
 **Changes:**
-- Game leaderboards now include current playtime sessions
+- Playtimes now calculate immediately after transfer periods end, similar to the legacy code
 """
 if saved_version["version"] != version:
     display_patch_notes = True

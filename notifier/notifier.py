@@ -40,12 +40,13 @@ class Notifier:
                     elif user_id in self.transfers:
                         if time.time() - self.transfers[user_id]["start"] > 5:
                             await self.send_leave_message(user_id, self.transfers[user_id]["old_place_id"], "absolute" if status == 0 else "website")
+                            await self.bot.stat_manager.finish_tracking_playtime(user_id)
                             del self.transfers[user_id]
                     elif user_id in self.bot.stat_manager.stats:
                         if self.bot.stat_manager.stats[user_id]["currently_playing"] != {}:
-                            self.bot.stat_manager.finish_tracking_playtime(user_id)
+                            await self.bot.stat_manager.finish_tracking_playtime(user_id)
                 print(f"{self.bot.user_manager.users[user_id]["display_name"]} is {'offline.' if status == 0 else 'on the Roblox website!'}")
-            if status == 2 and (game_instance_id is None or place_id is None):
+            elif status == 2 and (game_instance_id is None or place_id is None):
                 print(f"{self.bot.user_manager.users[user_id]["display_name"]} has their joins off, or you aren't following them.")
                 print(f"   -> Follow them @ https://roblox.com/users/{user_id}/profile")
             elif status == 2:
