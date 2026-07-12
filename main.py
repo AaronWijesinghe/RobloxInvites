@@ -27,6 +27,7 @@ Updated from __v{saved_version["version"]}__ to __v{version}__
     - The new command structure for game leaderboards is as follows: /leaderboard game [all | weekly] `PLACE_ID`
 - Game titles that previously showed [TITLE NOT AVAILABLE] should now show a title
     - This is because your .ROBLOSECURITY header is now passed into all Roblox API requests.
+- Added server start, stop, and update patch note notifications
 """
 if saved_version["version"] != version:
     display_patch_notes = True
