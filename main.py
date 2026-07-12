@@ -6,19 +6,32 @@ import notifier
 import storage
 from styling.ansi import *
 from styling.ri_colors import *
-from dotenv import load_dotenv
 from discord.ext import commands
+from dotenv import load_dotenv
 
 load_dotenv()
 version = "1.1.0"
-release_notes = """
-**Version 1.1.0**
-Patch notes will be added on release :)
-"""
 cookies = storage.load_data("cookies.json", None, False, "A cookie is required to use Roblox Invites.")
 headers = {
     "Cookie": f".ROBLOSECURITY={cookies[0]}"
 }
+
+display_patch_notes = False
+saved_version = storage.load_data("version.json", {"version": "0.0.0"})
+patch_notes = f"""
+Updated from __v{saved_version["version"]}__ to __v{version}__
+
+**Changes:**
+- [admin] Added text that shows before the bot starts
+- Added weekly leaderboards for games
+    - The new command structure for game leaderboards is as follows: /leaderboard game [all | weekly] `PLACE_ID`
+- Game titles that previously showed [TITLE NOT AVAILABLE] should now show a title
+    - This is because your .ROBLOSECURITY header is now passed into all Roblox API requests.
+"""
+if saved_version["version"] != version:
+    display_patch_notes = True
+    saved_version["version"] = version
+storage.save_data(saved_version, "version.json")
 
 
 def clear():
@@ -31,10 +44,17 @@ async def presence_tracker(bot):
     print("Waiting for the bot to get ready...")
     await bot.wait_until_ready()
 
-    embed = discord.Embed(
-        title="Roblox Invites has been started!",
-        color=discord.Color.blue()
-    )
+    if display_patch_notes:
+        embed = discord.Embed(
+            title="Roblox Invites has been updated!",
+            description=patch_notes,
+            color=discord.Color.blue()
+        )
+    else:
+        embed = discord.Embed(
+            title="Roblox Invites has been started!",
+            color=discord.Color.blue()
+        )
     channel = bot.get_channel(bot.channel_manager.channels["announcement_channel"])
     await channel.send(embed=embed)
 
