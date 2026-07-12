@@ -10,6 +10,7 @@ class LeaderboardCog(commands.Cog):
         self.bot = bot
 
     leaderboard = app_commands.Group(name="leaderboard", description="Leaderboard commands")
+    game = app_commands.Group(name="game", description="Game-related leaderboard commands", parent=leaderboard)
 
     async def all_games_autocomplete(
         self,
@@ -53,7 +54,7 @@ class LeaderboardCog(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
-    @leaderboard.command(name="game_alltime", description="Sends this server's all-time playtime leaderboard for a game")
+    @game.command(name="all", description="Sends this server's all-time playtime leaderboard for a game")
     @app_commands.autocomplete(place_id=all_games_autocomplete)
     async def all_time_game_leaderboard(
         self, 
@@ -68,7 +69,7 @@ class LeaderboardCog(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
-    @leaderboard.command(name="game_weekly", description="Sends this server's weekly playtime leaderboard for a game")
+    @game.command(name="weekly", description="Sends this server's weekly playtime leaderboard for a game")
     @app_commands.autocomplete(place_id=all_games_autocomplete)
     async def weekly_game_leaderboard(
         self, 

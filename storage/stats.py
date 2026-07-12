@@ -170,6 +170,7 @@ class StatManager:
     async def get_game_leaderboard(self, stats, place_id):
         total = 0
         playtimes = {}
+        no_players = True
         for user_id, statistics in stats.items():
             current_playtime = 0
             stored_playtime = 0
@@ -180,6 +181,8 @@ class StatManager:
                 stored_playtime = statistics["games_playtime"][str(place_id)]["playtime"]
                 total += statistics["games_playtime"][str(place_id)]["playtime"]
             playtimes[str(user_id)] = current_playtime + stored_playtime
+            if playtimes[str(user_id)] != 0:
+                no_players = False
 
         if str(place_id) not in self.api.cache["indexes"]:
             await self.api.cache_id(place_id)
@@ -190,8 +193,12 @@ class StatManager:
 
         message_content += f"\n**Playtime for Top 20 Users:**"
         playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:20]
-        for i, (user, playtime) in enumerate(playtimes, start=1):
-            message_content += f"\n[#{i}] {self.user_manager.users[str(user)]["display_name"]} ({playtime / 3600:.2f}h)"
+        if not no_players:
+            for i, (user, playtime) in enumerate(playtimes, start=1):
+                if playtime != 0:
+                    message_content += f"\n[#{i}] {self.user_manager.users[str(user)]["display_name"]} ({playtime / 3600:.2f}h)"
+        else:
+            message_content += f"\nNo one has played this game yet."
         
         return (message_title, message_content)
 
