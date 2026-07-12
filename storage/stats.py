@@ -139,7 +139,7 @@ class StatManager:
             if user not in old:
                 diff[user] = new[user]
                 continue
-            diff[user] = {"games_playtime": {}, "currently_playing": new["currently_playing"]}
+            diff[user] = {"games_playtime": {}, "currently_playing": new[user]["currently_playing"]}
             diff[user]["total_playtime"] = new[user]["total_playtime"] - old[user]["total_playtime"]
             for game in new[user]["games_playtime"].keys():
                 if not game in old[user]["games_playtime"]:
@@ -178,9 +178,9 @@ class StatManager:
                     current_playtime = round(time.time() - statistics["currently_playing"]["start"])
             if str(place_id) in statistics["games_playtime"]:
                 stored_playtime = statistics["games_playtime"][str(place_id)]["playtime"]
-                total += statistics["games_playtime"][str(place_id)]["playtime"]
             if (current_playtime + stored_playtime) > 0:
-                playtimes[str(user_id)] = current_playtime + stored_playtime
+                playtimes[str(user_id)] = (current_playtime + stored_playtime)
+                total += (current_playtime + stored_playtime)
 
         if str(place_id) not in self.api.cache["indexes"]:
             await self.api.cache_id(place_id)

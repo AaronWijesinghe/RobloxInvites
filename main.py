@@ -10,7 +10,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-version = "1.1.0"
+version = "1.2.0"
 cookies = storage.load_data("cookies.json", None, False, "A cookie is required to use Roblox Invites.")
 headers = {
     "Cookie": f".ROBLOSECURITY={cookies[0]}"
@@ -22,12 +22,7 @@ patch_notes = f"""
 Updated from __v{saved_version["version"]}__ to __v{version}__
 
 **Changes:**
-- [admin] Added text that shows before the bot starts
-- Added weekly leaderboards for games
-    - The new command structure for game leaderboards is as follows: /leaderboard game [all | weekly] `PLACE_ID`
-- Game titles that previously showed [TITLE NOT AVAILABLE] should now show a title
-    - This is because your .ROBLOSECURITY header is now passed into all Roblox API requests.
-- Added server start, stop, and update patch note notifications
+- Game leaderboards now include current playtime sessions
 """
 if saved_version["version"] != version:
     display_patch_notes = True
