@@ -19,5 +19,5 @@ class ChannelManager:
 
         if channel_type in ["announcement", "invite"]:
             self.channels[f"{channel_type}_channel"] = channel_id
-        save_data(self.channels, "channels.json")
+        await save_data(self.channels, "channels.json")
         return True

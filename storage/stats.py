@@ -9,9 +9,6 @@ class StatManager:
         self.stats = load_data("stats.json")
         self.extended_stats = load_data("extended_stats.json", {"version": 1, "periods": []})
 
-    def refresh_stats(self):
-        self.stats = load_data("stats.json")
-
     async def fix_stats(self, user_id):
         default_stats = {
             "total_playtime": 0,
@@ -23,7 +20,7 @@ class StatManager:
         for key in default_stats.keys():
             if key not in self.stats[str(user_id)]:
                 self.stats[str(user_id)][key] = default_stats[key]
-        save_data(self.stats, "stats.json")
+        await save_data(self.stats, "stats.json")
 
     async def save_period(self):
         stats_temp = self.stats
@@ -36,12 +33,12 @@ class StatManager:
                     stats_temp[user]["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
                 stats_temp[user]["currently_playing"] = {}
         self.extended_stats["periods"] += [stats_temp]
-        save_data(self.extended_stats, "extended_stats.json")
+        await save_data(self.extended_stats, "extended_stats.json")
 
     async def remove_last_period(self):
         if len(self.extended_stats) > 1:
             del self.extended_stats["periods"][-1]
-            save_data(self.extended_stats, "extended_stats.json")
+            await save_data(self.extended_stats, "extended_stats.json")
             return True
         else:
             return False
@@ -85,7 +82,7 @@ class StatManager:
             "game_instance_id": game_instance_id,
             "start": round(time.time()),
         }
-        save_data(self.stats, "stats.json")
+        await save_data(self.stats, "stats.json")
 
 
     async def finish_tracking_playtime(self, int_user_id):
@@ -106,7 +103,7 @@ class StatManager:
                 ]
             )
             self.stats[user_id]["currently_playing"] = {}
-        save_data(self.stats, "stats.json")
+        await save_data(self.stats, "stats.json")
 
     async def get_data(self, stats_temp={}):
         total = 0

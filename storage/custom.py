@@ -19,7 +19,7 @@ class CGTManager:
             "game": await self.api.get_game_name(place_id),
             "place_id": place_id,
         }
-        save_data(self.custom_titles, "custom_titles.json")
+        await save_data(self.custom_titles, "custom_titles.json")
 
     async def remove_custom_title(self, place_id):
         if place_id not in self.api.cache["indexes"]:
@@ -28,4 +28,4 @@ class CGTManager:
         
         if str(universe_id) in self.custom_titles["titles"]:
             del self.custom_titles["titles"][str(universe_id)]
-        save_data(self.custom_titles, "custom_titles.json")
+        await save_data(self.custom_titles, "custom_titles.json")

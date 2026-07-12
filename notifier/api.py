@@ -38,7 +38,7 @@ class RobloxAPI:
                 "last_update": [datetime.now().month, datetime.now().day, datetime.now().year],
                 "max_players": {}
             }
-            save_data(self.cache, "cached_ids.json")
+            await save_data(self.cache, "cached_ids.json")
 
     async def cache_game_name(self, int_place_id: int) -> None:
         place_id = str(int_place_id)
@@ -47,7 +47,7 @@ class RobloxAPI:
         game_name = game_data["data"][0]["name"]
         self.cache["caches"][str(universe_id)]["name"] = game_name
         self.cache["caches"][str(universe_id)]["last_update"] = [datetime.now().month, datetime.now().day, datetime.now().year]
-        save_data(self.cache, "cached_ids.json")
+        await save_data(self.cache, "cached_ids.json")
 
     async def cache_max_players(self, int_place_id: int) -> None:
         place_id = str(int_place_id)
@@ -58,7 +58,7 @@ class RobloxAPI:
         else:
             max_players = 2
         self.cache["caches"][str(universe_id)]["max_players"][place_id] = max_players
-        save_data(self.cache, "cached_ids.json")
+        await save_data(self.cache, "cached_ids.json")
 
     async def get_misc(self, url):
         async with self.retry_client.get(url, headers=self.headers) as response:

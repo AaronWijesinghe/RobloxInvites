@@ -84,10 +84,10 @@ class Notifier:
                 del self.user_presences[user_id]
                 if user_id in self.bot.stat_manager.stats:
                     del self.bot.stat_manager.stats[user_id]
-                    save_data(self.bot.stat_manager.stats, "stats.json")
-                save_data(self.bot.user_manager.users, "users.json")
+                    await save_data(self.bot.stat_manager.stats, "stats.json")
+                await save_data(self.bot.user_manager.users, "users.json")
         self.old_user_presences = deepcopy(self.user_presences)
-        save_data(self.old_user_presences, "old_user_presences.json")
+        await save_data(self.old_user_presences, "old_user_presences.json")
 
     async def check_joins(self, user_id, place_id, game_instance_id):
         joined = []
