@@ -10,7 +10,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-version = "1.3.1"
+version = "1.3.2"
 cookies = storage.load_data("cookies.json", None, False, "A cookie is required to use Roblox Invites.")
 headers = {
     "Cookie": f".ROBLOSECURITY={cookies[0]}"

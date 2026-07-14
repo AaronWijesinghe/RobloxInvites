@@ -111,6 +111,8 @@ class StatManager:
         game_playtimes = {}
         if stats_temp == {}:
             stats_temp = deepcopy(self.stats)
+        else:
+            stats_temp = deepcopy(stats_temp)
         for user in stats_temp:
             if stats_temp[user]["currently_playing"] != {}:
                 currently_playing = stats_temp[user]["currently_playing"]
@@ -200,7 +202,7 @@ class StatManager:
         creation_date = datetime.now().strftime("%m-%d-%Y")
         creation_time = datetime.now().strftime("%H:%M:%S")
 
-        total, playtimes, game_playtimes = await self.get_data({str(user_id): self.stats[str(user_id)]})
+        total, playtimes, game_playtimes = await self.get_data(deepcopy({str(user_id): self.stats[str(user_id)]}))
         total_server, playtimes_server, game_playtimes_server = await self.get_data()
         playtimes_server = sorted(playtimes_server.items(), key=lambda item: item[1], reverse=True)
         game_playtimes_server = sorted(game_playtimes_server.items(), key=lambda item: item[1], reverse=True)
