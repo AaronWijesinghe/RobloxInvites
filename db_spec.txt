@@ -1,0 +1,61 @@
+# Database spec for the SQL rewrite!
+# Cookies will not be stored to the SQL database for (hopefully) obvious reasons
+# Current user presences will still be stored in RAM as JSON/dictionary objects
+
+# Global tables
+
+TABLE old_user_presences
+PRIMARY KEY user_id
+KEY game_instance_id
+KEY place_id
+KEY status
+
+TABLE place_id_cache
+PRIMARY KEY place_id
+KEY universe_id
+KEY max_players
+
+TABLE universe_id_cache
+PRIMARY KEY universe_id
+KEY root_place_id
+KEY game_name
+KEY month_last_updated
+KEY day_last_updated
+KEY year_last_updated
+
+# Guild-specific tables
+
+TABLE guild_settings
+PRIMARY KEY guild_id
+KEY announcement_channel
+KEY invite_channel
+
+TABLE subscriptions
+PRIMARY KEY (guild_id, user_id)
+
+TABLE users
+PRIMARY KEY user_id
+KEY username
+KEY display_name
+
+TABLE custom_titles
+PRIMARY KEY (guild_id, universe_id)
+KEY title
+KEY color
+KEY game_name
+KEY root_place_id
+
+TABLE blacklist
+PRIMARY KEY (guild_id, place_id)
+KEY game_name
+
+TABLE total_playtimes
+PRIMARY KEY user_id
+KEY total_playtime
+
+TABLE game_playtimes
+PRIMARY KEY user_id
+KEY place_id
+KEY playtime
+
+TABLE snapshots
