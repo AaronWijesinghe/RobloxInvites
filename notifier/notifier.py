@@ -30,18 +30,14 @@ class Notifier:
                 if user_id in self.old_user_presences:
                     if self.old_user_presences[user_id]["status"] == 2 and user_id not in self.transfers:
                         self.transfers[user_id] = {
-                            "start": time.time(),
                             "old_place_id": self.old_user_presences[user_id]["place_id"],
-                            "old_game_instance_id": self.old_user_presences[user_id][
-                                "game_instance_id"
-                            ],
+                            "old_game_instance_id": self.old_user_presences[user_id]["game_instance_id"],
                             "username": self.bot.user_manager.users[user_id]["username"],
                         }
                     elif user_id in self.transfers:
-                        if time.time() - self.transfers[user_id]["start"] > 5:
-                            await self.send_leave_message(user_id, self.transfers[user_id]["old_place_id"], "absolute" if status == 0 else "website")
-                            await self.bot.stat_manager.finish_tracking_playtime(user_id)
-                            del self.transfers[user_id]
+                        await self.send_leave_message(user_id, self.transfers[user_id]["old_place_id"], "absolute" if status == 0 else "website")
+                        await self.bot.stat_manager.finish_tracking_playtime(user_id)
+                        del self.transfers[user_id]
                     elif user_id in self.bot.stat_manager.stats:
                         if self.bot.stat_manager.stats[user_id]["currently_playing"] != {}:
                             await self.bot.stat_manager.finish_tracking_playtime(user_id)

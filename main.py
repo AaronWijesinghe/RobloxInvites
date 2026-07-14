@@ -10,7 +10,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-version = "1.3.0"
+version = "1.3.1"
 cookies = storage.load_data("cookies.json", None, False, "A cookie is required to use Roblox Invites.")
 headers = {
     "Cookie": f".ROBLOSECURITY={cookies[0]}"
@@ -22,9 +22,7 @@ patch_notes = f"""
 Updated from __v{saved_version["version"]}__ to __v{version}__
 
 **Changes:**
-- File writes have been converted to be asynchronous
-- Added new methods to save data in a non-asynchronous manner (save_data_blocking)
-- Added new methods to log in a non-asynchronous manner (write_to_log_blocking)
+- If leaderboards are used, the current playtimes of users will not be affected
 """
 if saved_version["version"] != version:
     display_patch_notes = True

@@ -1,4 +1,5 @@
 import time
+from copy import deepcopy
 from datetime import datetime
 from storage.database import *
 
@@ -23,7 +24,7 @@ class StatManager:
         await save_data(self.stats, "stats.json")
 
     async def save_period(self):
-        stats_temp = self.stats
+        stats_temp = deepcopy(self.stats)
         for user in stats_temp:
             if stats_temp[user]["currently_playing"] != {}:
                 currently_playing = stats_temp[user]["currently_playing"]
@@ -84,7 +85,6 @@ class StatManager:
         }
         await save_data(self.stats, "stats.json")
 
-
     async def finish_tracking_playtime(self, int_user_id):
         user_id = str(int_user_id)
         await self.fix_stats(user_id)
@@ -110,7 +110,7 @@ class StatManager:
         playtimes = {}
         game_playtimes = {}
         if stats_temp == {}:
-            stats_temp = self.stats
+            stats_temp = deepcopy(self.stats)
         for user in stats_temp:
             if stats_temp[user]["currently_playing"] != {}:
                 currently_playing = stats_temp[user]["currently_playing"]

@@ -7,3 +7,5 @@ logs/
 data/
 __pycache__*
 .env
+database/
+data/
