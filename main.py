@@ -1,4 +1,5 @@
 import os
+import asyncpg
 import aiohttp
 import asyncio
 import discord
@@ -22,7 +23,7 @@ patch_notes = f"""
 Updated from __v{saved_version["version"]}__ to __v{version}__
 
 **Changes:**
-- If leaderboards are used, the current playtimes of users will not be affected
+- Patch notes will be updated on release.
 """
 if saved_version["version"] != version:
     display_patch_notes = True
@@ -81,6 +82,13 @@ class RobloxInvitesBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents)
 
     async def setup_hook(self):
+        self.db = await asyncpg.create_pool(
+            user="postgres",
+            password="",
+            database="robloxinvites",
+            host="localhost"
+        )
+
         self.api = notifier.RobloxAPI(headers)
         await self.api.start()
 
