@@ -10,7 +10,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-version = "1.3.2"
+version = "1.3.3"
 cookies = storage.load_data("cookies.json", None, False, "A cookie is required to use Roblox Invites.")
 headers = {
     "Cookie": f".ROBLOSECURITY={cookies[0]}"
@@ -22,7 +22,8 @@ patch_notes = f"""
 Updated from __v{saved_version["version"]}__ to __v{version}__
 
 **Changes:**
-- If leaderboards are used, the current playtimes of users will not be affected
+- If a user has Roblox Studio open, the current playtime session will stop
+    - This fixes a critical playtime bug.
 """
 if saved_version["version"] != version:
     display_patch_notes = True

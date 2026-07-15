@@ -73,6 +73,9 @@ class Notifier:
                     await self.send_invite(user_id, place_id, game_instance_id)
                 print(f"{self.bot.user_manager.users[user_id]["display_name"]} is in a game: {underline}roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}{end}")
             elif status == 3:
+                if user_id in self.bot.stat_manager.stats:
+                    if self.bot.stat_manager.stats[user_id]["currently_playing"] != {}:
+                        await self.bot.stat_manager.finish_tracking_playtime(user_id)
                 print(f"{self.bot.user_manager.users[user_id]["display_name"]} is in Roblox Studio.")
 
             if "delete" in self.bot.user_manager.users[user_id]:
