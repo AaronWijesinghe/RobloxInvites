@@ -76,7 +76,7 @@ class Notifier:
                 if user_id in self.bot.stat_manager.stats:
                     if self.bot.stat_manager.stats[user_id]["currently_playing"] != {}:
                         await self.bot.stat_manager.finish_tracking_playtime(user_id)
-                        await self.send_leave_message(user_id, place_id, "absolute")
+                        await self.send_leave_message(user_id, self.old_user_presences[user_id]["place_id"], "absolute")
                 print(f"{self.bot.user_manager.users[user_id]["display_name"]} is in Roblox Studio.")
 
             if "delete" in self.bot.user_manager.users[user_id]:
