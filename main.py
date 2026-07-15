@@ -10,7 +10,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-version = "1.3.5"
+version = "1.3.6"
 cookies = storage.load_data("cookies.json", None, False, "A cookie is required to use Roblox Invites.")
 headers = {
     "Cookie": f".ROBLOSECURITY={cookies[0]}"
@@ -23,6 +23,7 @@ Updated from __v{saved_version["version"]}__ to __v{version}__
 
 **Changes:**
 - A leave message should now send if you enter Roblox Studio while playing a game
+    - This leave message should have the accurate playtime now
 """
 if saved_version["version"] != version:
     display_patch_notes = True
