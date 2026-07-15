@@ -27,7 +27,7 @@ class RobloxInvitesBot(commands.Bot):
         #self.blacklist_manager = storage.BlacklistManager()
         #self.channel_manager = storage.ChannelManager(self)
 
-        self.load_extension("cogs.user_cog")
+        await self.load_extension("cogs.user_cog")
         
         self.tree.copy_global_to(guild=self.dev_guild)
         await self.tree.sync(guild=self.dev_guild)
