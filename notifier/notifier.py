@@ -11,19 +11,17 @@ class Notifier:
         self.user_presences = {}
         self.transfers = {}
 
-    async def process_updates(self, user_ids):
-        new_presences = await self.bot.api.get_presences(user_ids)
-        for i, user_id in enumerate(user_ids):
-            self.user_presences[str(user_id)] = {
-                "game_instance_id": new_presences["userPresences"][i]["gameId"],
-                "place_id": new_presences["userPresences"][i]["placeId"],
-                "status": new_presences["userPresences"][i]["userPresenceType"],
-            }
+    async def send_guild_updates(self, guild):
+        guild_user_ids = await self.bot.api.get_guild_user_ids(guild)
+        guild_presences = await self.bot.api.get_guild_presences(guild, "current")
+        old_guild_presences = await self.bot.api.get_guild_presences(guild, "old")
 
-        for user_id, presence in list(self.user_presences.items()):
-            status = self.user_presences[user_id]["status"]
-            place_id = self.user_presences[user_id]["place_id"]
-            game_instance_id = self.user_presences[user_id]["game_instance_id"]
+        for i in guild_presences:
+            user_id = guild_user_ids[i]
+
+            status = guild_presences[i]["status"]
+            place_id = guild_presences[i]["place_id"]
+            game_instance_id = guild_presences[i]["game_instance_id"]
 
             if status in [0, 1]:
                 if user_id in self.old_user_presences:

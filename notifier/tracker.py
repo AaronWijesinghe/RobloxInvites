@@ -21,10 +21,23 @@ class PresenceTracker:
         times_checked = 1
         while True:
             try:
+                # [the "plan"]
+                # get all user ids
+                # get user presences for all users
+                # save current presences
+                # for each guild in bot.guilds, send out updates for each guild but do not modify data
+                # for all users, modify data based on the presence changes
+                # save old presences to old_presences
+                # handle user deletions
+
                 self.clear()
                 print(f"{gold}[Roblox Invites] [{self.version}] [{times_checked}]{end}")
-                user_ids = await self.bot.user_manager.get_user_ids()
+                user_ids = await self.bot.user_manager.get_all_user_ids()
+                await self.bot.presence_manager.save_presences("current")
+                for guild in self.bot.guilds:
+                    await self.bot.notifier.send_guild_updates(guild)
                 await self.bot.notifier.process_updates(user_ids)
+                await self.bot.presence_manager.save_presences("old")
                 await asyncio.sleep(3)
                 times_checked += 1
             except aiohttp.client_exceptions.ClientOSError:

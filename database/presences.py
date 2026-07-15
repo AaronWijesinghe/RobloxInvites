@@ -36,7 +36,7 @@ class PresenceManager:
                 WHERE user_id = $1
             """, user_id)
 
-    async def get_guild_presences(self, guild_id):
+    async def get_guild_presences(self, guild_id, presence_type):
         async with self.pool.acquire() as conn:
             rows = await conn.fetch("""
                 SELECT *
@@ -46,13 +46,22 @@ class PresenceManager:
         
         user_ids = [row["user_id"] for row in rows]
         async with self.pool.acquire() as conn:
-            rows = await conn.fetch("""
+            rows = await conn.fetch(f"""
                 SELECT *
-                FROM presences
+                FROM {"old_presences" if presence_type == "old" else "presences"}
                 WHERE user_id = ANY($1)
             """, user_ids)
+        
+        presences = {
+            user_ids[i]: {
+                "game_instance_id": rows[i]["game_instance_id"],
+                "place_id": rows[i]["place_id"],
+                "status": rows[i]["status"]
+            }
+            for i in range(len(user_ids))
+        }
 
-        return rows
+        return presences
 
     async def get_all_presences(self):
         async with self.pool.acquire() as conn:

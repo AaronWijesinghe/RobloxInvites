@@ -18,7 +18,7 @@ class UserManager:
                 SELECT *
                 FROM subscriptions
                 WHERE guild_id = $1
-            """, guild_id)
+            """, guild_id.id)
         
         user_ids = [row["user_id"] for row in rows]
         async with self.pool.acquire() as conn:
@@ -36,7 +36,7 @@ class UserManager:
                 SELECT *
                 FROM subscriptions
                 WHERE guild_id = $1
-            """, guild_id)
+            """, guild_id.id)
         
         user_ids = [row["user_id"] for row in rows]
         return user_ids
