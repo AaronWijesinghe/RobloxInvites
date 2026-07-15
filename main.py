@@ -2,33 +2,25 @@ import os
 import asyncpg
 import aiohttp
 import asyncio
-import discord
 import notifier
-import storage
+from bot import *
 from styling.ansi import *
 from styling.ri_colors import *
 from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-version = "1.3.2"
-cookies = storage.load_data("cookies.json", None, False, "A cookie is required to use Roblox Invites.")
+version = "2.0.0"
 headers = {
-    "Cookie": f".ROBLOSECURITY={cookies[0]}"
+    "Cookie": f".ROBLOSECURITY={os.environ["cookie"]}"
 }
 
-display_patch_notes = False
-saved_version = storage.load_data("version.json", {"version": "0.0.0"})
 patch_notes = f"""
-Updated from __v{saved_version["version"]}__ to __v{version}__
+Updated to __v{version}__
 
 **Changes:**
 - Patch notes will be updated on release.
 """
-if saved_version["version"] != version:
-    display_patch_notes = True
-    saved_version["version"] = version
-storage.save_data_blocking(saved_version, "version.json")
 
 
 def clear():
@@ -40,20 +32,6 @@ async def presence_tracker(bot):
     print(f"{gold}[Roblox Invites] [{version}] [0]{end}")
     print("Waiting for the bot to get ready...")
     await bot.wait_until_ready()
-
-    if display_patch_notes:
-        embed = discord.Embed(
-            title="Roblox Invites has been updated!",
-            description=patch_notes,
-            color=discord.Color.blue()
-        )
-    else:
-        embed = discord.Embed(
-            title="Roblox Invites has been started!",
-            color=discord.Color.blue()
-        )
-    channel = bot.get_channel(bot.channel_manager.channels["announcement_channel"])
-    await channel.send(embed=embed)
 
     times_checked = 1
     tracker = notifier.Notifier(bot)
@@ -75,46 +53,8 @@ async def presence_tracker(bot):
             await asyncio.sleep(10)
 
 
-class RobloxInvitesBot(commands.Bot):
-    def __init__(self):
-        intents = discord.Intents.default()
-        intents.message_content = True
-        super().__init__(command_prefix="!", intents=intents)
-
-    async def setup_hook(self):
-        self.db = await asyncpg.create_pool(
-            user="postgres",
-            password="",
-            database="robloxinvites",
-            host="localhost"
-        )
-
-        self.api = notifier.RobloxAPI(headers)
-        await self.api.start()
-
-        self.user_manager = storage.UserManager(self.api)
-        self.stat_manager = storage.StatManager(self.api, self.user_manager)
-        self.cgt_manager = storage.CGTManager(self.api)
-        self.blacklist_manager = storage.BlacklistManager()
-        self.channel_manager = storage.ChannelManager(self)
-
-        await self.load_extension("cogs.cgt_cog")
-        await self.load_extension("cogs.user_cog")
-        await self.load_extension("cogs.leaderboard_cog")
-        await self.load_extension("cogs.blacklist_cog")
-        await self.load_extension("cogs.invite_cog")
-        await self.load_extension("cogs.channel_cog")
-        
-        self.tree.copy_global_to(guild=MY_GUILD)
-        await self.tree.sync(guild=MY_GUILD)
-
-
-bot = RobloxInvitesBot()
-MY_GUILD = discord.Object(id=os.environ["guild"])
-
-@bot.event
-async def on_ready():
-    print(f"{bot.user} is online and ready!")
+api = notifier.RobloxAPI(headers)
+bot = RobloxInvitesBot(api, os.environ["guild"])
 
 async def main():
     try:
@@ -127,13 +67,6 @@ async def main():
     except asyncio.exceptions.CancelledError:
         pass
     finally:
-        embed = discord.Embed(
-            title="Roblox Invites has been stopped.",
-            color=red
-        )
-        channel = bot.get_channel(bot.channel_manager.channels["announcement_channel"])
-        await channel.send(embed=embed)
-
         await bot.api.close()
         await bot.close()
 

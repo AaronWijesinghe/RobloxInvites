@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from storage.database import *
+from database.database import *
 from storage.custom import *
 
 class BlacklistCog(commands.Cog):

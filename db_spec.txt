@@ -4,11 +4,22 @@
 
 # Global tables
 
+TABLE presences
+PRIMARY KEY user_id
+KEY game_instance_id
+KEY place_id
+KEY status
+
 TABLE old_user_presences
 PRIMARY KEY user_id
 KEY game_instance_id
 KEY place_id
 KEY status
+
+TABLE transfers
+PRIMARY KEY user_id
+KEY old_game_instance_id
+KEY old_place_id
 
 TABLE place_id_cache
 PRIMARY KEY place_id
@@ -23,6 +34,11 @@ KEY month_last_updated
 KEY day_last_updated
 KEY year_last_updated
 
+TABLE users
+PRIMARY KEY user_id
+KEY username
+KEY display_name
+
 # Guild-specific tables
 
 TABLE guild_settings
@@ -32,11 +48,6 @@ KEY invite_channel
 
 TABLE subscriptions
 PRIMARY KEY (guild_id, user_id)
-
-TABLE users
-PRIMARY KEY user_id
-KEY username
-KEY display_name
 
 TABLE custom_titles
 PRIMARY KEY (guild_id, universe_id)

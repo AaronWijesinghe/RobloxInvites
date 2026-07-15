@@ -1,8 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from storage.database import *
-from storage.custom import *
+from database.database import *
 
 class UserCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -56,6 +55,7 @@ class UserCog(commands.Cog):
         await interaction.client.user_manager.remove_user(user_id)
         await interaction.followup.send(f"Removed user @{interaction.client.user_manager.users[user_id]["username"]} from Roblox Invites. Hope you had a great time!")
 
+    """
     @user.command(name="stats", description="Gets a user's stat card")
     @app_commands.autocomplete(user_id=user_autocomplete)
     async def get_user_card(
@@ -71,6 +71,7 @@ class UserCog(commands.Cog):
             color=discord.Color.dark_gold()
         )
         await interaction.followup.send(embed=embed)
+    """
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(UserCog(bot))
