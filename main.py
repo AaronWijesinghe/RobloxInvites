@@ -2,6 +2,7 @@ import os
 import asyncio
 import notifier
 import discord
+import database
 from bot import *
 from styling.ansi import *
 from styling.ri_colors import *
@@ -23,7 +24,7 @@ Updated to __v{version}__
 dev_guild = discord.Object(id=os.environ["guild"])
 api = notifier.RobloxAPI(headers)
 bot = RobloxInvitesBot(api, dev_guild)
-tracker_core = notifier.Notifier(bot)
+tracker_core = notifier.TrackerCore(bot)
 bot.notifier = tracker_core
 presence_tracker = notifier.PresenceTracker(bot, version)
 

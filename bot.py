@@ -21,6 +21,8 @@ class RobloxInvitesBot(commands.Bot):
         await self.api.start()
         await self.db.initalize()
 
+        self.api.pool = self.db.pool
+
         self.user_manager = database.UserManager(self.db, self.api)
         self.presence_manager = database.PresenceManager(self.db, self.api, self.user_manager)
         self.transfer_manager = database.TransferManager(self.db)

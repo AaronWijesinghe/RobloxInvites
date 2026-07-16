@@ -5,7 +5,7 @@ from database.database import *
 from notifier.send_embed import send_embed
 from copy import deepcopy
 
-class Notifier:
+class TrackerCore:
     def __init__(self, bot):
         self.bot = bot
         self.transfers = {}
@@ -146,6 +146,7 @@ class Notifier:
             return
 
         embed_title = f"{display_name} left *{game}*{period}"
+        embed_desc = "" # for now
         #embed_desc = f"Time played: {playtime_str}\nTotal playtime for this game: {playtime_str_2}"
 
         if type == "website":
