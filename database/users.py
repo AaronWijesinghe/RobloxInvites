@@ -12,6 +12,22 @@ class UserManager:
                 WHERE user_id = $1
             """, user_id)
 
+    async def get_display_name(self, user_id):
+        async with self.pool.acquire() as conn:
+            return await conn.fetchval("""
+                SELECT display_name
+                FROM users
+                WHERE user_id = $1
+            """, user_id)
+
+    async def get_username(self, user_id):
+        async with self.pool.acquire() as conn:
+            return await conn.fetchval("""
+                SELECT username
+                FROM users
+                WHERE user_id = $1
+            """, user_id)
+
     async def get_guild_users(self, guild_id):
         async with self.pool.acquire() as conn:
             rows = await conn.fetch("""

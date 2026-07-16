@@ -63,6 +63,7 @@ class RobloxAPI:
         if place_id == None:
             return None
 
+        universe_id = await self.get_universe_id(place_id)
         game_data = await self.get_misc(f"https://games.roblox.com/v1/games?universeIds={universe_id}")
         game_name = game_data["data"][0]["name"]
 

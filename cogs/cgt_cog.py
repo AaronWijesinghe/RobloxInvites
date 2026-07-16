@@ -2,7 +2,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from database.database import *
-from storage.custom import *
 
 class CGTCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -18,7 +17,7 @@ class CGTCog(commands.Cog):
         place_id: str,
         hex_color: str
     ):
-        await self.bot.cgt_manager.add_custom_title(place_id, title, hex_color)
+        await self.bot.cgt_manager.add_custom_title(place_id, title, hex_color, interaction.guild)
         await interaction.response.send_message(f"**Added custom title!**\nPlace ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color}")
 
     @cgt.command(name="remove", description="Removes a Custom Title!")
@@ -33,7 +32,7 @@ class CGTCog(commands.Cog):
                 ephemeral=True,
             )
             return
-        await self.bot.cgt_manager.remove_custom_title(place_id)
+        await self.bot.cgt_manager.remove_custom_title(place_id, interaction.guild)
         await interaction.response.send_message(f"**Removed custom title!**\nPlace ID: {place_id}")
 
 async def setup(bot: commands.Bot):
