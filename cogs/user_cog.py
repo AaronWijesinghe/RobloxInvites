@@ -34,10 +34,10 @@ class UserCog(commands.Cog):
             return
 
         await interaction.response.defer()
-        await interaction.client.user_manager.add_user(username)
+        await interaction.client.user_manager.add_user(username, interaction.guild)
         await interaction.followup.send(f"Added user @{username} to Roblox Invites!")
 
-    @user.command(name="remove", description="Removes a user from Roblox Invites")
+    @user.command(name="remove", description="Removes a user from the current server")
     @app_commands.autocomplete(user_id=user_autocomplete)
     async def remove_user(
         self, 
@@ -52,7 +52,25 @@ class UserCog(commands.Cog):
             return
 
         await interaction.response.defer()
-        await interaction.client.user_manager.remove_user(user_id)
+        await interaction.client.user_manager.remove_user(user_id, interaction.guild)
+        await interaction.followup.send(f"Removed user @{interaction.client.user_manager.users[user_id]["username"]} from this guild. Hope you had a great time!")
+
+    @user.command(name="remove_global", description="Removes a user from Roblox Invites")
+    @app_commands.autocomplete(user_id=user_autocomplete)
+    async def remove_user_global(
+        self, 
+        interaction: discord.Interaction, 
+        user_id: str
+    ):
+        if not await self.bot.is_owner(interaction.user):
+            await interaction.response.send_message(
+                "You must be the bot owner to run this command.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.defer()
+        await interaction.client.user_manager.remove_user_global(user_id)
         await interaction.followup.send(f"Removed user @{interaction.client.user_manager.users[user_id]["username"]} from Roblox Invites. Hope you had a great time!")
 
     """

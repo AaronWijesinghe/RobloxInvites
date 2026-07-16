@@ -47,7 +47,14 @@ class UserManager:
                 SELECT *
                 FROM users
             """)
-        return rows
+        users = {
+            rows[i]["user_id"]: {
+                "username": rows[i]["username"],
+                "display_name": rows[i]["display_name"]
+            }
+            for i in range(len(rows))
+        }
+        return users
 
     async def get_all_user_ids(self):
         async with self.pool.acquire() as conn:
@@ -58,7 +65,7 @@ class UserManager:
         user_ids = [row["user_id"] for row in rows]
         return user_ids
 
-    async def add_user(self, username):
+    async def add_user(self, username, guild):
         req = await self.api.post_misc("https://users.roblox.com/v1/usernames/users", json={"usernames": [username]})
         if "data" not in req:
             return False
@@ -68,19 +75,41 @@ class UserManager:
         user_id = req["data"][0]["id"]
         username = req["data"][0]["name"]
         display_name = req["data"][0]["displayName"]
-        
+
         async with self.pool.acquire() as conn:
             await conn.execute("""
                 INSERT INTO users (user_id, username, display_name)
                 VALUES ($1, $2, $3)
+                ON CONFLICT (user_id)
                 DO UPDATE SET
-                    username = EXCLUDED.username
+                    username = EXCLUDED.username,
                     display_name = EXCLUDED.display_name
             """, user_id, username, display_name)
+
+            await conn.execute("""
+                INSERT INTO subscriptions (guild_id, user_id)
+                VALUES ($1, $2)
+                ON CONFLICT (guild_id, user_id)
+                DO NOTHING
+            """, guild.id, user_id)
         return True
 
-    async def remove_user(self, user_id):
+    async def remove_user(self, user_id, guild_id):
         async with self.pool.acquire() as conn:
+            await conn.execute("""
+                DELETE FROM subscriptions
+                WHERE user_id = $1
+                AND guild_id = $2
+            """, user_id, guild_id)
+        return True
+
+    async def remove_user_global(self, user_id):
+        async with self.pool.acquire() as conn:
+            await conn.execute("""
+                DELETE FROM subscriptions
+                WHERE user_id = $1
+            """, user_id)
+
             await conn.execute("""
                 DELETE FROM users
                 WHERE user_id = $1

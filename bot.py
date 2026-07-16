@@ -13,15 +13,17 @@ class RobloxInvitesBot(commands.Bot):
         intents.message_content = True
         super().__init__(command_prefix="!", intents=intents)
         
-        self.database = Database()
+        self.db = Database()
         self.api = api
         self.dev_guild = dev_guild
 
     async def setup_hook(self):
         await self.api.start()
-        await self.database.initalize()
+        await self.db.initalize()
 
-        self.user_manager = database.UserManager(self.database, self.api)
+        self.user_manager = database.UserManager(self.db, self.api)
+        self.presence_manager = database.PresenceManager(self.db, self.api, self.user_manager)
+        self.transfer_manager = database.TransferManager(self.db)
         #self.stat_manager = storage.StatManager(self.api, self.user_manager)
         #self.cgt_manager = storage.CGTManager(self.api)
         #self.blacklist_manager = storage.BlacklistManager()
