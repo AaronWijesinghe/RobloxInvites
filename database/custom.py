@@ -6,7 +6,7 @@ class CGTManager:
         self.api = api
         self.pool = self.database.pool
 
-    async def get_custom_title(self, universe_id, guild):
+    async def get_custom_title(self, guild, universe_id):
         if await self.check_custom_title(guild, universe_id):
             async with self.pool.acquire() as conn:
                 row = await conn.fetchrow("""
@@ -32,21 +32,19 @@ class CGTManager:
     async def add_custom_title(self, place_id, title, hex_color, guild):
         place_id = get_number(place_id)
         hex_color = hex_color.lower().replace("#", "")
-        #if place_id not in self.api.cache["indexes"]:
-        #    await self.api.cache_id(place_id)
-        #universe_id = self.api.cache["indexes"][place_id]
+
+        await self.api.cache_id(place_id)
         universe_id = await self.api.get_universe_id(place_id)
         game_name = await self.api.get_game_name(place_id)
         root_place_id = await self.api.get_root_place_id(place_id)
 
-        with self.pool.acquire() as conn:
+        print(guild.id, universe_id, title, hex_color, game_name, root_place_id)
+        async with self.pool.acquire() as conn:
             await conn.execute("""
                 INSERT INTO custom_titles (guild_id, universe_id, title, color, game_name, root_place_id)
                 VALUES ($1, $2, $3, $4, $5, $6)
-                ON CONFLICT (user_id)
-                DO UPDATE SET
-                    username = EXCLUDED.username,
-                    display_name = EXCLUDED.display_name
+                ON CONFLICT (guild_id, universe_id)
+                DO NOTHING
             """, guild.id, universe_id, title, hex_color, game_name, root_place_id)
 
     async def remove_custom_title(self, place_id, guild):

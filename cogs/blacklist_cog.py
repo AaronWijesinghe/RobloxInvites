@@ -2,7 +2,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from database.database import *
-from storage.custom import *
 
 class BlacklistCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -36,7 +35,7 @@ class BlacklistCog(commands.Cog):
             return
 
         await interaction.response.defer()
-        success = await interaction.client.blacklist_manager.add_blacklist(place_id, game_name)
+        success = await interaction.client.blacklist_manager.add_blacklist(interaction.guild, place_id, game_name)
         if success:
             await interaction.followup.send(f"Added place ID {place_id} to the blacklist.")
         else:
@@ -57,7 +56,7 @@ class BlacklistCog(commands.Cog):
             return
 
         await interaction.response.defer()
-        success = await interaction.client.blacklist_manager.remove_blacklist(place_id)
+        success = await interaction.client.blacklist_manager.remove_blacklist(interaction.guild, place_id)
         if success:
             await interaction.followup.send(f"Removed place ID {place_id} from the blacklist.")
         else:

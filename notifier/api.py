@@ -21,6 +21,7 @@ class RobloxAPI:
         await self.retry_client.close()
 
     async def cache_id(self, place_id):
+        place_id = int(place_id)
         if not await self.check_cached_id(place_id):
             universe_id = await self.get_misc(f"https://apis.roblox.com/universes/v1/places/{place_id}/universe")
             universe_id = universe_id["universeId"]
@@ -86,7 +87,7 @@ class RobloxAPI:
     async def get_universe_id(self, place_id):
         if place_id == None:
             return None
-        
+
         await self.cache_id(place_id)
         async with self.pool.acquire() as conn:
             universe_id = await conn.fetchval("""
@@ -94,8 +95,7 @@ class RobloxAPI:
                 FROM place_id_cache
                 WHERE place_id = $1
             """, place_id)
-
-        return universe_id
+            return universe_id
 
     async def get_root_place_id(self, place_id):
         if place_id == None:
@@ -120,11 +120,10 @@ class RobloxAPI:
         if place_id == None:
             return None
 
+        await self.cache_id(place_id)
         universe_id = await self.get_universe_id(place_id)
-        game_data = await self.get_misc(f"https://games.roblox.com/v1/games?universeIds={universe_id}")
-        game_name = game_data["data"][0]["name"]
-
-        return game_name
+        cached_data = await self.get_cached_data(universe_id)
+        return cached_data["game_name"]
     
     async def get_max_players(self, place_id):
         if place_id == None:

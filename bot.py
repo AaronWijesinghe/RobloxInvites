@@ -26,13 +26,14 @@ class RobloxInvitesBot(commands.Bot):
         self.user_manager = database.UserManager(self.db, self.api)
         self.presence_manager = database.PresenceManager(self.db, self.api, self.user_manager)
         self.transfer_manager = database.TransferManager(self.db)
-        #self.stat_manager = storage.StatManager(self.api, self.user_manager)
         self.cgt_manager = database.CGTManager(self.db, self.api)
-        #self.blacklist_manager = storage.BlacklistManager()
-        #self.channel_manager = storage.ChannelManager(self)
+        self.blacklist_manager = database.BlacklistManager(self.db, self.api)
+        #self.settings_manager = database.SettingsManager(self)
+        #self.stat_manager = storage.StatManager(self.api, self.user_manager)
 
         await self.load_extension("cogs.user_cog")
         await self.load_extension("cogs.cgt_cog")
+        await self.load_extension("cogs.blacklist_cog")
         
         self.tree.copy_global_to(guild=self.dev_guild)
         await self.tree.sync(guild=self.dev_guild)

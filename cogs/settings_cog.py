@@ -2,13 +2,12 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from database.database import *
-from storage.custom import *
 
-class ChannelCog(commands.Cog):
+class SettingsCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    channel = app_commands.Group(name="channel", description="Channel commands")
+    channel = app_commands.Group(name="settings", description="Server settings for Roblox Invites")
 
     @channel.command(name="invites", description="Sets the channel ID for the invites channel")
     async def set_invite_channel(
@@ -51,4 +50,4 @@ class ChannelCog(commands.Cog):
             await interaction.followup.send(f"Channel ID `{channel_id}` doesn't exist.")
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(ChannelCog(bot))
+    await bot.add_cog(SettingsCog(bot))

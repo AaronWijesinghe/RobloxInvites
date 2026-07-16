@@ -19,4 +19,4 @@ def get_number(string):
             new_string += char
         elif not char.isdigit() and scanning_place_id:
             break
-    return new_string
+    return int(new_string)
