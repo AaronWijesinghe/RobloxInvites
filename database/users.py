@@ -20,13 +20,13 @@ class UserManager:
                 WHERE user_id = $1
             """, user_id)
 
-    async def get_guild_users(self, guild_id):
+    async def get_guild_users(self, guild):
         async with self.pool.acquire() as conn:
             rows = await conn.fetch("""
                 SELECT *
                 FROM subscriptions
                 WHERE guild_id = $1
-            """, guild_id.id)
+            """, guild.id)
         
         user_ids = [row["user_id"] for row in rows]
         async with self.pool.acquire() as conn:
@@ -38,13 +38,13 @@ class UserManager:
 
         return rows
 
-    async def get_guild_user_ids(self, guild_id):
+    async def get_guild_user_ids(self, guild):
         async with self.pool.acquire() as conn:
             rows = await conn.fetch("""
                 SELECT *
                 FROM subscriptions
                 WHERE guild_id = $1
-            """, guild_id.id)
+            """, guild.id)
         
         user_ids = [row["user_id"] for row in rows]
         return user_ids
@@ -135,6 +135,16 @@ class UserManager:
 
             await conn.execute("""
                 DELETE FROM total_playtimes
+                WHERE user_id = ANY($1)
+            """, deleted_user_ids)
+
+            await conn.execute("""
+                DELETE FROM presences
+                WHERE user_id = ANY($1)
+            """, deleted_user_ids)
+
+            await conn.execute("""
+                DELETE FROM old_presences
                 WHERE user_id = ANY($1)
             """, deleted_user_ids)
 

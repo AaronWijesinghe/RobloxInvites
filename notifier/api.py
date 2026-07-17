@@ -22,7 +22,7 @@ class RobloxAPI:
 
     async def cache_id(self, place_id):
         place_id = int(place_id)
-        if not await self.check_cached_id(place_id):
+        if not await self.check_cached_place_id(place_id):
             universe_id = await self.get_misc(f"https://apis.roblox.com/universes/v1/places/{place_id}/universe")
             universe_id = universe_id["universeId"]
             
@@ -42,14 +42,29 @@ class RobloxAPI:
                     VALUES ($1, $2, $3)
                 """, place_id, universe_id, max_players)
 
-            now = datetime.now()
-            async with self.pool.acquire() as conn:
-                await conn.execute("""
-                    INSERT INTO universe_id_cache (universe_id, root_place_id, game_name, month_last_updated, day_last_updated, year_last_updated)
-                    VALUES ($1, $2, $3, $4, $5, $6)
-                """, universe_id, root_place_id, game_name, now.month, now.day, now.year)
+            if not await self.check_cached_universe_id(universe_id):
+                now = datetime.now()
+                async with self.pool.acquire() as conn:
+                    await conn.execute("""
+                        INSERT INTO universe_id_cache (universe_id, root_place_id, game_name, month_last_updated, day_last_updated, year_last_updated)
+                        VALUES ($1, $2, $3, $4, $5, $6)
+                    """, universe_id, root_place_id, game_name, now.month, now.day, now.year)
 
-    async def check_cached_id(self, place_id):
+    async def check_cached_place_id(self, place_id):
+        if place_id == None:
+            return False
+
+        async with self.pool.acquire() as conn:
+            exists = await conn.fetchval("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM place_id_cache
+                    WHERE place_id = $1
+                )
+            """, place_id)
+            return exists
+
+    async def check_cached_universe_id(self, place_id):
         if place_id == None:
             return False
 
@@ -147,21 +162,21 @@ class RobloxAPI:
     
     async def get_cached_games(self, guild):
         async with self.pool.acquire() as conn:
-            rows = conn.fetch("""
+            rows = await conn.fetch("""
                 SELECT user_id
                 FROM subscriptions
                 WHERE guild_id = $1
             """, guild.id)
             user_ids = [row["user_id"] for row in rows]
 
-            rows = conn.fetch("""
+            rows = await conn.fetch("""
                 SELECT place_id
                 FROM game_playtimes
                 WHERE user_id = ANY($1)
             """, user_ids)
             place_ids = [row["place_id"] for row in rows]
 
-            rows = conn.fetch("""
+            rows = await conn.fetch("""
                 SELECT *
                 FROM universe_id_cache
                 WHERE root_place_id = ANY($1)
