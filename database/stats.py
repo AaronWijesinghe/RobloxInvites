@@ -174,20 +174,42 @@ class StatManager:
     async def get_playtime_data_all(self, guild):
         user_ids = await self.user_manager.get_guild_user_ids(guild)
         async with self.pool.acquire() as conn:
-            rows = await conn.fetch("""
+            game_rows = await conn.fetch("""
                 SELECT *
                 FROM game_playtimes
                 WHERE user_id = ANY($1)
             """, user_ids)
+            current_rows = await conn.fetch("""
+                SELECT *
+                FROM currently_playing
+                WHERE user_id = ANY($1)
+            """, user_ids)
+        
+        current_rows = [
+            {
+                "user_id": row["user_id"], 
+                "place_id": row["place_id"],
+                "playtime": (datetime.now() - row["start_time"]).total_seconds()
+            }
+            for row in current_rows
+        ]
+        rows = game_rows + current_rows
 
         game_playtimes = {}
-        playtimes = {row["user_id"]: row["playtime"] for row in rows}
+        playtimes = {}
         for row in rows:
             place_id = row["place_id"]
+            user_id = row["user_id"]
+
             if place_id in game_playtimes:
                 game_playtimes[place_id] += row["playtime"]
             else:
                 game_playtimes[place_id] = row["playtime"]
+            
+            if user_id in playtimes:
+                playtimes[user_id] += row["playtime"]
+            else:
+                playtimes[user_id] = row["playtime"]
         total = sum([row["playtime"] for row in rows])
 
         return (playtimes, game_playtimes, total)
@@ -196,8 +218,6 @@ class StatManager:
         playtimes, game_playtimes, total = await self.get_playtime_data_all(guild)
         message_content = f"\n**Total Server Playtime:** {total / 3600:.2f}h"
 
-        print(playtimes)
-        print(list(playtimes.items()))
         message_title = "All-Time Playtime Leaderboard"
         message_content += f"\n**Playtime for Top 10 Users:**"
         playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:10]
@@ -214,7 +234,6 @@ class StatManager:
             message_content += f"\n[#{i}] {name}: {playtime / 3600:.2f}h"
         
         return (message_title, message_content)
-
 
     async def get_game_leaderboard(self, guild, root_place_id):
         playtimes, total = await self.get_playtime_data_game(guild, root_place_id)
