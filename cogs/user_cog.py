@@ -12,10 +12,11 @@ class UserCog(commands.Cog):
         interaction: discord.Interaction,
         query: str,
     ) -> list[app_commands.Choice[str]]:
-        users = await interaction.client.user_manager.search_users(interaction.guild, query)
+        users = await interaction.client.user_manager.get_guild_users(interaction.guild)
         return [
-            app_commands.Choice(name=user, value=id)
-            for id, user in users
+            app_commands.Choice(name=user["username"], value=user["user_id"])
+            for user in users
+            if query.lower() in user["username"].lower()
         ]
 
     user = app_commands.Group(name="user", description="User commands")

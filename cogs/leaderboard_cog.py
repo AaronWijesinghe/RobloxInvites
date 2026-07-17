@@ -2,8 +2,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from database.database import *
-from storage.custom import *
-
 
 class LeaderboardCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -17,15 +15,12 @@ class LeaderboardCog(commands.Cog):
         interaction: discord.Interaction,
         query: str,
     ) -> list[app_commands.Choice[str]]:
-        game_cache = {
-            interaction.client.api.cache["caches"][universe_id]["name"]: interaction.client.api.cache["caches"][universe_id]["root_place_id"]
-            for universe_id in interaction.client.api.cache["caches"].keys()
-        }
+        game_list = await self.bot.api.get_cached_games(interaction.guild)
 
         return [
-            app_commands.Choice(name=name, value=str(value))
-            for (name, value) in list(game_cache.items())
-            if query.lower() in name.lower()
+            app_commands.Choice(name=game["game_name"], value=game["game_name"])
+            for game in game_list
+            if query.lower() in game["game_name"].lower()
         ][:25]
 
     @leaderboard.command(name="all", description="Sends this server's all-time playtime leaderboard")
@@ -59,7 +54,7 @@ class LeaderboardCog(commands.Cog):
     async def all_time_game_leaderboard(
         self, 
         interaction: discord.Interaction,
-        place_id: str
+        place_id: int
     ):
         (message_title, message_content) = await interaction.client.stat_manager.get_alltime_game_leaderboard(place_id)
         embed = discord.Embed(
@@ -74,7 +69,7 @@ class LeaderboardCog(commands.Cog):
     async def weekly_game_leaderboard(
         self, 
         interaction: discord.Interaction,
-        place_id: str
+        place_id: int
     ):
         (message_title, message_content) = await interaction.client.stat_manager.get_weekly_game_leaderboard(place_id)
         embed = discord.Embed(

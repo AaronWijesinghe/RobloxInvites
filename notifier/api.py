@@ -144,3 +144,26 @@ class RobloxAPI:
             response.raise_for_status()
             user_data = await response.json()
             return user_data
+    
+    async def get_cached_games(self, guild):
+        async with self.pool.acquire() as conn:
+            rows = conn.fetch("""
+                SELECT user_id
+                FROM subscriptions
+                WHERE guild_id = $1
+            """, guild.id)
+            user_ids = [row["user_id"] for row in rows]
+
+            rows = conn.fetch("""
+                SELECT place_id
+                FROM game_playtimes
+                WHERE user_id = ANY($1)
+            """, user_ids)
+            place_ids = [row["place_id"] for row in rows]
+
+            rows = conn.fetch("""
+                SELECT *
+                FROM universe_id_cache
+                WHERE root_place_id = ANY($1)
+            """, place_ids)
+            return rows

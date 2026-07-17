@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS users (
     user_id BIGINT PRIMARY KEY,
     username TEXT NOT NULL,
-    display_name TEXT NOT NULL
+    display_name TEXT NOT NULL,
+    erased INT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS presences (

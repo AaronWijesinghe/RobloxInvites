@@ -102,6 +102,42 @@ class UserManager:
             """, guild.id, user_id)
         return True
 
+    async def remove_deleted_users(self):
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch("""
+                SELECT user_id
+                FROM users
+                WHERE erased = 1
+            """)
+            if rows is None:
+                return
+            deleted_user_ids = [row["user_id"] for row in rows]
+
+            await conn.execute("""
+                DELETE FROM subscriptions
+                WHERE user_id = ANY($1)
+            """, deleted_user_ids)
+
+            await conn.execute("""
+                DELETE FROM users
+                WHERE user_id = ANY($1)
+            """, deleted_user_ids)
+
+            await conn.execute("""
+                DELETE FROM currently_playing
+                WHERE user_id = ANY($1)
+            """, deleted_user_ids)
+
+            await conn.execute("""
+                DELETE FROM game_playtimes
+                WHERE user_id = ANY($1)
+            """, deleted_user_ids)
+
+            await conn.execute("""
+                DELETE FROM total_playtimes
+                WHERE user_id = ANY($1)
+            """, deleted_user_ids)
+
     async def remove_user(self, user_id, guild):
         async with self.pool.acquire() as conn:
             await conn.execute("""
@@ -109,36 +145,23 @@ class UserManager:
                 WHERE guild_id = $1
                 AND user_id = $2
             """, guild.id, user_id)
+
+            exists = await conn.fetchval("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM subscriptions
+                    WHERE user_id = $1
+                )
+            """, user_id)
+
+            if not exists:
+                await self.remove_user_global(user_id)
         return True
 
     async def remove_user_global(self, user_id):
         async with self.pool.acquire() as conn:
             await conn.execute("""
-                DELETE FROM subscriptions
+                UPDATE users
+                SET erased = 1
                 WHERE user_id = $1
             """, user_id)
-
-            await conn.execute("""
-                DELETE FROM users
-                WHERE user_id = $1
-            """, user_id)
-        return True
-
-    async def search_users(self, guild, query):
-        async with self.pool.acquire() as conn:
-            rows = await conn.fetch("""
-                SELECT *
-                FROM users
-                WHERE username ILIKE '%' || $1 || '%'
-                AND guild_id = $2
-            """, query, guild.id)
-
-        users = [
-            (
-                rows[i]["user_id"],
-                rows[i]["username"]
-            )
-            for i in range(len(rows))
-        ][:25]
-
-        return users
