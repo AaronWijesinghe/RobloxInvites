@@ -18,7 +18,7 @@ class CGTCog(commands.Cog):
         hex_color: str
     ):
         await self.bot.cgt_manager.add_custom_title(place_id, title, hex_color, interaction.guild)
-        await interaction.response.send_message(f"**Added custom title!**\nPlace ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color}")
+        await interaction.response.send_message(f"**Added custom title!**\nPlace ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color.replace("#", "")}")
 
     @cgt.command(name="remove", description="Removes a Custom Title!")
     async def remove_custom_title(

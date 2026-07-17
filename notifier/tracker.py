@@ -39,8 +39,7 @@ class PresenceTracker:
                     await self.bot.presence_manager.save_presences("current")
                     for guild in self.bot.guilds:
                         await self.bot.notifier.send_guild_updates(guild)
-                    # later :)
-                    #await self.bot.notifier.process_updates(user_ids)
+                    await self.bot.notifier.process_updates()
                     await self.bot.presence_manager.save_presences("old")
                 await asyncio.sleep(3)
                 times_checked += 1

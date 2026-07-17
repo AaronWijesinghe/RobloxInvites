@@ -5,3 +5,4 @@ from .transfers import *
 from .custom import *
 from .blacklist import *
 from .settings import *
+from .stats import *

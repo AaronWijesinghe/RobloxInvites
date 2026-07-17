@@ -4,14 +4,6 @@ class UserManager:
         self.api = api
         self.pool = self.database.pool
 
-    async def get_user(self, user_id):
-        async with self.pool.acquire() as conn:
-            return await conn.fetchrow("""
-                SELECT *
-                FROM users
-                WHERE user_id = $1
-            """, user_id)
-
     async def get_display_name(self, user_id):
         async with self.pool.acquire() as conn:
             return await conn.fetchval("""
@@ -110,13 +102,13 @@ class UserManager:
             """, guild.id, user_id)
         return True
 
-    async def remove_user(self, user_id, guild_id):
+    async def remove_user(self, user_id, guild):
         async with self.pool.acquire() as conn:
             await conn.execute("""
                 DELETE FROM subscriptions
-                WHERE user_id = $1
-                AND guild_id = $2
-            """, user_id, guild_id)
+                WHERE guild_id = $1
+                AND user_id = $2
+            """, guild.id, user_id)
         return True
 
     async def remove_user_global(self, user_id):
@@ -131,3 +123,22 @@ class UserManager:
                 WHERE user_id = $1
             """, user_id)
         return True
+
+    async def search_users(self, guild, query):
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch("""
+                SELECT *
+                FROM users
+                WHERE username ILIKE '%' || $1 || '%'
+                AND guild_id = $2
+            """, query, guild.id)
+
+        users = [
+            (
+                rows[i]["user_id"],
+                rows[i]["username"]
+            )
+            for i in range(len(rows))
+        ][:25]
+
+        return users

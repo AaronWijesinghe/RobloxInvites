@@ -12,11 +12,11 @@ class UserCog(commands.Cog):
         interaction: discord.Interaction,
         query: str,
     ) -> list[app_commands.Choice[str]]:
+        users = await interaction.client.user_manager.search_users(interaction.guild, query)
         return [
-            app_commands.Choice(name=user["username"], value=id)
-            for id, user in interaction.client.user_manager.users.items()
-            if query.lower() in user["username"].lower()
-        ][:25]
+            app_commands.Choice(name=user, value=id)
+            for id, user in users
+        ]
 
     user = app_commands.Group(name="user", description="User commands")
 
@@ -42,7 +42,7 @@ class UserCog(commands.Cog):
     async def remove_user(
         self, 
         interaction: discord.Interaction, 
-        user_id: str
+        user_id: int
     ):
         if not await self.bot.is_owner(interaction.user):
             await interaction.response.send_message(
@@ -53,14 +53,14 @@ class UserCog(commands.Cog):
 
         await interaction.response.defer()
         await interaction.client.user_manager.remove_user(user_id, interaction.guild)
-        await interaction.followup.send(f"Removed user @{interaction.client.user_manager.users[user_id]["username"]} from this guild. Hope you had a great time!")
+        await interaction.followup.send(f"Removed user with ID {user_id} from this guild. Hope you had a great time!")
 
+    #@app_commands.autocomplete(user_id=user_autocomplete)
     @user.command(name="remove_global", description="Removes a user from Roblox Invites")
-    @app_commands.autocomplete(user_id=user_autocomplete)
     async def remove_user_global(
         self, 
         interaction: discord.Interaction, 
-        user_id: str
+        user_id: int
     ):
         if not await self.bot.is_owner(interaction.user):
             await interaction.response.send_message(
@@ -71,7 +71,7 @@ class UserCog(commands.Cog):
 
         await interaction.response.defer()
         await interaction.client.user_manager.remove_user_global(user_id)
-        await interaction.followup.send(f"Removed user @{interaction.client.user_manager.users[user_id]["username"]} from Roblox Invites. Hope you had a great time!")
+        await interaction.followup.send(f"Removed user with ID {user_id} from Roblox Invites. Hope you had a great time!")
 
     """
     @user.command(name="stats", description="Gets a user's stat card")

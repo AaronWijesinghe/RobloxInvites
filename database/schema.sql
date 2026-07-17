@@ -65,5 +65,24 @@ CREATE TABLE IF NOT EXISTS custom_titles (
 CREATE TABLE IF NOT EXISTS blacklist (
     guild_id BIGINT NOT NULL,
     place_id BIGINT NOT NULL,
+    game_name TEXT NOT NULL,
     PRIMARY KEY (guild_id, place_id)
+);
+
+CREATE TABLE IF NOT EXISTS currently_playing (
+    user_id BIGINT PRIMARY KEY,
+    place_id BIGINT NOT NULL,
+    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS total_playtimes (
+    user_id BIGINT PRIMARY KEY,
+    total_playtime BIGINT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS game_playtimes (
+    user_id BIGINT NOT NULL,
+    place_id BIGINT NOT NULL,
+    playtime BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, place_id)
 );

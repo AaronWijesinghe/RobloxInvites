@@ -5,19 +5,22 @@ class BlacklistManager:
         self.pool = self.database.pool
 
     async def check_blacklist(self, guild, place_id):
-        universe_id = await self.api.get_universe_id(place_id)
         async with self.pool.acquire() as conn:
             exists = await conn.fetchval("""
                 SELECT EXISTS (
                     SELECT 1
                     FROM blacklist
                     WHERE guild_id = $1
-                    AND universe_id = $2
+                    AND place_id = $2
                 )
-            """, guild.id, universe_id)
+            """, guild.id, place_id)
             return exists
 
     async def add_blacklist(self, guild, place_id, game_name):
+        if place_id.isdigit():
+            place_id = int(place_id)
+        else:
+            return False
         if not await self.check_blacklist(guild, place_id):
             async with self.pool.acquire() as conn:
                 await conn.execute("""
@@ -29,10 +32,14 @@ class BlacklistManager:
             return False
 
     async def remove_blacklist(self, guild, place_id):
+        if place_id.isdigit():
+            place_id = int(place_id)
+        else:
+            return False
         if await self.check_blacklist(guild, place_id):
             async with self.pool.acquire() as conn:
                 await conn.execute("""
-                    DELETE FROM blacklist (guild_id, place_id, game_name)
+                    DELETE FROM blacklist
                     WHERE guild_id = $1
                     AND place_id = $2
                 """, guild.id, place_id)

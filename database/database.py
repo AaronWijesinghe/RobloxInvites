@@ -24,3 +24,12 @@ class Database:
         schema_path = Path(__file__).parent / ".." / "database" / "schema.sql"
         async with self.pool.acquire() as conn:
             await conn.execute(schema_path.read_text())
+    
+    async def create_guild(self, guild):
+        async with self.pool.acquire() as conn:
+            await conn.execute(f"""
+                INSERT INTO guild_settings (guild_id)
+                VALUES ($1)
+                ON CONFLICT (guild_id)
+                DO NOTHING
+            """, guild.id)

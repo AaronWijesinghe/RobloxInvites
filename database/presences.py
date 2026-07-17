@@ -63,7 +63,7 @@ class PresenceManager:
                     "place_id": rows[i]["place_id"],
                     "user_status": rows[i]["user_status"]
                 }
-                for i in range(len(user_ids))
+                for i in range(len(rows))
             }
         else:
             presences = {
@@ -72,7 +72,7 @@ class PresenceManager:
                     "place_id": None,
                     "user_status": 0
                 }
-                for i in range(len(user_ids))
+                for i in range(len(rows))
             }
 
         return presences
@@ -98,7 +98,7 @@ class PresenceManager:
                 "place_id": rows[i]["place_id"],
                 "user_status": rows[i]["user_status"]
             }
-            for i in range(len(user_ids))
+            for i in range(len(rows))
         }
 
         return presences

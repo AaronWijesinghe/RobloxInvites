@@ -23,7 +23,7 @@ class SettingsCog(commands.Cog):
             return
 
         await interaction.response.defer()
-        success = await interaction.client.channel_manager.set_channel("invite", channel_id)
+        success = await interaction.client.settings_manager.set_channel(interaction.guild, "invite", channel_id)
         if success:
             await interaction.followup.send(f"Set the invite channel ID to `{channel_id}`.")
         else:
@@ -43,7 +43,7 @@ class SettingsCog(commands.Cog):
             return
 
         await interaction.response.defer()
-        success = await interaction.client.channel_manager.set_channel("announcement", channel_id)
+        success = await interaction.client.settings_manager.set_channel(interaction.guild, "announcement", channel_id)
         if success:
             await interaction.followup.send(f"Set the announcement channel ID to `{channel_id}`.")
         else:
