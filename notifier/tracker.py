@@ -37,6 +37,7 @@ class PresenceTracker:
                     print("No users are currently being tracked. Add some through the bot!")
                 else:
                     await self.bot.presence_manager.save_presences("current")
+                    await self.bot.notifier.preprocess_playtimes()
                     for guild in self.bot.guilds:
                         await self.bot.notifier.send_guild_updates(guild)
                     await self.bot.notifier.process_updates()
