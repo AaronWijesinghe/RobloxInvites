@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
     user_id BIGINT PRIMARY KEY,
+    discord_id BIGINT NOT NULL,
     username TEXT NOT NULL,
     display_name TEXT NOT NULL,
     erased INT DEFAULT 0

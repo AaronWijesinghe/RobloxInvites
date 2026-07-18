@@ -73,26 +73,56 @@ class UserManager:
         user_ids = [row["user_id"] for row in rows]
         return user_ids
 
-    async def add_user(self, username, guild):
+    async def add_user(self, username, discord_user, guild):
         req = await self.api.post_misc("https://users.roblox.com/v1/usernames/users", json={"usernames": [username]})
         if "data" not in req:
-            return False
+            return "This user doesn't exist."
         if len(req["data"]) == 0:
-            return False
+            return "This user doesn't exist."
 
         user_id = req["data"][0]["id"]
         username = req["data"][0]["name"]
         display_name = req["data"][0]["displayName"]
 
         async with self.pool.acquire() as conn:
+            user_exists_in_ri = await conn.fetchval("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM users
+                    WHERE user_id = $1
+                )
+            """, user_id)
+            user_exists_in_guild = await conn.fetchval("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM subscriptions
+                    WHERE guild_id = $1
+                    AND user_id = $2
+                )
+            """, guild.id, user_id)
+            owner_account_id = await conn.fetchval("""
+                SELECT discord_id
+                FROM users
+                WHERE user_id = $1
+            """, user_id)
+            if not user_exists_in_ri:
+                user_data = await self.api.get_misc(f"https://users.roblox.com/v1/users/{user_id}")
+                if user_data["description"] != "I confirm that I am joining the Invites program.":
+                    return f"You must verify that the following account (@{username}) is yours.\nPlease set `I confirm that I am joining the Invites program.` as your description and retry again."
+            elif user_exists_in_guild:
+                return f"This user already exists in this server."
+            else:
+                if owner_account_id != discord_user.id:
+                    return "This account has already been linked by someone else."
+
             await conn.execute("""
-                INSERT INTO users (user_id, username, display_name)
-                VALUES ($1, $2, $3)
+                INSERT INTO users (user_id, discord_id, username, display_name)
+                VALUES ($1, $2, $3, $4)
                 ON CONFLICT (user_id)
                 DO UPDATE SET
                     username = EXCLUDED.username,
                     display_name = EXCLUDED.display_name
-            """, user_id, username, display_name)
+            """, user_id, discord_user.id, username, display_name)
 
             await conn.execute("""
                 INSERT INTO subscriptions (guild_id, user_id)
@@ -101,6 +131,42 @@ class UserManager:
                 DO NOTHING
             """, guild.id, user_id)
         return True
+
+    async def remove_user(self, discord_user, guild):
+        async with self.pool.acquire() as conn:
+            user_id = await conn.fetchval("""
+                SELECT user_id
+                FROM users
+                WHERE discord_id = $1
+            """, discord_user.id)
+            if user_id is None:
+                return False
+
+            await conn.execute("""
+                DELETE FROM subscriptions
+                WHERE guild_id = $1
+                AND user_id = $2
+            """, guild.id, user_id)
+
+            exists = await conn.fetchval("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM subscriptions
+                    WHERE user_id = $1
+                )
+            """, user_id)
+
+            if not exists:
+                await self.remove_user_global(user_id)
+        return True
+
+    async def remove_user_global(self, user_id):
+        async with self.pool.acquire() as conn:
+            await conn.execute("""
+                UPDATE users
+                SET erased = 1
+                WHERE user_id = $1
+            """, user_id)
 
     async def remove_deleted_users(self):
         async with self.pool.acquire() as conn:
@@ -147,31 +213,3 @@ class UserManager:
                 DELETE FROM old_presences
                 WHERE user_id = ANY($1)
             """, deleted_user_ids)
-
-    async def remove_user(self, user_id, guild):
-        async with self.pool.acquire() as conn:
-            await conn.execute("""
-                DELETE FROM subscriptions
-                WHERE guild_id = $1
-                AND user_id = $2
-            """, guild.id, user_id)
-
-            exists = await conn.fetchval("""
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM subscriptions
-                    WHERE user_id = $1
-                )
-            """, user_id)
-
-            if not exists:
-                await self.remove_user_global(user_id)
-        return True
-
-    async def remove_user_global(self, user_id):
-        async with self.pool.acquire() as conn:
-            await conn.execute("""
-                UPDATE users
-                SET erased = 1
-                WHERE user_id = $1
-            """, user_id)
