@@ -65,6 +65,12 @@ def convert_cached_ids():
                             max_players = max_players_req["data"][0]["maxPlayers"]
                         except IndexError:
                             max_players = 1
+                        except KeyError:
+                            if max_players_req["errors"][0]["code"] == 1 and max_players_req["errors"][0]["message"] == "The place is invalid.":
+                                max_players = 1
+                            else:
+                                print(max_players_req)
+                                exit()
                         print(f"Saved {current_entry}/{total_entries} (request - max {max_players} players)")
                         time.sleep(0.5)
                 else:
@@ -74,8 +80,11 @@ def convert_cached_ids():
                     except IndexError:
                         max_players = 1
                     except KeyError:
-                        print(max_players_req)
-                        exit()
+                        if max_players_req["errors"][0]["code"] == 1 and max_players_req["errors"][0]["message"] == "The place is invalid.":
+                            max_players = 1
+                        else:
+                            print(max_players_req)
+                            exit()
                     print(f"Saved {current_entry}/{total_entries} (request - max {max_players} players)")
                     time.sleep(0.5)
             cached_ids["place_id_cache_temp"][place_id] = {
@@ -83,18 +92,16 @@ def convert_cached_ids():
                 "max_players": max_players
             }
             save_data(cached_ids, "cached_ids.json")
-        else:
-            print(f"Skipped {current_entry}/{total_entries}")
         current_entry += 1
 
     print("\nFinished converting Place ID cache items")
     place_id_cache = []
     for place_id, cache in cached_ids["place_id_cache_temp"].items():
-        place_id_cache += (
+        place_id_cache += [(
             int(place_id),
             int(cache["universe_id"]),
             int(cache["max_players"])
-        )
+        )]
     cached_ids["place_id_cache"] = place_id_cache
     print("Place ID cache converted")
 
@@ -140,22 +147,43 @@ def convert_stats():
     print("Done converting statistics data and stats saved to disk")
     input("Press ENTER to return to the main menu.")
 
-async def upload_stats():
-    stats = load_data("stats.json")
-    if "total_playtimes" not in stats or "game_playtimes" not in stats:
+async def upload_caches():
+    cached_ids = load_data("cached_ids.json")
+    if "place_id_cache" not in cached_ids or "universe_id_cache" not in cached_ids:
         return
+
     database = Database()
     await database.initalize()
     pool = database.pool
 
     async with pool.acquire() as conn:
         await conn.executemany("""
-            SET (user_id, total_playtime)
+            INSERT INTO place_id_cache (place_id, universe_id, max_players)
+            VALUES ($1, $2, $3)
+        """, cached_ids["place_id_cache"])
+
+        await conn.executemany("""
+            INSERT INTO universe_id_cache (universe_id, root_place_id, game_name, month_last_updated, day_last_updated, year_last_updated)
+            VALUES ($1, $2, $3, $4, $5, $6)
+        """, cached_ids["universe_id_cache"])
+
+async def upload_stats():
+    stats = load_data("stats.json")
+    if "total_playtimes" not in stats or "game_playtimes" not in stats:
+        return
+
+    database = Database()
+    await database.initalize()
+    pool = database.pool
+
+    async with pool.acquire() as conn:
+        await conn.executemany("""
+            INSERT INTO total_playtimes (user_id, total_playtime)
             VALUES ($1, $2)
         """, stats["total_playtimes"])
 
         await conn.executemany("""
-            SET (user_id, place_id, playtime)
+            INSERT INTO game_playtimes (user_id, place_id, playtime)
             VALUES ($1, $2, $3)
         """, stats["game_playtimes"])
 
@@ -178,5 +206,7 @@ while True:
         convert_cached_ids()
     elif command == "stats":
         convert_stats()
+    elif command == "upload_cache":
+        asyncio.run(upload_caches())
     elif command == "upload_stats":
         asyncio.run(upload_stats())
