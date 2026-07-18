@@ -81,7 +81,8 @@ class LeaderboardCog(commands.Cog):
             color=discord.Color.dark_gold()
         )
         await interaction.response.send_message(embed=embed)
-        
+    """
+
     @leaderboard.command(name="save", description="Saves a snapshot of user data for weekly leaderboards")
     async def save_period(
         self, 
@@ -95,7 +96,7 @@ class LeaderboardCog(commands.Cog):
             return
 
         await interaction.response.defer()
-        await interaction.client.stat_manager.save_period()
+        await interaction.client.stat_manager.save_snapshot(interaction.guild)
         await interaction.followup.send("Saved the current data to a snapshot!")
 
     @leaderboard.command(name="remove", description="Removes the last saved user snapshot")
@@ -111,9 +112,8 @@ class LeaderboardCog(commands.Cog):
             return
 
         await interaction.response.defer()
-        await interaction.client.stat_manager.remove_last_period()
+        await interaction.client.stat_manager.remove_last_snapshot(interaction.guild)
         await interaction.followup.send("Removed the last saved snapshot.")
-    """
         
 async def setup(bot: commands.Bot):
     await bot.add_cog(LeaderboardCog(bot))

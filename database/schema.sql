@@ -87,3 +87,31 @@ CREATE TABLE IF NOT EXISTS game_playtimes (
     playtime BIGINT NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, place_id)
 );
+
+CREATE TABLE IF NOT EXISTS snapshot_metadata (
+    snapshot_id BIGSERIAL PRIMARY KEY,
+    guild_id BIGINT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS total_playtime_snapshots (
+    snapshot_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    total_playtime BIGINT NOT NULL,
+    
+    PRIMARY KEY (snapshot_id, user_id),
+    FOREIGN KEY (snapshot_id)
+        REFERENCES snapshot_metadata(snapshot_id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS game_playtime_snapshots (
+    snapshot_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    place_id BIGINT NOT NULL,
+    playtime BIGINT NOT NULL,
+    
+    PRIMARY KEY (snapshot_id, user_id, place_id),
+    FOREIGN KEY (snapshot_id)
+        REFERENCES snapshot_metadata(snapshot_id)
+        ON DELETE CASCADE
+);
