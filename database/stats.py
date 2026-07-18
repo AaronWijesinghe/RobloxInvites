@@ -81,9 +81,17 @@ class StatManager:
     async def get_total_playtimes(self, user_ids):
         async with self.pool.acquire() as conn:
             total_rows = await conn.fetch("""
-                SELECT *
-                FROM total_playtimes
-                WHERE user_id = ANY($1)
+                SELECT
+                    tp.user_id,
+                    tp.total_playtime +
+                    COALESCE(
+                        EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
+                        0
+                    ) AS total_playtime
+                FROM total_playtimes tp
+                LEFT JOIN currently_playing cp
+                    ON tp.user_id = cp.user_id
+                WHERE tp.user_id = ANY($1)
             """, user_ids)
             return total_rows
 
@@ -91,16 +99,36 @@ class StatManager:
         async with self.pool.acquire() as conn:
             if place_id is None:
                 game_rows = await conn.fetch("""
-                    SELECT *
-                    FROM game_playtimes
-                    WHERE user_id = ANY($1)
+                    SELECT
+                        gp.user_id,
+                        gp.place_id,
+                        gp.playtime +
+                        COALESCE(
+                            EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
+                            0
+                        ) AS playtime
+                    FROM game_playtimes gp
+                    LEFT JOIN currently_playing cp
+                        ON gp.user_id = cp.user_id
+                        AND gp.place_id = cp.place_id
+                    WHERE gp.user_id = ANY($1)
                 """, user_ids)
             else:
                 game_rows = await conn.fetch("""
-                    SELECT *
-                    FROM game_playtimes
-                    WHERE user_id = ANY($1)
-                    AND place_id = $2
+                    SELECT
+                        gp.user_id,
+                        gp.place_id,
+                        gp.playtime +
+                        COALESCE(
+                            EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
+                            0
+                        ) AS playtime
+                    FROM game_playtimes gp
+                    LEFT JOIN currently_playing cp
+                        ON gp.user_id = cp.user_id
+                        AND gp.place_id = cp.place_id
+                    WHERE gp.user_id = ANY($1)
+                    AND gp.place_id = $2
                 """, user_ids, place_id)
             return game_rows
 
@@ -162,29 +190,17 @@ class StatManager:
                 VALUES ($1)
                 RETURNING snapshot_id
             """, guild.id)
-        
-        total_rows = await self.get_total_playtimes(user_ids)
+
+        print("hi1")
+        try:
+            total_rows = await self.get_total_playtimes(user_ids)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+        print("hi2")
         game_rows = await self.get_game_playtimes(user_ids)
-        current_rows = await self.get_current_playtimes(user_ids)
-        current_total_playtimes = {
-            (row["user_id"]): (datetime.now() - row["start_time"]).total_seconds()
-            for row in current_rows
-        }
-        current_game_playtimes = {
-            (row["user_id"], row["place_id"]): (datetime.now() - row["start_time"]).total_seconds()
-            for row in current_rows
-        }
-        seen_users = [row["user_id"] for row in game_rows]
-        seen_games = [(row["user_id"], row["place_id"]) for row in game_rows]
 
-        for user_id, current in current_total_playtimes.items():
-            if user_id not in seen_users:
-                total_rows.append((snapshot_id, user_id, current))
-
-        for (user_id, place_id), current in current_game_playtimes.items():
-            if (user_id, place_id) not in seen_games:
-                game_rows.append((snapshot_id, user_id, place_id, current))
-
+        print("hi3")
         total_playtimes = [(snapshot_id, *row) for row in total_rows]
         game_playtimes = [(snapshot_id, *row) for row in game_rows]
 
@@ -217,7 +233,71 @@ class StatManager:
             """, guild.id)
             return True
 
-    async def get_playtime(self, user_id, place_id, playtime_type):
+    async def diff_last_snapshot(self, guild):
+        async with self.pool.acquire() as conn:
+            snapshot_id = await conn.fetchval("""
+                SELECT snapshot_id
+                FROM snapshot_metadata
+                WHERE guild_id = $1
+                ORDER BY snapshot_id DESC
+                LIMIT 1
+            """, guild.id)
+
+            if snapshot_id is None:
+                return (None, None)
+
+            total_rows = await conn.fetch("""
+                SELECT
+                    s.user_id,
+                    COALESCE(g.playtime, 0)
+                    + COALESCE(EXTRACT(EPOCH FROM (NOW() - cp.start_time)), 0)
+                    - s.total_playtime AS total_playtime
+                FROM total_playtime_snapshots s
+                LEFT JOIN game_playtimes g
+                    ON g.user_id = s.user_id
+                LEFT JOIN currently_playing cp
+                    ON cp.user_id = s.user_id
+                WHERE s.snapshot_id = $1;
+            """, snapshot_id)
+
+            game_rows = await conn.fetch("""
+                SELECT
+                    s.user_id,
+                    s.place_id,
+                    COALESCE(g.playtime, 0)
+                    + COALESCE(EXTRACT(EPOCH FROM (NOW() - cp.start_time)), 0)
+                    - s.playtime AS playtime
+                FROM game_playtime_snapshots s
+                LEFT JOIN game_playtimes g
+                    ON g.user_id = s.user_id
+                    AND g.place_id = s.place_id
+                LEFT JOIN currently_playing cp
+                    ON cp.user_id = s.user_id
+                    AND cp.place_id = s.place_id
+                WHERE s.snapshot_id = $1;
+            """, snapshot_id)
+
+        return (total_rows, game_rows)
+
+    async def get_snapshot_total_playtimes(self, snapshot_id):
+        async with self.pool.acquire() as conn:
+            total_rows = await conn.fetch("""
+                SELECT *
+                FROM total_playtime_snapshots
+                WHERE snapshot_id = $1
+            """, snapshot_id)
+            return total_rows
+    
+    async def get_snapshot_game_playtimes(self, snapshot_id):
+        async with self.pool.acquire() as conn:
+            game_rows = await conn.fetch("""
+                SELECT *
+                FROM game_playtime_snapshots
+                WHERE snapshot_id = $1
+            """, snapshot_id)
+            return game_rows
+
+    async def get_playtime_str(self, user_id, place_id, playtime_type):
         playtime = 0
         root_place_id = await self.api.get_root_place_id(place_id)
 
@@ -225,10 +305,6 @@ class StatManager:
             playtime += await self.get_game_playtime(user_id, root_place_id)
         if playtime_type in ["current", "both"]:
             playtime += await self.get_current_playtime(user_id)
-        return playtime
-
-    async def get_playtime_str(self, user_id, place_id, playtime_type):
-        playtime = await self.get_playtime(user_id, place_id, playtime_type)
 
         hours = round(playtime // 3600)
         minutes = round((playtime % 3600) // 60)
@@ -254,33 +330,10 @@ class StatManager:
             await self.update_total_playtime(user_id)
             await self.remove_currently_playing(user_id)
 
-    async def get_playtime_data_game(self, guild, root_place_id):
-        user_ids = await self.user_manager.get_guild_user_ids(guild)
-        rows = await self.get_game_playtimes(user_ids, root_place_id)
-
-        game_playtimes = [(row["user_id"], row["playtime"]) for row in rows if row["place_id"] == root_place_id]
-        total = sum([playtime[1] for playtime in game_playtimes])
-
-        return (game_playtimes, total)
-
-    async def get_playtime_data_all(self, guild):
-        user_ids = await self.user_manager.get_guild_user_ids(guild)
-        game_rows = await self.get_game_playtimes(user_ids)
-        current_rows = await self.get_current_playtimes(user_ids)
-        
-        current_rows = [
-            {
-                "user_id": row["user_id"], 
-                "place_id": row["place_id"],
-                "playtime": (datetime.now() - row["start_time"]).total_seconds()
-            }
-            for row in current_rows
-        ]
-        rows = game_rows + current_rows
-
+    async def get_playtime_data_all(self, game_rows):
         game_playtimes = {}
         playtimes = {}
-        for row in rows:
+        for row in game_rows:
             place_id = row["place_id"]
             user_id = row["user_id"]
 
@@ -288,42 +341,18 @@ class StatManager:
                 game_playtimes[place_id] += row["playtime"]
             else:
                 game_playtimes[place_id] = row["playtime"]
-            
+
             if user_id in playtimes:
                 playtimes[user_id] += row["playtime"]
             else:
                 playtimes[user_id] = row["playtime"]
-        total = sum([row["playtime"] for row in rows])
+        total = sum([row["playtime"] for row in game_rows])
 
         return (playtimes, game_playtimes, total)
 
-    async def get_snapshot_data(self, guild):
-        async with self.pool.acquire() as conn:
-            snapshot_id = await conn.fetchval("""
-                SELECT snapshot_id
-                FROM snapshot_metadata
-                WHERE guild_id = $1
-                ORDER BY snapshot_id DESC
-                LIMIT 1
-            """, guild.id)
-            total_rows = await conn.fetch("""
-                SELECT *
-                FROM total_playtime_snapshots
-                WHERE snapshot_id = $1
-            """, snapshot_id)
-            game_rows = await conn.fetch("""
-                SELECT *
-                FROM game_playtime_snapshots
-                WHERE snapshot_id = $1
-            """, snapshot_id)
-        
-        total_rows
-
-    async def get_user_leaderboard(self, guild):
-        playtimes, game_playtimes, total = await self.get_playtime_data_all(guild)
+    async def get_user_leaderboard(self, playtimes, game_playtimes, total):
         message_content = f"\n**Total Server Playtime:** {total / 3600:.2f}h"
 
-        message_title = "All-Time Playtime Leaderboard"
         message_content += f"\n**Playtime for Top 10 Users:**"
         playtimes = sorted(playtimes.items(), key=lambda item: item[1], reverse=True)[:10]
         for i, (user, playtime) in enumerate(playtimes, start=1):
@@ -338,17 +367,19 @@ class StatManager:
             name = await self.api.get_game_name(place_id)
             message_content += f"\n[#{i}] {name}: {playtime / 3600:.2f}h"
         
-        return (message_title, message_content)
+        return message_content
 
-    async def get_game_leaderboard(self, guild, root_place_id):
-        playtimes, total = await self.get_playtime_data_game(guild, root_place_id)
+    async def get_game_leaderboard(self, root_place_id, rows):
+        playtimes = [(row["user_id"], row["playtime"]) for row in rows if row["place_id"] == root_place_id]
+        total = sum([playtime[1] for playtime in playtimes])
+
         await self.api.cache_id(root_place_id)
         name = await self.api.get_game_name(root_place_id)
         message_title = f"Leaderboard for {name}"
         message_content = f"\n**Total Server Playtime:** {total / 3600:.2f}h"
 
         message_content += f"\n**Playtime for Top 20 Users:**"
-        if len(playtimes) == 0:
+        if total == 0:
             message_content += f"\nNo one has played this game yet."
         else:
             playtimes = sorted(playtimes, key=lambda item: item[1], reverse=True)[:20]
@@ -357,3 +388,47 @@ class StatManager:
                 message_content += f"\n[#{i}] {display_name} ({playtime / 3600:.2f}h)"
         
         return (message_title, message_content)
+
+    async def get_alltime_user_leaderboard(self, guild):
+        user_ids = await self.user_manager.get_guild_user_ids(guild)
+        game_rows = await self.get_game_playtimes(user_ids)
+        (playtimes, game_playtimes, total) = await self.get_playtime_data_all(game_rows)
+
+        message_title = "All-Time Playtime Leaderboard"
+        message_content = await self.get_user_leaderboard(playtimes, game_playtimes, total)
+
+        return (message_title, message_content)
+
+    async def get_ls_user_leaderboard(self, guild):
+        total_rows, game_rows = await self.diff_last_snapshot(guild)
+
+        if (total_rows, game_rows) == (None, None):
+            message_title = "Error"
+            message_content = "There are no snapshots saved."
+        else:
+            (playtimes, game_playtimes, total) = await self.get_playtime_data_all(game_rows)
+            message_title = "Playtime Leaderboard Since Last Snapshot"
+            message_content = await self.get_user_leaderboard(playtimes, game_playtimes, total)
+
+        return (message_title, message_content)
+
+    async def get_alltime_game_leaderboard(self, guild, root_place_id):
+        user_ids = await self.user_manager.get_guild_user_ids(guild)
+        game_rows = await self.get_game_playtimes(user_ids, root_place_id)
+        message_title, message_content = await self.get_game_leaderboard(root_place_id, game_rows)
+
+        return (message_title, message_content)
+
+    async def get_ls_game_leaderboard(self, guild, root_place_id):
+        try:
+            total_rows, game_rows = await self.diff_last_snapshot(guild)
+            if (total_rows, game_rows) == (None, None):
+                message_title = "Error"
+                message_content = "There are no snapshots saved."
+            else:
+                message_title, message_content = await self.get_game_leaderboard(root_place_id, game_rows)
+
+            return (message_title, message_content)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()

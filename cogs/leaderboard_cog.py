@@ -28,7 +28,7 @@ class LeaderboardCog(commands.Cog):
         self, 
         interaction: discord.Interaction
     ):
-        (message_title, message_content) = await interaction.client.stat_manager.get_user_leaderboard(interaction.guild)
+        (message_title, message_content) = await interaction.client.stat_manager.get_alltime_user_leaderboard(interaction.guild)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
@@ -36,20 +36,18 @@ class LeaderboardCog(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
-    """
-    @leaderboard.command(name="weekly", description="Sends this server's weekly playtime leaderboard")
-    async def weekly_user_leaderboard(
+    @leaderboard.command(name="last_snapshot", description="Sends this server's playtime leaderboard since last snapshot")
+    async def ls_leaderboard(
         self,
         interaction: discord.Interaction
     ):
-        (message_title, message_content) = await interaction.client.stat_manager.get_weekly_user_leaderboard()
+        (message_title, message_content) = await interaction.client.stat_manager.get_ls_user_leaderboard(interaction.guild)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
             color=discord.Color.dark_gold()
         )
         await interaction.response.send_message(embed=embed)
-    """
 
     @game.command(name="all", description="Sends this server's all-time playtime leaderboard for a game")
     @app_commands.autocomplete(place_id=all_games_autocomplete)
@@ -58,7 +56,7 @@ class LeaderboardCog(commands.Cog):
         interaction: discord.Interaction,
         place_id: int
     ):
-        (message_title, message_content) = await interaction.client.stat_manager.get_game_leaderboard(interaction.guild, place_id)
+        (message_title, message_content) = await interaction.client.stat_manager.get_alltime_game_leaderboard(interaction.guild, place_id)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
@@ -66,22 +64,20 @@ class LeaderboardCog(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
-    """
-    @game.command(name="weekly", description="Sends this server's weekly playtime leaderboard for a game")
+    @game.command(name="last_snapshot", description="Sends this server's playtime leaderboard for a game since the last saved snapshot")
     @app_commands.autocomplete(place_id=all_games_autocomplete)
-    async def weekly_game_leaderboard(
+    async def ls_game_leaderboard(
         self, 
         interaction: discord.Interaction,
         place_id: int
     ):
-        (message_title, message_content) = await interaction.client.stat_manager.get_weekly_game_leaderboard(place_id)
+        (message_title, message_content) = await interaction.client.stat_manager.get_ls_game_leaderboard(interaction.guild, place_id)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
             color=discord.Color.dark_gold()
         )
         await interaction.response.send_message(embed=embed)
-    """
 
     @leaderboard.command(name="save", description="Saves a snapshot of user data for weekly leaderboards")
     async def save_period(
