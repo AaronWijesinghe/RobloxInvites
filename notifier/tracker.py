@@ -21,15 +21,6 @@ class PresenceTracker:
         times_checked = 1
         while True:
             try:
-                # [the "plan"]
-                # get all user ids
-                # get user presences for all users
-                # save current presences
-                # for each guild in bot.guilds, send out updates for each guild but do not modify data
-                # for all users, modify data based on the presence changes
-                # save old presences to old_presences
-                # handle user deletions
-
                 self.clear()
                 print(f"{gold}[Roblox Invites] [{self.version}] [{times_checked}]{end}")
                 user_ids = await self.bot.user_manager.get_all_user_ids()

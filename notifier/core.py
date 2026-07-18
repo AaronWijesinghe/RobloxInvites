@@ -65,6 +65,9 @@ class TrackerCore:
                             await self.send_invite(guild, user_id, place_id, game_instance_id)
                 else:
                     await self.send_invite(guild, user_id, place_id, game_instance_id)
+            elif status == 3:
+                if await self.bot.stat_manager.check_currently_playing(user_id):
+                    await self.send_leave_message(user_id, old_guild_presences[user_id]["place_id"], "absolute")
 
     async def process_updates(self):
         presences = await self.bot.presence_manager.get_all_presences("current")
@@ -111,6 +114,8 @@ class TrackerCore:
                     await self.bot.stat_manager.start_tracking_playtime(user_id, place_id)
                 print(f"{users[user_id]["username"]} is in a game: {underline}roblox://experiences/start?placeId={place_id}&gameInstanceId={game_instance_id}{end}")
             elif status == 3:
+                if await self.bot.stat_manager.check_currently_playing(user_id):
+                    await self.bot.stat_manager.finish_tracking_playtime(user_id)
                 print(f"{users[user_id]["username"]} is in Roblox Studio.")
 
     async def send_invite(self, guild, user_id, place_id, game_instance_id, transfer=False):
@@ -169,7 +174,8 @@ class TrackerCore:
             embed_desc += f"\n\nTotal playtime for this game: {playtime_str}\n**Join them** in *{game}* with the button below!\n-# Place ID: {place_id}"
         """
 
-        await send_embed(self.bot, embed_title, embed_desc, embed_color, 1494129250343583898, join_embed_url)
+        invite_channel = self.bot.settings_manager.get_channel(guild, "invite")
+        await send_embed(self.bot, embed_title, embed_desc, embed_color, invite_channel, join_embed_url)
 
     async def send_leave_message(self, guild, user_id, place_id, type):
         if await self.bot.blacklist_manager.check_blacklist(guild, place_id):
@@ -205,4 +211,5 @@ class TrackerCore:
             else:
                 embed_desc = f"{display_name} (@{username}) has left *{game}*{period}\n" + embed_desc
 
-        await send_embed(self.bot, embed_title, embed_desc, red, 1494129250343583898)
+        invite_channel = self.bot.settings_manager.get_channel(guild, "invite")
+        await send_embed(self.bot, embed_title, embed_desc, red, invite_channel)
