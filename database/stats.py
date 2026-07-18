@@ -407,7 +407,7 @@ class StatManager:
             message_content = "There are no snapshots saved."
         else:
             (playtimes, game_playtimes, total) = await self.get_playtime_data_all(game_rows)
-            message_title = "Playtime Leaderboard Since Last Snapshot"
+            message_title = "Playtime Leaderboard since Last Snapshot"
             message_content = await self.get_user_leaderboard(playtimes, game_playtimes, total)
 
         return (message_title, message_content)
@@ -420,15 +420,11 @@ class StatManager:
         return (message_title, message_content)
 
     async def get_ls_game_leaderboard(self, guild, root_place_id):
-        try:
-            total_rows, game_rows = await self.diff_last_snapshot(guild)
-            if (total_rows, game_rows) == (None, None):
-                message_title = "Error"
-                message_content = "There are no snapshots saved."
-            else:
-                message_title, message_content = await self.get_game_leaderboard(root_place_id, game_rows)
+        total_rows, game_rows = await self.diff_last_snapshot(guild)
+        if (total_rows, game_rows) == (None, None):
+            message_title = "Error"
+            message_content = "There are no snapshots saved."
+        else:
+            message_title, message_content = await self.get_game_leaderboard(root_place_id, game_rows)
 
-            return (message_title, message_content)
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        return (message_title + " since Last Snapshot", message_content)
