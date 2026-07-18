@@ -2,6 +2,7 @@ import os
 import json
 import aiofiles
 import asyncpg
+import getpass
 from pathlib import Path
 
 class Database:
@@ -14,7 +15,7 @@ class Database:
 
     async def connect(self):
         self.pool = await asyncpg.create_pool(
-            user="aaron",
+            user=getpass.getuser(),
             password="",
             database="roblox_invites",
             host="localhost"
