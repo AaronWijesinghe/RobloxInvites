@@ -119,3 +119,17 @@ class PresenceManager:
             """, user_ids)
 
         return rows
+
+    async def check_joins(self, user_id, place_id, game_instance_id):
+        joined = []
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch(f"""
+                SELECT *
+                FROM presences
+                WHERE place_id = $1
+                AND game_instance_id = $2
+                AND NOT user_id = $3
+            """, place_id, game_instance_id, user_id)
+        for row in rows:
+            joined += [(row["display_name"], row["username"])]
+        return joined

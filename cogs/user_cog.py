@@ -28,7 +28,11 @@ class UserCog(commands.Cog):
         username: str
     ):
         await interaction.response.defer()
-        success = await interaction.client.user_manager.add_user(username, interaction.user, interaction.guild)
+        try:
+            success = await interaction.client.user_manager.add_user(username, interaction.user, interaction.guild)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
         if success == True:
             await interaction.followup.send(f"Added user @{username} to Roblox Invites!")
         else:

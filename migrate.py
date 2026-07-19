@@ -148,7 +148,7 @@ def convert_stats():
     input("Press ENTER to return to the main menu.")
 
 async def upload_caches():
-    cached_ids = load_data("cached_ids.json")
+    cached_ids = load_data("cached_ids.json", {}, False, "You don't have any cached data.")
     if "place_id_cache" not in cached_ids or "universe_id_cache" not in cached_ids:
         return
 
@@ -166,6 +166,29 @@ async def upload_caches():
             INSERT INTO universe_id_cache (universe_id, root_place_id, game_name, month_last_updated, day_last_updated, year_last_updated)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, cached_ids["universe_id_cache"])
+
+async def upload_users():
+    users = load_data("users.json", {}, False, "You don't have any user data.")
+    users_upload = []
+
+    for i, (user_id, data) in enumerate(list(users.items()), start=1):
+        discord_id = int(input(f"({i}/{len(list(users))}) Enter the Discord ID for {data["display_name"]} (@{data["username"]}): "))
+        users_upload += [(
+            int(user_id),
+            discord_id,
+            data["username"],
+            data["display_name"]
+        )]
+
+    database = Database()
+    await database.initalize()
+    pool = database.pool
+
+    async with pool.acquire() as conn:
+        await conn.executemany("""
+            INSERT INTO users (user_id, discord_id, username, display_name)
+            VALUES ($1, $2, $3, $4)
+        """, users_upload)
 
 async def upload_stats():
     stats = load_data("stats.json")
@@ -199,6 +222,7 @@ while True:
     print("- stats - Saves statistics data to prepare for upload to database")
     print("- upload_cache - Uploads cache to database")
     print("- upload_stats - Uploads stats to database")
+    print("- upload_users - Uploads users to database")
 
     command = input("\nType a command: ").lower().strip()
 
@@ -210,3 +234,5 @@ while True:
         asyncio.run(upload_caches())
     elif command == "upload_stats":
         asyncio.run(upload_stats())
+    elif command == "upload_users":
+        asyncio.run(upload_users())

@@ -19,6 +19,8 @@ class TrackerCore:
             place_id = presences[user_id]["place_id"]
             game_instance_id = presences[user_id]["game_instance_id"]
 
+            if status == 2 and None in [user_id, place_id]:
+                continue
             if status == 2:
                 if user_id in old_presences:
                     if await self.bot.transfer_manager.check_transfer(user_id):
@@ -87,7 +89,8 @@ class TrackerCore:
             if status in [0, 1]:
                 if user_id in old_presences:
                     if old_status == 2 and user_id not in self.transfers:
-                        await self.bot.transfer_manager.add_transfer(user_id, old_place_id, old_game_instance_id)
+                        if not (game_instance_id is None or place_id is None):
+                            await self.bot.transfer_manager.add_transfer(user_id, old_place_id, old_game_instance_id)
                     elif await self.bot.transfer_manager.check_transfer(user_id):
                         await self.bot.stat_manager.finish_tracking_playtime(user_id)
                         await self.bot.transfer_manager.remove_transfer(user_id)
@@ -164,17 +167,15 @@ class TrackerCore:
             if not await self.bot.cgt_manager.check_custom_title(guild, universe_id):
                 embed_color = orange
 
-        """
-        joined = await self.check_joins(user_id, place_id, game_instance_id)
+        joined = await self.bot.presence_manager.check_joins(user_id, place_id, game_instance_id)
         if len(joined) > 0:
             embed_title += f" (+{len(joined)})"
             embed_desc = f"**{display_name} (@{username}) just joined:**"
             for user in joined:
                 embed_desc += f"\n- {user[0]} (@{user[1]})"
             embed_desc += f"\n\nTotal playtime for this game: {playtime_str}\n**Join them** in *{game}* with the button below!\n-# Place ID: {place_id}"
-        """
 
-        invite_channel = self.bot.settings_manager.get_channel(guild, "invite")
+        invite_channel = await self.bot.settings_manager.get_channel(guild, "invite")
         await send_embed(self.bot, embed_title, embed_desc, embed_color, invite_channel, join_embed_url)
 
     async def send_leave_message(self, guild, user_id, place_id, type):
@@ -211,5 +212,5 @@ class TrackerCore:
             else:
                 embed_desc = f"{display_name} (@{username}) has left *{game}*{period}\n" + embed_desc
 
-        invite_channel = self.bot.settings_manager.get_channel(guild, "invite")
+        invite_channel = await self.bot.settings_manager.get_channel(guild, "invite")
         await send_embed(self.bot, embed_title, embed_desc, red, invite_channel)

@@ -191,16 +191,9 @@ class StatManager:
                 RETURNING snapshot_id
             """, guild.id)
 
-        print("hi1")
-        try:
-            total_rows = await self.get_total_playtimes(user_ids)
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-        print("hi2")
+        total_rows = await self.get_total_playtimes(user_ids)
         game_rows = await self.get_game_playtimes(user_ids)
 
-        print("hi3")
         total_playtimes = [(snapshot_id, *row) for row in total_rows]
         game_playtimes = [(snapshot_id, *row) for row in game_rows]
 
@@ -362,10 +355,13 @@ class StatManager:
         message_content += f"\n\n**Playtime for Top 10 Games:**"
         game_playtimes = sorted(game_playtimes.items(), key=lambda item: item[1], reverse=True)[:10]
 
-        for i, (place_id, playtime) in enumerate(game_playtimes, start=1):
-            await self.api.cache_id(place_id)
-            name = await self.api.get_game_name(place_id)
-            message_content += f"\n[#{i}] {name}: {playtime / 3600:.2f}h"
+        if total == 0:
+            message_content += f"\nNo one has played yet."
+        else:
+            for i, (place_id, playtime) in enumerate(game_playtimes, start=1):
+                await self.api.cache_id(place_id)
+                name = await self.api.get_game_name(place_id)
+                message_content += f"\n[#{i}] {name}: {playtime / 3600:.2f}h"
         
         return message_content
 
@@ -426,5 +422,6 @@ class StatManager:
             message_content = "There are no snapshots saved."
         else:
             message_title, message_content = await self.get_game_leaderboard(root_place_id, game_rows)
+            message_title = f"{message_title} since Last Snapshot"
 
-        return (message_title + " since Last Snapshot", message_content)
+        return (message_title, message_content)

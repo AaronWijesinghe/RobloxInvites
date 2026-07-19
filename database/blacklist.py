@@ -17,10 +17,6 @@ class BlacklistManager:
             return exists
 
     async def add_blacklist(self, guild, place_id, game_name):
-        if place_id.isdigit():
-            place_id = int(place_id)
-        else:
-            return False
         if not await self.check_blacklist(guild, place_id):
             async with self.pool.acquire() as conn:
                 await conn.execute("""
@@ -32,10 +28,6 @@ class BlacklistManager:
             return False
 
     async def remove_blacklist(self, guild, place_id):
-        if place_id.isdigit():
-            place_id = int(place_id)
-        else:
-            return False
         if await self.check_blacklist(guild, place_id):
             async with self.pool.acquire() as conn:
                 await conn.execute("""
@@ -46,3 +38,12 @@ class BlacklistManager:
             return True
         else:
             return False
+
+    async def get_blacklisted_games(self, guild):
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch("""
+                SELECT *
+                FROM blacklist
+                WHERE guild_id = $1
+            """, guild.id)
+            return rows
