@@ -167,29 +167,6 @@ async def upload_caches():
             VALUES ($1, $2, $3, $4, $5, $6)
         """, cached_ids["universe_id_cache"])
 
-async def upload_users():
-    users = load_data("users.json", {}, False, "You don't have any user data.")
-    users_upload = []
-
-    for i, (user_id, data) in enumerate(list(users.items()), start=1):
-        discord_id = int(input(f"({i}/{len(list(users))}) Enter the Discord ID for {data["display_name"]} (@{data["username"]}): "))
-        users_upload += [(
-            int(user_id),
-            discord_id,
-            data["username"],
-            data["display_name"]
-        )]
-
-    database = Database()
-    await database.initalize()
-    pool = database.pool
-
-    async with pool.acquire() as conn:
-        await conn.executemany("""
-            INSERT INTO users (user_id, discord_id, username, display_name)
-            VALUES ($1, $2, $3, $4)
-        """, users_upload)
-
 async def upload_stats():
     stats = load_data("stats.json")
     if "total_playtimes" not in stats or "game_playtimes" not in stats:
@@ -209,6 +186,41 @@ async def upload_stats():
             INSERT INTO game_playtimes (user_id, place_id, playtime)
             VALUES ($1, $2, $3)
         """, stats["game_playtimes"])
+
+async def upload_users():
+    users = load_data("users.json", {}, False, "You don't have any user data.")
+    users_upload = []
+
+    print("Roblox Invites previously ran on a single-server architecture.")
+    guild_id = int(input("What Discord server will the following users be added to? "))
+
+    for i, (user_id, data) in enumerate(list(users.items()), start=1):
+        discord_id = int(input(f"({i}/{len(list(users))}) Enter the Discord ID for {data["display_name"]} (@{data["username"]}): "))
+        users_upload += [(
+            int(user_id),
+            discord_id,
+            data["username"],
+            data["display_name"]
+        )]
+        subscriptions_upload += [(
+            guild_id,
+            int(user_id)
+        )]
+
+    database = Database()
+    await database.initalize()
+    pool = database.pool
+
+    async with pool.acquire() as conn:
+        await conn.executemany("""
+            INSERT INTO users (user_id, discord_id, username, display_name)
+            VALUES ($1, $2, $3, $4)
+        """, users_upload)
+
+        await conn.executemany("""
+            INSERT INTO subscriptions (guild_id, user_id)
+            VALUES ($1, $2)
+        """, subscriptions_upload)
 
 while True:
     clear()
