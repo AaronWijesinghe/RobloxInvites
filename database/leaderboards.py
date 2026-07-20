@@ -312,7 +312,7 @@ class LeaderboardManager:
         return (message_title, message_content)
 
     async def get_user_stats(self, guild, user_id):
-        guild_user_ids = self.bot.user_manager.get_guild_user_ids(guild)
+        guild_user_ids = await self.bot.user_manager.get_guild_user_ids(guild)
         if user_id not in guild_user_ids:
             return ("Error", "That user isn't in this server.")
 
