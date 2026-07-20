@@ -32,6 +32,9 @@ class CGTManager:
     async def add_custom_title(self, place_id, title, hex_color, guild):
         hex_color = hex_color.lower().replace("#", "")
 
+        if not "{0}" in title:
+            return "You must include {0} in your Custom Title to represent the user's display name."
+
         success = await self.api.cache_id(place_id)
         if not success:
             return "This game doesn't exist."
