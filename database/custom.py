@@ -32,14 +32,21 @@ class CGTManager:
     async def add_custom_title(self, place_id, title, hex_color, guild):
         hex_color = hex_color.lower().replace("#", "")
 
+        try:
+            int(hex_color, 16)
+        except ValueError:
+            return "Invalid hex color."
+
         if not "{0}" in title:
             return "You must include `{0}` in your Custom Title to represent the user's display name."
+        elif title.count("{0}") > 1:
+            return "You can only include `{0}` in your Custom Title."
+        elif len(title) > 150:
+            return f"Your Custom Title is too long ({len(title)}, max 150 characters)."
         elif "\\" in title:
             return "Do not try to break the bot. :)"
         elif "<@" in title:
             return "Do not try to ping other users with Custom Titles."
-        elif len(hex_color) != 6:
-            return "Invalid hex color."
 
         success = await self.api.cache_id(place_id)
         if not success:
