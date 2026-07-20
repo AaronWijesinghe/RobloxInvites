@@ -30,7 +30,7 @@ Leaving a game:<br>
 
 ## How to Use
 1. Clone this repository anywhere on your PC, but preferably in a place you can easily access.
-2. Manually input your .ROBLOSECURITY cookie, your bot token, and guild ID (development purposes, this is optional) in .env
+2. Manually input your .ROBLOSECURITY cookie, your bot token, and guild ID (development purposes, this is optional) in .env (as cookie, token, and guild respectively)
 3. Setup a PostgreSQL database named "roblox_invites"
 4. Run main.py using Python 3.14+ (older versions can be used) with the modules in requirements.txt. For accurate playtime tracking, keep the bot running for as long as possible!
 
@@ -55,7 +55,7 @@ You can generate playtime leaderboards (weekly/overall), game leaderboards, and 
 ### Managing Users
 `user_id` is autocompleted in these commands.
 - /user add `username` - Adds a user with username `username`
-- /user remove `user_id` - Removes a user with ID `user_id`
+- /user remove - Removes the runner of the command from the server's userlist
 - /user stats `user_id` - Generates a user statistics card for user `user_id`
 
 ### Managing Custom Titles
