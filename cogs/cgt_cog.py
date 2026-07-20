@@ -15,7 +15,7 @@ class CGTCog(commands.Cog):
         game_list = await self.bot.cgt_manager.get_cgt_games(interaction.guild)
 
         return [
-            app_commands.Choice(name=game["game_name"], value=game["root_place_id"])
+            app_commands.Choice(name=game["game_name"], value=game["place_id"])
             for game in game_list
             if query.lower() in game["game_name"].lower()
         ][:25]
