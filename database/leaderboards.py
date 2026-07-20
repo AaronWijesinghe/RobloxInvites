@@ -364,17 +364,13 @@ class LeaderboardManager:
         return (message_title, message_content)
 
     async def get_alltime_user_leaderboard(self, guild):
-        try:
-            total_playtimes = await self.get_total_playtimes_ranked(guild)
-            agg_game_playtimes = await self.get_agg_game_playtimes_ranked(guild)
+        total_playtimes = await self.get_total_playtimes_ranked(guild)
+        agg_game_playtimes = await self.get_agg_game_playtimes_ranked(guild)
 
-            message_title = "All-Time Playtime Leaderboard"
-            message_content = await self.get_user_leaderboard(total_playtimes, agg_game_playtimes)
+        message_title = "All-Time Playtime Leaderboard"
+        message_content = await self.get_user_leaderboard(total_playtimes, agg_game_playtimes)
 
-            return (message_title, message_content)
-        except:
-            import traceback
-            traceback.print_exc()
+        return (message_title, message_content)
 
     async def get_ls_user_leaderboard(self, guild):
         ls_total_playtimes = await self.get_ls_total_playtimes_ranked(guild)

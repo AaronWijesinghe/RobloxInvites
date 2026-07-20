@@ -68,11 +68,7 @@ class UserCog(commands.Cog):
         interaction: discord.Interaction
     ):
         await interaction.response.defer()
-        try:
-            (message_title, message_content, join_url) = await interaction.client.notifier.create_invite_card(interaction.user)
-        except:
-            import traceback
-            traceback.print_exc()
+        (message_title, message_content, join_url) = await interaction.client.notifier.create_invite_card(interaction.user)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
