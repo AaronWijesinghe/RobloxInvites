@@ -14,12 +14,12 @@ class SettingsCog(commands.Cog):
     async def set_invite_channel(
         self, 
         interaction: discord.Interaction, 
-        channel_id: str
+        channel_id: int
     ):
         await interaction.response.defer()
         success = await interaction.client.settings_manager.set_channel(interaction.guild, "invite", channel_id)
         if success:
-            await interaction.followup.send(f"Set the invite channel ID to `{channel_id}`.")
+            await interaction.followup.send(f"Set the invite channel ID to https://discord.com/channels/{interaction.guild.id}/{channel_id}")
         else:
             await interaction.followup.send(f"Channel ID `{channel_id}` doesn't exist.")
 
@@ -28,12 +28,12 @@ class SettingsCog(commands.Cog):
     async def set_announcement_channel(
         self, 
         interaction: discord.Interaction, 
-        channel_id: str
+        channel_id: int
     ):
         await interaction.response.defer()
         success = await interaction.client.settings_manager.set_channel(interaction.guild, "announcement", channel_id)
         if success:
-            await interaction.followup.send(f"Set the announcement channel ID to `{channel_id}`.")
+            await interaction.followup.send(f"Set the announcement channel ID to https://discord.com/channels/{interaction.guild.id}/{channel_id}")
         else:
             await interaction.followup.send(f"Channel ID `{channel_id}` doesn't exist.")
 
