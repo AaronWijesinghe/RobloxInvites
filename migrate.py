@@ -129,6 +129,18 @@ def convert_stats():
     clear()
     print("[Roblox Invites Migration Tool]")
     print("Converting statistics data...")
+
+    for user in stats:
+        if stats[user]["currently_playing"] != {}:
+            currently_playing = stats[user]["currently_playing"]
+            if str(currently_playing["root_place_id"]) in stats[user]["games_playtime"]:
+                stats[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
+            else:
+                stats[user]["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
+        stats[user]["currently_playing"] = {}
+        if os.path.exists("./server/old_user_presences.json"):
+            os.remove("./server/old_user_presences.json")
+
     for user_id, user_statistics in stats.items():
         if user_id in ["total_playtimes", "game_playtimes"]:
             continue
@@ -217,7 +229,6 @@ async def upload_users():
             guild_id,
             int(user_id)
         )]
-
     database = Database()
     await database.initalize()
     pool = database.pool
