@@ -33,7 +33,7 @@ class CGTManager:
         hex_color = hex_color.lower().replace("#", "")
 
         if not "{0}" in title:
-            return "You must include {0} in your Custom Title to represent the user's display name."
+            return "You must include `{0}` in your Custom Title to represent the user's display name."
 
         success = await self.api.cache_id(place_id)
         if not success:
