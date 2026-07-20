@@ -34,7 +34,7 @@ class CGTManager:
 
         success = await self.api.cache_id(place_id)
         if not success:
-            return False
+            return "This game doesn't exist."
         universe_id = await self.api.get_universe_id(place_id)
         game_name = await self.api.get_game_name(place_id)
         root_place_id = await self.api.get_root_place_id(place_id)
@@ -51,7 +51,7 @@ class CGTManager:
             if added:
                 return True
             else:
-                return False
+                return "This game was already added.\nIt must be removed from the Custom Titles list by a server admin."
 
     async def remove_custom_title(self, place_id, guild):
         universe_id = await self.api.get_universe_id(place_id)
