@@ -28,11 +28,7 @@ class UserCog(commands.Cog):
         username: str
     ):
         await interaction.response.defer()
-        try:
-            success = await interaction.client.user_manager.add_user(username, interaction.user, interaction.guild)
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        success = await interaction.client.user_manager.add_user(username, interaction.user, interaction.guild)
         if success == True:
             await interaction.followup.send(f"Added user @{username} to Roblox Invites!")
         else:
@@ -58,17 +54,13 @@ class UserCog(commands.Cog):
         user_id: int
     ):
         await interaction.response.defer()
-        try:
-            message_title, message_content = await self.bot.stat_manager.get_user_stats(interaction.guild, user_id)
-            embed = discord.Embed(
-                title=message_title,
-                description=message_content,
-                color=discord.Color.dark_gold()
-            )
-            await interaction.followup.send(embed=embed)
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        message_title, message_content = await interaction.client.leaderboard_manager.get_user_stats(interaction.guild, user_id)
+        embed = discord.Embed(
+            title=message_title,
+            description=message_content,
+            color=discord.Color.dark_gold()
+        )
+        await interaction.followup.send(embed=embed)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(UserCog(bot))

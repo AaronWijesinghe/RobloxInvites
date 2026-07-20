@@ -30,7 +30,7 @@ class RobloxAPI:
             root_place_id = game_data["data"][0]["rootPlaceId"]
            
             server_data = await self.get_misc(f"https://games.roblox.com/v1/games/{place_id}/servers/0?sortOrder=2&excludeFullGames=false&limit=10")
-            if len(game_data["data"]) > 0:
+            if len(server_data["data"]) > 0:
                 max_players = server_data["data"][0]["maxPlayers"]
             else:
                 max_players = 2

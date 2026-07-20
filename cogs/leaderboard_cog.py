@@ -28,7 +28,7 @@ class LeaderboardCog(commands.Cog):
         self, 
         interaction: discord.Interaction
     ):
-        (message_title, message_content) = await interaction.client.stat_manager.get_alltime_user_leaderboard(interaction.guild)
+        (message_title, message_content) = await interaction.client.leaderboard_manager.get_alltime_user_leaderboard(interaction.guild)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
@@ -41,7 +41,7 @@ class LeaderboardCog(commands.Cog):
         self,
         interaction: discord.Interaction
     ):
-        (message_title, message_content) = await interaction.client.stat_manager.get_ls_user_leaderboard(interaction.guild)
+        (message_title, message_content) = await interaction.client.leaderboard_manager.get_ls_user_leaderboard(interaction.guild)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
@@ -56,7 +56,7 @@ class LeaderboardCog(commands.Cog):
         interaction: discord.Interaction,
         place_id: int
     ):
-        (message_title, message_content) = await interaction.client.stat_manager.get_alltime_game_leaderboard(interaction.guild, place_id)
+        (message_title, message_content) = await interaction.client.leaderboard_manager.get_alltime_game_leaderboard(interaction.guild, place_id)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
@@ -71,7 +71,7 @@ class LeaderboardCog(commands.Cog):
         interaction: discord.Interaction,
         place_id: int
     ):
-        (message_title, message_content) = await interaction.client.stat_manager.get_ls_game_leaderboard(interaction.guild, place_id)
+        (message_title, message_content) = await interaction.client.leaderboard_manager.get_ls_game_leaderboard(interaction.guild, place_id)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
@@ -86,7 +86,7 @@ class LeaderboardCog(commands.Cog):
         interaction: discord.Interaction, 
     ):
         await interaction.response.defer()
-        await interaction.client.stat_manager.save_snapshot(interaction.guild)
+        await interaction.client.snapshot_manager.save_snapshot(interaction.guild)
         await interaction.followup.send("Saved the current data to a snapshot!")
 
     @leaderboard.command(name="remove", description="Removes the last saved user snapshot")
@@ -96,7 +96,7 @@ class LeaderboardCog(commands.Cog):
         interaction: discord.Interaction, 
     ):
         await interaction.response.defer()
-        await interaction.client.stat_manager.remove_last_snapshot(interaction.guild)
+        await interaction.client.snapshot_manager.remove_last_snapshot(interaction.guild)
         await interaction.followup.send("Removed the last saved snapshot.")
         
 async def setup(bot: commands.Bot):
