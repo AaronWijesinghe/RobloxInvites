@@ -33,7 +33,9 @@ class CGTManager:
         place_id = get_number(place_id)
         hex_color = hex_color.lower().replace("#", "")
 
-        await self.api.cache_id(place_id)
+        success = await self.api.cache_id(place_id)
+        if not success:
+            return False
         universe_id = await self.api.get_universe_id(place_id)
         game_name = await self.api.get_game_name(place_id)
         root_place_id = await self.api.get_root_place_id(place_id)

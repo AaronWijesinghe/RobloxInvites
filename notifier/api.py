@@ -23,6 +23,8 @@ class API:
         place_id = int(place_id)
         if not await self.check_cached_place_id(place_id):
             universe_id = await self.get_misc(f"https://apis.roblox.com/universes/v1/places/{place_id}/universe")
+            if not "universeId" in universe_id:
+                return False
             universe_id = universe_id["universeId"]
             
             game_data = await self.get_misc(f"https://games.roblox.com/v1/games?universeIds={universe_id}")
@@ -48,6 +50,7 @@ class API:
                         INSERT INTO universe_id_cache (universe_id, root_place_id, game_name, month_last_updated, day_last_updated, year_last_updated)
                         VALUES ($1, $2, $3, $4, $5, $6)
                     """, universe_id, root_place_id, game_name, now.month, now.day, now.year)
+        return True
 
     async def check_cached_place_id(self, place_id):
         if place_id == None:

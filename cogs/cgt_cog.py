@@ -30,8 +30,11 @@ class CGTCog(commands.Cog):
         place_id: int,
         hex_color: str
     ):
-        await self.bot.cgt_manager.add_custom_title(place_id, title, hex_color, interaction.guild)
-        await interaction.response.send_message(f"**Added custom title!**\nPlace ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color.replace("#", "")}")
+        success = await self.bot.cgt_manager.add_custom_title(place_id, title, hex_color, interaction.guild)
+        if success:
+            await interaction.response.send_message(f"**Added custom title!**\nPlace ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color.replace("#", "")}")
+        else:
+            await interaction.response.send_message(f"That game doesn't exist.")
 
     @cgt.command(name="remove", description="Removes a Custom Title!")
     @app_commands.default_permissions(manage_guild=True)
