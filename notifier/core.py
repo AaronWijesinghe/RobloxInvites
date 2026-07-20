@@ -152,12 +152,12 @@ class TrackerCore:
         custom_title = {}
         if await self.bot.cgt_manager.check_custom_title(guild, universe_id):
             custom_title = await self.bot.cgt_manager.get_custom_title(guild, universe_id)
-            embed_title = custom_title["title"].format(display_name)
+            embed_title = custom_title["title"].replace("{0}", display_name)
             embed_color = int(custom_title["color"], 16)
 
         if transfer:
             if await self.bot.cgt_manager.check_custom_title(guild, universe_id):
-                embed_title = f"{custom_title["title"].format(display_name)[:-1]} in a new server!"
+                embed_title = f"{custom_title["title"].replace("{0}", display_name)[:-1]} in a new server!"
             else:
                 embed_title = f"{display_name} transferred servers!"
             embed_desc = f"{display_name} (@{username}) has transferred to a different server in *{game}*{period}\nSession playtime: {playtime_str_current}\nTotal playtime for this game: {playtime_str}\n-# Place ID: {place_id}"
