@@ -44,7 +44,7 @@ class CGTManager:
         elif len(title) > 150:
             return f"Your Custom Title is too long ({len(title)}, max 150 characters)."
         elif "\\" in title:
-            return "Do not try to break the bot. :)"
+            return "Do not try to break the bot. :)\n(Don't put backslashes in your Custom Title. I'm not sentient, I promise.)"
         elif "<@" in title:
             return "Do not try to ping other users with Custom Titles."
 
