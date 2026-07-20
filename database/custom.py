@@ -34,6 +34,12 @@ class CGTManager:
 
         if not "{0}" in title:
             return "You must include `{0}` in your Custom Title to represent the user's display name."
+        elif "\\" in title:
+            return "Do not try to break the bot. :)"
+        elif "<@" in title:
+            return "Do not try to ping other users with Custom Titles."
+        elif len(hex_color) != 6:
+            return "Invalid hex color."
 
         success = await self.api.cache_id(place_id)
         if not success:
