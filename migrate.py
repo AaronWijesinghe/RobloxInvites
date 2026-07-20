@@ -278,6 +278,7 @@ while True:
     print("\nCommands:")
     print("- cache - Saves cache data to prepare for upload to database")
     print("- stats - Saves statistics data to prepare for upload to database")
+    print("- upload - Uploads everything to database")
     print("- upload_cache - Uploads cache to database")
     print("- upload_stats - Uploads stats to database")
     print("- upload_users - Uploads users to database")

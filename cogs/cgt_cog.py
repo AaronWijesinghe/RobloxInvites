@@ -21,17 +21,12 @@ class CGTCog(commands.Cog):
         await interaction.response.send_message(f"**Added custom title!**\nPlace ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color.replace("#", "")}")
 
     @cgt.command(name="remove", description="Removes a Custom Title!")
+    @app_commands.default_permissions(manage_guild=True)
     async def remove_custom_title(
         self, 
         interaction: discord.Interaction, 
         place_id: str
     ):
-        if not await self.bot.is_owner(interaction.user):
-            await interaction.response.send_message(
-                "You must be the bot owner to run this command.",
-                ephemeral=True,
-            )
-            return
         await self.bot.cgt_manager.remove_custom_title(place_id, interaction.guild)
         await interaction.response.send_message(f"**Removed custom title!**\nPlace ID: {place_id}")
 

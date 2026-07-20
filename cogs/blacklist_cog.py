@@ -29,13 +29,6 @@ class BlacklistCog(commands.Cog):
         place_id: int,
         game_name: str
     ):
-        if not await self.bot.is_owner(interaction.user):
-            await interaction.response.send_message(
-                "You must be the bot owner to run this command.",
-                ephemeral=True,
-            )
-            return
-
         await interaction.response.defer()
         success = await interaction.client.blacklist_manager.add_blacklist(interaction.guild, place_id, game_name)
         if success:
@@ -51,13 +44,6 @@ class BlacklistCog(commands.Cog):
         interaction: discord.Interaction, 
         place_id: int
     ):
-        if not await self.bot.is_owner(interaction.user):
-            await interaction.response.send_message(
-                "You must be the bot owner to run this command.",
-                ephemeral=True,
-            )
-            return
-
         await interaction.response.defer()
         success = await interaction.client.blacklist_manager.remove_blacklist(interaction.guild, place_id)
         if success:

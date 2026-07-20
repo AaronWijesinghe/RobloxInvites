@@ -80,33 +80,21 @@ class LeaderboardCog(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @leaderboard.command(name="save", description="Saves a snapshot of user data for weekly leaderboards")
+    @app_commands.default_permissions(manage_guild=True)
     async def save_period(
         self, 
         interaction: discord.Interaction, 
     ):
-        if not await self.bot.is_owner(interaction.user):
-            await interaction.response.send_message(
-                "You must be the bot owner to run this command.",
-                ephemeral=True,
-            )
-            return
-
         await interaction.response.defer()
         await interaction.client.stat_manager.save_snapshot(interaction.guild)
         await interaction.followup.send("Saved the current data to a snapshot!")
 
     @leaderboard.command(name="remove", description="Removes the last saved user snapshot")
+    @app_commands.default_permissions(manage_guild=True)
     async def remove_last_period(
         self, 
         interaction: discord.Interaction, 
     ):
-        if not await self.bot.is_owner(interaction.user):
-            await interaction.response.send_message(
-                "You must be the bot owner to run this command.",
-                ephemeral=True,
-            )
-            return
-
         await interaction.response.defer()
         await interaction.client.stat_manager.remove_last_snapshot(interaction.guild)
         await interaction.followup.send("Removed the last saved snapshot.")
