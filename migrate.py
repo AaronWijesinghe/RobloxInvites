@@ -105,6 +105,7 @@ def convert_cached_ids():
     print("Place ID cache converted")
 
     print("\nConverting Universe ID cache...")
+    cache["universe_id_cache"] = []
     for universe_id, cache in cached_ids["caches"].items():
         if "last_update" in cache:
             month, day, year = cache["last_update"][0], cache["last_update"][1], cache["last_update"][2]
