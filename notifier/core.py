@@ -129,12 +129,12 @@ class TrackerCore:
         if await self.bot.blacklist_manager.check_blacklist(guild, place_id):
             return
 
-        #try:
-        universe_id = await self.bot.api.get_universe_id(place_id)
-        game = await self.bot.api.get_game_name(place_id)
-        max_players = await self.bot.api.get_max_players(place_id)
-        #except:
-        #    return
+        try:
+            universe_id = await self.bot.api.get_universe_id(place_id)
+            game = await self.bot.api.get_game_name(place_id)
+            max_players = await self.bot.api.get_max_players(place_id)
+        except:
+            return
 
         display_name = await self.bot.user_manager.get_display_name(user_id)
         username = await self.bot.user_manager.get_username(user_id)

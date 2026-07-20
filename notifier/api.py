@@ -3,7 +3,7 @@ from datetime import datetime
 from database.database import *
 from aiohttp_retry import RetryClient, ExponentialRetry
 
-class RobloxAPI:
+class API:
     def __init__(self, headers):
         self.session = None
         self.retry_client = None

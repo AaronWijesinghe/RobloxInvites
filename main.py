@@ -22,7 +22,7 @@ Updated to __v{version}__
 """
 
 dev_guild = discord.Object(id=os.environ["guild"])
-api = notifier.RobloxAPI(headers)
+api = notifier.API(headers)
 bot = RobloxInvitesBot(api, dev_guild)
 tracker_core = notifier.TrackerCore(bot)
 bot.notifier = tracker_core
