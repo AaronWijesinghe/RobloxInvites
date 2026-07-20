@@ -30,8 +30,8 @@ Leaving a game:<br>
 
 ## How to Use
 1. Clone this repository anywhere on your PC, but preferably in a place you can easily access.
-2. Manually input a cookie in `/data/cookies.json` (see *JSON Files*)
-3. Add your token and guild ID in a .env file within the same directory as main.py. (set `token` and `guild` with these values respectively)
+2. Manually input your .ROBLOSECURITY cookie, your bot token, and guild ID (development purposes, this is optional) in .env
+3. Setup a PostgreSQL database named "roblox_invites"
 4. Run main.py using Python 3.14+ (older versions can be used) with the modules in requirements.txt. For accurate playtime tracking, keep the bot running for as long as possible!
 
 ## Commands
@@ -40,7 +40,7 @@ You can generate playtime leaderboards (weekly/overall), game leaderboards, and 
 
 ### Leaderboards
 - /leaderboard all - Generates an all-time playtime leaderboard for your server
-- /leaderboard weekly - Generates a playtime leaderboard for your server from the last saved snapshot to now
+- /leaderboard last_snapshot - Generates a playtime leaderboard for your server from the last saved snapshot to now
 - /leadebroard save - Saves a snapshot of user data to `extended_stats.json`
 - /leaderboard remove - Removes the last saved saved snapshot from `extended_stats.json`
 
@@ -69,11 +69,11 @@ You can generate playtime leaderboards (weekly/overall), game leaderboards, and 
 - /blacklist remove `blacklisted_id` - Removes blacklisted place ID `blacklisted_id` from the blacklist.
 
 ### Managing Channels
-- /channel invites `channel_id` - Sets the invites channel to `channel_id`
-- /channel announcements `channel_id` - Sets the announcements channel to `channel_id`
+- /settings invites `channel_id` - Sets the invites channel to `channel_id`
+- /settings announcements `channel_id` - Sets the announcements channel to `channel_id`
 
 ### Sending Invite Cards
-- /invite_user `user_id` - Sends an invite card in the context of ID `user_id`
+- /invite_user - Sends an invite card with your current game name and a link to join you
 
 ## JSON Files
 Roblox Invites stores JSON files in /data to store configuration data, user data, Custom Titles, cookies, and more.<br>

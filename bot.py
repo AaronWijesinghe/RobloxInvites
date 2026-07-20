@@ -1,0 +1,47 @@
+import discord
+import database
+from database import Database
+from discord.ext import commands
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class RobloxInvitesBot(commands.Bot):
+    def __init__(self, api, dev_guild):
+        intents = discord.Intents.default()
+        intents.message_content = True
+        super().__init__(command_prefix="!", intents=intents)
+        
+        self.db = Database()
+        self.api = api
+        self.dev_guild = dev_guild
+
+    async def setup_hook(self):
+        await self.api.start()
+        await self.db.initalize()
+
+        self.api.pool = self.db.pool
+
+        self.user_manager = database.UserManager(self.db, self.api)
+        self.presence_manager = database.PresenceManager(self.db, self.api, self.user_manager)
+        self.transfer_manager = database.TransferManager(self.db)
+        self.cgt_manager = database.CGTManager(self.db, self.api)
+        self.blacklist_manager = database.BlacklistManager(self.db, self.api)
+        self.settings_manager = database.SettingsManager(self.db, self)
+        self.stat_manager = database.StatManager(self.db, self.api, self.user_manager)
+        self.snapshot_manager = database.SnapshotManager(self.db, self, self.api)
+        self.leaderboard_manager = database.LeaderboardManager(self.db, self, self.api)
+
+        await self.load_extension("cogs.user_cog")
+        await self.load_extension("cogs.cgt_cog")
+        await self.load_extension("cogs.blacklist_cog")
+        await self.load_extension("cogs.settings_cog")
+        await self.load_extension("cogs.leaderboard_cog")
+
+        self.tree.copy_global_to(guild=self.dev_guild)
+        await self.tree.sync(guild=self.dev_guild)
+
+    async def on_ready(self):
+        for guild in self.guilds:
+            await self.db.create_guild(guild)
+        print(f"{self.user} is online and ready!")
