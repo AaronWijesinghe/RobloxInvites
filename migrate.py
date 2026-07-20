@@ -2,7 +2,6 @@ import os
 import json
 import requests
 import time
-import asyncpg
 import asyncio
 from dotenv import load_dotenv
 from database.database import *
@@ -238,6 +237,37 @@ async def upload_users():
             DO NOTHING
         """, subscriptions_upload)
 
+async def upload_custom_titles():
+    custom_titles = load_data("custom_titles.json", {}, False, "You don't have any custom titles.")
+
+    clear()
+    print("[Roblox Invites Migrate Tool]")
+    print("Roblox Invites previously ran on a single-server architecture.")
+    guild_id = int(input("What Discord server will the saved custom titles be added to? "))
+
+    ct_upload = []
+    for universe_id, title in custom_titles["titles"].items():
+        ct_upload += [(
+            guild_id,
+            int(universe_id),
+            title["title"],
+            title["color"],
+            title["game"],
+            int(title["place_id"])
+        )]
+
+    database = Database()
+    await database.initalize()
+    pool = database.pool
+
+    async with pool.acquire() as conn:
+        await conn.executemany("""
+            INSERT INTO custom_titles (guild_id, universe_id, title, color, game_name, root_place_id)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (guild_id, universe_id)
+            DO NOTHING
+        """, ct_upload)
+
 while True:
     clear()
     print("[Roblox Invites Migration Tool]")
@@ -251,6 +281,7 @@ while True:
     print("- upload_cache - Uploads cache to database")
     print("- upload_stats - Uploads stats to database")
     print("- upload_users - Uploads users to database")
+    print("- upload_ct - Uploads custom titles to database")
 
     command = input("\nType a command: ").lower().strip()
 
@@ -264,3 +295,5 @@ while True:
         asyncio.run(upload_stats())
     elif command == "upload_users":
         asyncio.run(upload_users())
+    elif command == "upload_ct":
+        asyncio.run(upload_custom_titles())
