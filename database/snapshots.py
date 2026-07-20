@@ -5,6 +5,43 @@ class SnapshotManager:
         self.bot = bot
         self.api = api
 
+    async def get_total_playtimes_unfiltered(self, user_ids):
+        async with self.pool.acquire() as conn:
+            total_rows = await conn.fetch("""
+                SELECT
+                    t.user_id,
+                    t.total_playtime +
+                    COALESCE(
+                        EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
+                        0
+                    ) AS total_playtime
+                FROM total_playtimes t
+                LEFT JOIN currently_playing cp
+                    ON t.user_id = cp.user_id
+                WHERE t.user_id = ANY($1)
+                ORDER BY t.total_playtime
+            """, user_ids)
+            return total_rows
+
+    async def get_game_playtimes_unfiltered(self, user_ids):
+        async with self.pool.acquire() as conn:
+            game_rows = await conn.fetch("""
+                SELECT
+                    gp.user_id,
+                    gp.place_id,
+                    gp.playtime +
+                    COALESCE(
+                        EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
+                        0
+                    ) AS playtime
+                FROM game_playtimes gp
+                LEFT JOIN currently_playing cp
+                    ON gp.user_id = cp.user_id
+                    AND gp.place_id = cp.place_id
+                WHERE gp.user_id = ANY($1)
+            """, user_ids)
+            return game_rows
+
     async def get_latest_snapshot_id(self, guild):
         async with self.pool.acquire() as conn:
             snapshot_id = await conn.fetchval("""
@@ -25,8 +62,8 @@ class SnapshotManager:
                 RETURNING snapshot_id
             """, guild.id)
 
-        total_rows = await self.bot.stat_manager.get_total_playtimes(user_ids)
-        game_rows = await self.bot.stat_manager.get_game_playtimes(user_ids)
+        total_rows = await self.get_total_playtimes_unfiltered(user_ids)
+        game_rows = await self.get_game_playtimes_unfiltered(user_ids)
 
         total_playtimes = [(snapshot_id, *row) for row in total_rows]
         game_playtimes = [(snapshot_id, *row) for row in game_rows]

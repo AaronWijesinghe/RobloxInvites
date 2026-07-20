@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS users (
     discord_id BIGINT NOT NULL,
     username TEXT NOT NULL,
     display_name TEXT NOT NULL,
-    erased INT DEFAULT 0
+    erased INT DEFAULT 0,
+    joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS presences (

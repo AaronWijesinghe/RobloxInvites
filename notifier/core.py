@@ -179,6 +179,28 @@ class TrackerCore:
         invite_channel = await self.bot.settings_manager.get_channel(guild, "invite")
         await send_embed(self.bot, embed_title, embed_desc, embed_color, invite_channel, join_embed_url)
 
+    async def create_invite_card(self, discord_user):
+        user_id = await self.bot.user_manager.get_user_from_discord_id(discord_user)
+        if user_id == None:
+            return ("Error", f"You aren't part of Roblox Invites.\nSign up for Roblox Invites using `/user add`!", "https://roblox.com/home")
+
+        username = await self.bot.user_manager.get_username(user_id)
+        display_name = await self.bot.user_manager.get_display_name(user_id)
+        
+        presence = await self.bot.presence_manager.get_presence(user_id)
+        place_id = presence["place_id"]
+        game_instance_id = presence["game_instance_id"]
+
+        if place_id == None:
+            return ("Invite Card", f"{display_name} (@{username}) isn't playing anything right now.", "https://roblox.com/home")
+
+        game = await self.bot.api.get_game_name(place_id)
+        embed_title = f"Invite Card"
+        embed_desc = f"**{display_name} (@{username}) has invited you** to play *{game}* with them!\n**Join them** with the button below."
+        join_embed_url = f"https://join.rblxevnts.co/?placeId={place_id}&gameInstanceId={game_instance_id}"
+
+        return (embed_title, embed_desc, join_embed_url)
+
     async def send_leave_message(self, guild, user_id, place_id, type):
         if await self.bot.blacklist_manager.check_blacklist(guild, place_id):
             return

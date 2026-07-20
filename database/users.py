@@ -44,6 +44,15 @@ class UserManager:
         user_ids = [row["user_id"] for row in rows]
         return user_ids
 
+    async def get_user_from_discord_id(self, discord_user):
+        async with self.pool.acquire() as conn:
+            user_id = await conn.fetchval("""
+                SELECT user_id
+                FROM users
+                WHERE discord_id = $1
+            """, discord_user.id)
+            return user_id
+
     async def get_all_users(self):
         async with self.pool.acquire() as conn:
             rows = await conn.fetch("""

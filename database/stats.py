@@ -45,15 +45,15 @@ class StatManager:
         async with self.pool.acquire() as conn:
             total_playtime = await conn.fetchval("""
                 SELECT
-                    tp.total_playtime +
+                    t.total_playtime +
                     COALESCE(
                         EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
                         0
                     ) AS total_playtime
-                FROM total_playtimes tp
+                FROM total_playtimes t
                 LEFT JOIN currently_playing cp
-                    ON tp.user_id = cp.user_id
-                WHERE tp.user_id = $1
+                    ON t.user_id = cp.user_id
+                WHERE t.user_id = $1
             """, user_id)
             if total_playtime is None:
                 return 0
@@ -73,18 +73,10 @@ class StatManager:
     async def get_game_playtime(self, user_id, place_id):
         async with self.pool.acquire() as conn:
             playtime = await conn.fetchval("""
-                SELECT
-                    gp.playtime +
-                    COALESCE(
-                        EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
-                        0
-                    ) AS playtime
-                FROM game_playtimes gp
-                LEFT JOIN currently_playing cp
-                    ON gp.user_id = cp.user_id
-                    AND gp.place_id = cp.place_id
-                WHERE gp.user_id = $1
-                AND gp.place_id = $2
+                SELECT playtime
+                FROM game_playtimes
+                WHERE user_id = $1
+                AND place_id = $2
             """, user_id, place_id)
             if playtime is None:
                 return 0
@@ -102,61 +94,6 @@ class StatManager:
             diff = datetime.now() - start_time
             current_playtime = round(diff.total_seconds())
             return round(current_playtime)
-
-    async def get_total_playtimes(self, user_ids):
-        async with self.pool.acquire() as conn:
-            total_rows = await conn.fetch("""
-                SELECT
-                    tp.user_id,
-                    tp.total_playtime +
-                    COALESCE(
-                        EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
-                        0
-                    ) AS total_playtime
-                FROM total_playtimes tp
-                LEFT JOIN currently_playing cp
-                    ON tp.user_id = cp.user_id
-                WHERE tp.user_id = ANY($1)
-                ORDER BY tp.total_playtime
-            """, user_ids)
-            return total_rows
-
-    async def get_game_playtimes(self, user_ids, place_id=None):
-        async with self.pool.acquire() as conn:
-            if place_id is None:
-                game_rows = await conn.fetch("""
-                    SELECT
-                        gp.user_id,
-                        gp.place_id,
-                        gp.playtime +
-                        COALESCE(
-                            EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
-                            0
-                        ) AS playtime
-                    FROM game_playtimes gp
-                    LEFT JOIN currently_playing cp
-                        ON gp.user_id = cp.user_id
-                        AND gp.place_id = cp.place_id
-                    WHERE gp.user_id = ANY($1)
-                """, user_ids)
-            else:
-                game_rows = await conn.fetch("""
-                    SELECT
-                        gp.user_id,
-                        gp.place_id,
-                        gp.playtime +
-                        COALESCE(
-                            EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
-                            0
-                        ) AS playtime
-                    FROM game_playtimes gp
-                    LEFT JOIN currently_playing cp
-                        ON gp.user_id = cp.user_id
-                        AND gp.place_id = cp.place_id
-                    WHERE gp.user_id = ANY($1)
-                    AND gp.place_id = $2
-                """, user_ids, place_id)
-            return game_rows
 
     async def get_current_playtimes(self, user_ids):
         async with self.pool.acquire() as conn:
@@ -240,23 +177,3 @@ class StatManager:
             await self.update_game_playtime(user_id, root_place_id, current)
             await self.update_total_playtime(user_id)
             await self.remove_currently_playing(user_id)
-
-    async def get_playtime_data_all(self, game_rows):
-        game_playtimes = {}
-        playtimes = {}
-        for row in game_rows:
-            place_id = row["place_id"]
-            user_id = row["user_id"]
-
-            if place_id in game_playtimes:
-                game_playtimes[place_id] += row["playtime"]
-            else:
-                game_playtimes[place_id] = row["playtime"]
-
-            if user_id in playtimes:
-                playtimes[user_id] += row["playtime"]
-            else:
-                playtimes[user_id] = row["playtime"]
-        total = sum([row["playtime"] for row in game_rows])
-
-        return (playtimes, game_playtimes, total)

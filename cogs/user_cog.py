@@ -62,5 +62,28 @@ class UserCog(commands.Cog):
         )
         await interaction.followup.send(embed=embed)
 
+    @app_commands.command(name="send_invite", description="Sends out your own personal invite card!")
+    async def send_invite(
+        self, 
+        interaction: discord.Interaction
+    ):
+        await interaction.response.defer()
+        try:
+            (message_title, message_content, join_url) = await interaction.client.notifier.create_invite_card(interaction.user)
+        except:
+            import traceback
+            traceback.print_exc()
+        embed = discord.Embed(
+            title=message_title,
+            description=message_content,
+            color=discord.Color.dark_purple()
+        )
+        
+        view = discord.ui.View()
+        join_btn = discord.ui.Button(label="Join in Roblox", url=join_url)
+        view.add_item(join_btn)
+
+        await interaction.followup.send(embed=embed, view=view)
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(UserCog(bot))
