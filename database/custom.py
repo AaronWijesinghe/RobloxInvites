@@ -41,7 +41,7 @@ class CGTManager:
             return "You must include `{0}` in your Custom Title to represent the user's display name."
         elif title.count("{0}") > 1:
             return "You can only include one `{0}` in your Custom Title."
-        elif len(title) > 150:
+        elif len(title) > 200:
             return f"Your Custom Title is too long ({len(title)}, max 150 characters)."
         elif "\\" in title:
             return "Do not try to break the bot. :)\n(Don't put backslashes in your Custom Title. I'm not sentient, I promise.)"
