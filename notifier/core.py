@@ -226,7 +226,7 @@ class TrackerCore:
             custom_title = await self.bot.cgt_manager.get_custom_title(guild, universe_id)
             embed_title = (
                 custom_title["title"]
-                .format(display_name)
+                .replace("{0}", display_name)
                 .replace(f"{display_name} is", f"{display_name} was")
                 .replace("!", ".")
             )
