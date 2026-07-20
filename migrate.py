@@ -138,8 +138,8 @@ def convert_stats():
             else:
                 stats[user]["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
         stats[user]["currently_playing"] = {}
-        if os.path.exists("./server/old_user_presences.json"):
-            os.remove("./server/old_user_presences.json")
+    if os.path.exists("./server/old_user_presences.json"):
+        os.remove("./server/old_user_presences.json")
 
     for user_id, user_statistics in stats.items():
         if user_id in ["total_playtimes", "game_playtimes"]:
