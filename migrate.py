@@ -160,11 +160,15 @@ async def upload_caches():
         await conn.executemany("""
             INSERT INTO place_id_cache (place_id, universe_id, max_players)
             VALUES ($1, $2, $3)
+            ON CONFLICT (place_id)
+            DO NOTHING
         """, cached_ids["place_id_cache"])
 
         await conn.executemany("""
             INSERT INTO universe_id_cache (universe_id, root_place_id, game_name, month_last_updated, day_last_updated, year_last_updated)
             VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (universe_id)
+            DO NOTHING
         """, cached_ids["universe_id_cache"])
 
 async def upload_stats():
@@ -180,19 +184,27 @@ async def upload_stats():
         await conn.executemany("""
             INSERT INTO total_playtimes (user_id, total_playtime)
             VALUES ($1, $2)
+            ON CONFLICT (user_id)
+            DO NOTHING
         """, stats["total_playtimes"])
 
         await conn.executemany("""
             INSERT INTO game_playtimes (user_id, place_id, playtime)
             VALUES ($1, $2, $3)
+            ON CONFLICT (user_id, place_id)
+            DO NOTHING
         """, stats["game_playtimes"])
 
 async def upload_users():
     users = load_data("users.json", {}, False, "You don't have any user data.")
     users_upload = []
+    subscriptions_upload = []
 
+    clear()
+    print("[Roblox Invites Migrate Tool]")
     print("Roblox Invites previously ran on a single-server architecture.")
     guild_id = int(input("What Discord server will the following users be added to? "))
+    print("")
 
     for i, (user_id, data) in enumerate(list(users.items()), start=1):
         discord_id = int(input(f"({i}/{len(list(users))}) Enter the Discord ID for {data["display_name"]} (@{data["username"]}): "))
@@ -215,11 +227,15 @@ async def upload_users():
         await conn.executemany("""
             INSERT INTO users (user_id, discord_id, username, display_name)
             VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_id)
+            DO NOTHING
         """, users_upload)
 
         await conn.executemany("""
             INSERT INTO subscriptions (guild_id, user_id)
             VALUES ($1, $2)
+            ON CONFLICT (guild_id, user_id)
+            DO NOTHING
         """, subscriptions_upload)
 
 while True:

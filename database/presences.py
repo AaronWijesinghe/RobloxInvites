@@ -23,13 +23,13 @@ class PresenceManager:
 
         async with self.pool.acquire() as conn:
             await conn.executemany(f"""
-            INSERT INTO {"old_presences" if presence_type == "old" else "presences"} (user_id, game_instance_id, place_id, user_status)
-            VALUES ($1, $2, $3, $4)
-            ON CONFLICT (user_id)
-            DO UPDATE SET
-                game_instance_id = EXCLUDED.game_instance_id,
-                place_id = EXCLUDED.place_id,
-                user_status = EXCLUDED.user_status
+                INSERT INTO {"old_presences" if presence_type == "old" else "presences"} (user_id, game_instance_id, place_id, user_status)
+                VALUES ($1, $2, $3, $4)
+                ON CONFLICT (user_id)
+                DO UPDATE SET
+                    game_instance_id = EXCLUDED.game_instance_id,
+                    place_id = EXCLUDED.place_id,
+                    user_status = EXCLUDED.user_status
             """, presence_records)
 
     async def get_presence(self, user_id):
@@ -40,39 +40,31 @@ class PresenceManager:
                 WHERE user_id = $1
             """, user_id)
 
-    async def get_guild_presences(self, guild_id, presence_type):
-        async with self.pool.acquire() as conn:
-            rows = await conn.fetch("""
-                SELECT *
-                FROM subscriptions
-                WHERE guild_id = $1
-            """, guild_id)
-        
-        user_ids = [row["user_id"] for row in rows]
+    async def get_guild_presences(self, guild, presence_type):
+        table = "old_presences" if presence_type == "old" else "presences"
+    
         async with self.pool.acquire() as conn:
             rows = await conn.fetch(f"""
-                SELECT *
-                FROM {"old_presences" if presence_type == "old" else "presences"}
-                WHERE user_id = ANY($1)
-            """, user_ids)
+                SELECT p.*
+                FROM {table} AS p
+                JOIN subscriptions AS s
+                    ON p.user_id = s.user_id
+                WHERE s.guild_id = $1
+            """, guild.id)
         
         if len(rows) > 0:
             presences = {
-                user_ids[i]: {
-                    "game_instance_id": rows[i]["game_instance_id"],
-                    "place_id": rows[i]["place_id"],
-                    "user_status": rows[i]["user_status"]
-                }
-                for i in range(len(rows))
+                row["user_id"]: row
+                for row in rows
             }
         else:
             presences = {
-                user_ids[i]: {
+                row["user_id"]: {
                     "game_instance_id": None,
                     "place_id": None,
                     "user_status": 0
                 }
-                for i in range(len(rows))
+                for row in rows
             }
 
         return presences
@@ -93,12 +85,8 @@ class PresenceManager:
             """, user_ids)
         
         presences = {
-            user_ids[i]: {
-                "game_instance_id": rows[i]["game_instance_id"],
-                "place_id": rows[i]["place_id"],
-                "user_status": rows[i]["user_status"]
-            }
-            for i in range(len(rows))
+            row["user_id"]: row
+            for row in rows
         }
 
         return presences
@@ -108,6 +96,7 @@ class PresenceManager:
             rows = await conn.fetch("""
                 SELECT *
                 FROM users
+                ORDER BY user_id
             """)
         
         user_ids = [row["user_id"] for row in rows]
@@ -116,20 +105,25 @@ class PresenceManager:
                 SELECT *
                 FROM presences
                 WHERE user_id = ANY($1)
+                ORDER BY user_id
             """, user_ids)
 
         return rows
 
-    async def check_joins(self, user_id, place_id, game_instance_id):
+    async def check_joins(self, guild, user_id, place_id, game_instance_id):
         joined = []
         async with self.pool.acquire() as conn:
             rows = await conn.fetch(f"""
-                SELECT *
+                SELECT user_id
                 FROM presences
                 WHERE place_id = $1
                 AND game_instance_id = $2
                 AND NOT user_id = $3
             """, place_id, game_instance_id, user_id)
-        for row in rows:
-            joined += [(row["display_name"], row["username"])]
+            guild_users = await self.user_manager.get_guild_users(guild)
+            joined_user_ids = [row["user_id"] for row in rows]
+
+        for guild_user in guild_users:
+            if guild_user["user_id"] in joined_user_ids:
+                joined = [(guild_user["display_name"], guild_user["username"])]
         return joined

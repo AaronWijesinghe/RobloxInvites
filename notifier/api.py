@@ -1,5 +1,4 @@
 import aiohttp
-import asyncio
 from datetime import datetime
 from database.database import *
 from aiohttp_retry import RetryClient, ExponentialRetry
@@ -64,18 +63,18 @@ class RobloxAPI:
             """, place_id)
             return exists
 
-    async def check_cached_universe_id(self, place_id):
-        if place_id == None:
+    async def check_cached_universe_id(self, universe_id):
+        if universe_id == None:
             return False
 
         async with self.pool.acquire() as conn:
             exists = await conn.fetchval("""
                 SELECT EXISTS (
                     SELECT 1
-                    FROM place_id_cache
-                    WHERE place_id = $1
+                    FROM universe_id_cache
+                    WHERE universe_id = $1
                 )
-            """, place_id)
+            """, universe_id)
             return exists
 
     async def get_cached_data(self, universe_id):

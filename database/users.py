@@ -22,28 +22,23 @@ class UserManager:
 
     async def get_guild_users(self, guild):
         async with self.pool.acquire() as conn:
-            rows = await conn.fetch("""
-                SELECT *
-                FROM subscriptions
-                WHERE guild_id = $1
+            rows = await conn.fetch(f"""
+                SELECT u.*
+                FROM users AS u
+                JOIN subscriptions AS s
+                    ON u.user_id = s.user_id
+                WHERE s.guild_id = $1
             """, guild.id)
-        
-        user_ids = [row["user_id"] for row in rows]
-        async with self.pool.acquire() as conn:
-            rows = await conn.fetch("""
-                SELECT *
-                FROM users
-                WHERE user_id = ANY($1)
-            """, user_ids)
 
         return rows
 
     async def get_guild_user_ids(self, guild):
         async with self.pool.acquire() as conn:
             rows = await conn.fetch("""
-                SELECT *
+                SELECT user_id
                 FROM subscriptions
                 WHERE guild_id = $1
+                ORDER BY user_id
             """, guild.id)
         
         user_ids = [row["user_id"] for row in rows]
@@ -54,13 +49,11 @@ class UserManager:
             rows = await conn.fetch("""
                 SELECT *
                 FROM users
+                ORDER BY user_id
             """)
         users = {
-            rows[i]["user_id"]: {
-                "username": rows[i]["username"],
-                "display_name": rows[i]["display_name"]
-            }
-            for i in range(len(rows))
+            row["user_id"]: row
+            for row in rows
         }
         return users
 
@@ -69,6 +62,7 @@ class UserManager:
             rows = await conn.fetch("""
                 SELECT user_id
                 FROM users
+                ORDER BY user_id
             """)
         user_ids = [row["user_id"] for row in rows]
         return user_ids

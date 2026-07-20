@@ -3,7 +3,6 @@ from styling.ri_colors import *
 from styling.formatting import *
 from database.database import *
 from notifier.send_embed import send_embed
-from copy import deepcopy
 
 class TrackerCore:
     def __init__(self, bot):
@@ -19,7 +18,7 @@ class TrackerCore:
             place_id = presences[user_id]["place_id"]
             game_instance_id = presences[user_id]["game_instance_id"]
 
-            if status == 2 and None in [user_id, place_id]:
+            if status == 2 and (game_instance_id is None or place_id is None):
                 continue
             if status == 2:
                 if user_id in old_presences:
@@ -37,8 +36,8 @@ class TrackerCore:
 
 
     async def send_guild_updates(self, guild):
-        guild_presences = await self.bot.presence_manager.get_guild_presences(guild.id, "current")
-        old_guild_presences = await self.bot.presence_manager.get_guild_presences(guild.id, "old")
+        guild_presences = await self.bot.presence_manager.get_guild_presences(guild, "current")
+        old_guild_presences = await self.bot.presence_manager.get_guild_presences(guild, "old")
 
         for user_id in guild_presences:
             status = guild_presences[user_id]["user_status"]
@@ -50,6 +49,8 @@ class TrackerCore:
                     if await self.bot.transfer_manager.check_transfer(user_id):
                         transfer = await self.bot.transfer_manager.get_transfer(user_id)
                         await self.send_leave_message(guild, user_id, transfer["old_place_id"], "absolute" if status == 0 else "website")
+            elif status == 2 and (game_instance_id is None or place_id is None):
+                continue
             elif status == 2:
                 if user_id in old_guild_presences:
                     if await self.bot.transfer_manager.check_transfer(user_id) == True:
@@ -89,7 +90,7 @@ class TrackerCore:
             if status in [0, 1]:
                 if user_id in old_presences:
                     if old_status == 2 and user_id not in self.transfers:
-                        if not (game_instance_id is None or place_id is None):
+                        if not (old_game_instance_id is None or old_place_id is None):
                             await self.bot.transfer_manager.add_transfer(user_id, old_place_id, old_game_instance_id)
                     elif await self.bot.transfer_manager.check_transfer(user_id):
                         await self.bot.stat_manager.finish_tracking_playtime(user_id)
@@ -167,14 +168,14 @@ class TrackerCore:
             if not await self.bot.cgt_manager.check_custom_title(guild, universe_id):
                 embed_color = orange
 
-        joined = await self.bot.presence_manager.check_joins(user_id, place_id, game_instance_id)
+        joined = await self.bot.presence_manager.check_joins(guild, user_id, place_id, game_instance_id)
         if len(joined) > 0:
             embed_title += f" (+{len(joined)})"
             embed_desc = f"**{display_name} (@{username}) just joined:**"
             for user in joined:
                 embed_desc += f"\n- {user[0]} (@{user[1]})"
             embed_desc += f"\n\nTotal playtime for this game: {playtime_str}\n**Join them** in *{game}* with the button below!\n-# Place ID: {place_id}"
-
+            
         invite_channel = await self.bot.settings_manager.get_channel(guild, "invite")
         await send_embed(self.bot, embed_title, embed_desc, embed_color, invite_channel, join_embed_url)
 
