@@ -62,7 +62,7 @@ class CGTManager:
                 """, guild.id, universe_id)
             return True
 
-    async def get_cached_games(self, guild):
+    async def get_cgt_games(self, guild):
         async with self.pool.acquire() as conn:
             rows = await conn.fetch("""
                 SELECT root_place_id
