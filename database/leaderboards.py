@@ -390,17 +390,13 @@ class LeaderboardManager:
         return (message_title, message_content)
 
     async def get_alltime_game_leaderboard(self, guild, root_place_id):
-        try:
-            if not await self.bot.stat_manager.check_if_game_played(guild, root_place_id):
-                return ("Error", "This game doesn't exist.")
+        if not await self.bot.stat_manager.check_if_game_played(guild, root_place_id):
+            return ("Error", "This game doesn't exist.")
 
-            game_playtimes_breakdown = await self.get_game_playtimes_breakdown_ranked(guild, root_place_id)
-            message_title, message_content = await self.get_game_leaderboard(root_place_id, game_playtimes_breakdown)
+        game_playtimes_breakdown = await self.get_game_playtimes_breakdown_ranked(guild, root_place_id)
+        message_title, message_content = await self.get_game_leaderboard(root_place_id, game_playtimes_breakdown)
 
-            return (message_title, message_content)
-        except:
-            import traceback
-            traceback.print_exc()
+        return (message_title, message_content)
 
     async def get_ls_game_leaderboard(self, guild, root_place_id):
         if not await self.bot.stat_manager.check_if_game_played(guild, root_place_id):

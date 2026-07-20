@@ -19,7 +19,7 @@ class StatManager:
             return exists
 
     async def check_if_game_played(self, guild, place_id):
-        guild_user_ids = await self.bot.user_manager.get_guild_user_ids(guild)
+        guild_user_ids = await self.user_manager.get_guild_user_ids(guild)
         async with self.pool.acquire() as conn:
             exists = await conn.fetchval("""
                 SELECT EXISTS (
