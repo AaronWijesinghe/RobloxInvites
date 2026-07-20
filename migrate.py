@@ -124,23 +124,25 @@ def convert_cached_ids():
 
 def convert_stats():
     stats = load_data("stats.json", {}, False, "You don't have any statistics data.")
-    stats["total_playtimes"] = []
-    stats["game_playtimes"] = []
     clear()
     print("[Roblox Invites Migration Tool]")
     print("Converting statistics data...")
 
-    for user in stats:
-        if stats[user]["currently_playing"] != {}:
-            currently_playing = stats[user]["currently_playing"]
-            if str(currently_playing["root_place_id"]) in stats[user]["games_playtime"]:
-                stats[user]["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
+    for user_id, data in stats.items():
+        if user_id in ["total_playtimes", "game_playtimes"]:
+            continue
+        if data["currently_playing"] != {}:
+            currently_playing = data["currently_playing"]
+            if str(currently_playing["root_place_id"]) in data["games_playtime"]:
+                data["games_playtime"][str(currently_playing["root_place_id"])]["playtime"] += round(time.time() - currently_playing["start"])
             else:
-                stats[user]["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
-        stats[user]["currently_playing"] = {}
+                data["games_playtime"][str(currently_playing["root_place_id"])] = {"playtime": round(time.time() - currently_playing["start"])}
+        data["currently_playing"] = {}
     if os.path.exists("./server/old_user_presences.json"):
         os.remove("./server/old_user_presences.json")
 
+    stats["total_playtimes"] = []
+    stats["game_playtimes"] = []
     for user_id, user_statistics in stats.items():
         if user_id in ["total_playtimes", "game_playtimes"]:
             continue
