@@ -63,17 +63,21 @@ class CGTManager:
             return True
 
     async def get_cgt_games(self, guild):
-        async with self.pool.acquire() as conn:
-            rows = await conn.fetch("""
-                SELECT root_place_id
-                FROM custom_titles
-                WHERE guild_id = $1
-            """, guild.id)
-            place_ids = [row["root_place_id"] for row in rows]
+        try:
+            async with self.pool.acquire() as conn:
+                rows = await conn.fetch("""
+                    SELECT root_place_id
+                    FROM custom_titles
+                    WHERE guild_id = $1
+                """, guild.id)
+                place_ids = [row["root_place_id"] for row in rows]
 
-            rows = await conn.fetch("""
-                SELECT *
-                FROM universe_id_cache
-                WHERE root_place_id = ANY($1)
-            """, place_ids)
-            return rows
+                rows = await conn.fetch("""
+                    SELECT *
+                    FROM universe_id_cache
+                    WHERE root_place_id = ANY($1)
+                """, place_ids)
+                return rows
+        except:
+            import traceback
+            traceback.print_exc()
