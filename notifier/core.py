@@ -70,7 +70,7 @@ class TrackerCore:
                     await self.send_invite(guild, user_id, place_id, game_instance_id)
             elif status == 3:
                 if await self.bot.stat_manager.check_currently_playing(user_id):
-                    await self.send_leave_message(user_id, old_guild_presences[user_id]["place_id"], "absolute")
+                    await self.send_leave_message(guild, user_id, old_guild_presences[user_id]["place_id"], "absolute")
 
     async def process_updates(self):
         presences = await self.bot.presence_manager.get_all_presences("current")

@@ -50,23 +50,25 @@ class UserCog(commands.Cog):
         else:
             await interaction.followup.send(f"You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!")
 
-    """
-    @user.command(name="stats", description="Gets a user's stat card")
+    @user.command(name="stats", description="Gets a user's statistics")
     @app_commands.autocomplete(user_id=user_autocomplete)
     async def get_user_card(
         self, 
         interaction: discord.Interaction, 
-        user_id: str
+        user_id: int
     ):
         await interaction.response.defer()
-        message_title, message_content = await self.bot.stat_manager.get_user_stats(user_id)
-        embed = discord.Embed(
-            title=message_title,
-            description=message_content,
-            color=discord.Color.dark_gold()
-        )
-        await interaction.followup.send(embed=embed)
-    """
+        try:
+            message_title, message_content = await self.bot.stat_manager.get_user_stats(interaction.guild, user_id)
+            embed = discord.Embed(
+                title=message_title,
+                description=message_content,
+                color=discord.Color.dark_gold()
+            )
+            await interaction.followup.send(embed=embed)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(UserCog(bot))

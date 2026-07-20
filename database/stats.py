@@ -45,21 +45,51 @@ class StatManager:
     async def get_total_playtime(self, user_id):
         async with self.pool.acquire() as conn:
             total_playtime = await conn.fetchval("""
-                SELECT total_playtime
-                FROM total_playtimes
-                WHERE user_id = $1
+                SELECT
+                    tp.user_id,
+                    tp.total_playtime +
+                    COALESCE(
+                        EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
+                        0
+                    ) AS total_playtime
+                FROM total_playtimes tp
+                LEFT JOIN currently_playing cp
+                    ON tp.user_id = cp.user_id
+                WHERE tp.user_id = $1
+                ORDER BY tp.total_playtime
             """, user_id)
             if total_playtime is None:
                 return 0
             return total_playtime
 
-    async def get_game_playtime(self, user_id, place_id):
+    async def get_total_game_playtime(self, place_id):
         async with self.pool.acquire() as conn:
             playtime = await conn.fetchval("""
                 SELECT playtime
                 FROM game_playtimes
-                WHERE user_id = $1
-                AND place_id = $2
+                WHERE place_id = $1
+            """, place_id)
+            if playtime is None:
+                return 0
+            return playtime
+
+    async def get_game_playtime(self, user_id, place_id):
+        async with self.pool.acquire() as conn:
+            playtime = await conn.fetchval("""
+                SELECT
+                    gp.user_id,
+                    gp.place_id,
+                    gp.playtime +
+                    COALESCE(
+                        EXTRACT(EPOCH FROM (NOW() - cp.start_time)),
+                        0
+                    ) AS playtime
+                FROM game_playtimes gp
+                LEFT JOIN currently_playing cp
+                    ON gp.user_id = cp.user_id
+                    AND gp.place_id = cp.place_id
+                WHERE gp.user_id = $1
+                AND gp.place_id = $2
             """, user_id, place_id)
             if playtime is None:
                 return 0
@@ -92,6 +122,7 @@ class StatManager:
                 LEFT JOIN currently_playing cp
                     ON tp.user_id = cp.user_id
                 WHERE tp.user_id = ANY($1)
+                ORDER BY tp.total_playtime
             """, user_ids)
             return total_rows
 
@@ -250,7 +281,7 @@ class StatManager:
                     ON g.user_id = s.user_id
                 LEFT JOIN currently_playing cp
                     ON cp.user_id = s.user_id
-                WHERE s.snapshot_id = $1;
+                WHERE s.snapshot_id = $1
             """, snapshot_id)
 
             game_rows = await conn.fetch("""
@@ -267,7 +298,7 @@ class StatManager:
                 LEFT JOIN currently_playing cp
                     ON cp.user_id = s.user_id
                     AND cp.place_id = s.place_id
-                WHERE s.snapshot_id = $1;
+                WHERE s.snapshot_id = $1
             """, snapshot_id)
 
         return (total_rows, game_rows)
@@ -383,6 +414,125 @@ class StatManager:
                 display_name = await self.user_manager.get_display_name(user)
                 message_content += f"\n[#{i}] {display_name} ({playtime / 3600:.2f}h)"
         
+        return (message_title, message_content)
+
+    async def get_user_stats(self, guild, user_id):
+        creation_date = datetime.now().strftime("%m-%d-%Y")
+        creation_time = datetime.now().strftime("%H:%M:%S")
+        guild_user_ids = await self.user_manager.get_guild_user_ids(guild)
+
+        async with self.pool.acquire() as conn:
+            snapshot_id = await conn.fetchval("""
+                SELECT snapshot_id
+                FROM snapshot_metadata
+                WHERE guild_id = $1
+                ORDER BY snapshot_id DESC
+                LIMIT 1
+            """, guild.id)
+
+            leaderboard_spot = await conn.fetchval("""
+                SELECT rank
+                FROM (
+                    SELECT
+                        user_id,
+                        total_playtime,
+                        RANK() OVER (ORDER BY total_playtime DESC) AS rank
+                    FROM total_playtimes
+                    WHERE user_id = ANY($1)
+                )
+                WHERE user_id = $2
+            """, guild_user_ids, user_id)
+
+            game_playtimes = await conn.fetch("""
+                SELECT
+                    user_id,
+                    place_id,
+                    playtime,
+                    RANK() OVER (ORDER BY playtime DESC) AS rank
+                FROM game_playtimes
+                WHERE user_id = $1                           
+            """, user_id)
+
+            if snapshot_id != None:
+                ls_leaderboard_spot = await conn.fetchval("""
+                    SELECT rank
+                    FROM (
+                        SELECT
+                            user_id,
+                            total_playtime,
+                            RANK() OVER (ORDER BY total_playtime DESC) AS rank
+                        FROM (
+                            SELECT
+                                s.user_id,
+                                COALESCE(g.playtime, 0)
+                                + COALESCE(EXTRACT(EPOCH FROM (NOW() - cp.start_time)), 0)
+                                - s.total_playtime AS total_playtime
+                            FROM total_playtime_snapshots s
+                            LEFT JOIN game_playtimes g
+                                ON g.user_id = s.user_id
+                            LEFT JOIN currently_playing cp
+                                ON cp.user_id = s.user_id
+                            WHERE s.snapshot_id = $1
+                            AND s.user_id = ANY($2)
+                        ) playtimes
+                    ) ranked
+                    WHERE user_id = $3
+                """, snapshot_id, guild_user_ids, user_id)
+
+                ls_game_playtimes = await conn.fetch("""
+                    SELECT
+                        user_id,
+                        place_id,
+                        playtime,
+                        RANK() OVER (ORDER BY playtime DESC) AS rank
+                    FROM (
+                        SELECT
+                            s.user_id,
+                            s.place_id,
+                            COALESCE(g.playtime, 0)
+                            + COALESCE(EXTRACT(EPOCH FROM (NOW() - cp.start_time)), 0)
+                            - s.playtime AS playtime
+                        FROM game_playtime_snapshots s
+                        LEFT JOIN game_playtimes g
+                            ON g.user_id = s.user_id
+                            AND g.place_id = s.place_id
+                        LEFT JOIN currently_playing cp
+                            ON cp.user_id = s.user_id
+                            AND cp.place_id = s.place_id
+                        WHERE s.snapshot_id = $1
+                        AND s.user_id = $2
+                    ) games_ranked
+                """, snapshot_id, user_id)
+
+        total = await self.get_total_playtime(user_id)
+
+        display_name = await self.user_manager.get_display_name(user_id)
+        username = await self.user_manager.get_username(user_id)
+
+        message_title = f"{display_name}'s usercard"
+        message_content = f"Created on {creation_date} @ {creation_time} EST"
+
+        message_content += f"\n\n**Your Playtimes:**"
+        message_content += f"\nOverall Playtime: {total / 3600:.2f}h"
+
+        message_content += f"\n\n**Your Standings:**"
+        message_content += f"\nOverall Leaderboard Position: #{leaderboard_spot}"
+        if snapshot_id != None:
+            message_content += f"\nSince-Last-Snapshot Leaderboard Position: #{ls_leaderboard_spot}"
+
+        message_content += f"\n\n**Your Top 5 Games Overall:**"
+        for game in game_playtimes[:5]:
+            await self.api.cache_id(game["place_id"])
+            name = await self.api.get_game_name(game["place_id"])
+            message_content += f"\n[#{game["rank"]}] {name}: {game["playtime"] / 3600:.2f}h"
+
+        if snapshot_id != None:
+            message_content += f"\n\n**Your Top 5 Games since Last Snapshot:**"
+            for game in ls_game_playtimes[:5]:
+                await self.api.cache_id(game["place_id"])
+                name = await self.api.get_game_name(game["place_id"])
+                message_content += f"\n[#{game["rank"]}] {name}: {game["playtime"] / 3600:.2f}h"
+
         return (message_title, message_content)
 
     async def get_alltime_user_leaderboard(self, guild):
