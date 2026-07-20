@@ -48,10 +48,7 @@ class CGTManager:
             """, guild.id, universe_id, title, hex_color, game_name, root_place_id)
 
     async def remove_custom_title(self, place_id, guild):
-        #if place_id not in self.api.cache["indexes"]:
-        #    await self.api.cache_id(place_id)
-        #universe_id = self.api.cache["indexes"][place_id]
-        universe_id = self.api.get_universe_id(place_id)
+        universe_id = await self.api.get_universe_id(place_id)
 
         if await self.check_custom_title(guild, universe_id):
             async with self.pool.acquire() as conn:
