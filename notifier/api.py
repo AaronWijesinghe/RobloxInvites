@@ -23,7 +23,7 @@ class API:
         place_id = int(place_id)
         if not await self.check_cached_place_id(place_id):
             universe_id = await self.get_misc(f"https://apis.roblox.com/universes/v1/places/{place_id}/universe")
-            if not "universeId" in universe_id:
+            if "universeId" not in universe_id:
                 return False
             universe_id = universe_id["universeId"]
             

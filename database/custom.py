@@ -41,12 +41,17 @@ class CGTManager:
 
         print(guild.id, universe_id, title, hex_color, game_name, root_place_id)
         async with self.pool.acquire() as conn:
-            await conn.execute("""
+            added = await conn.fetchval("""
                 INSERT INTO custom_titles (guild_id, universe_id, title, color, game_name, root_place_id)
                 VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT (guild_id, universe_id)
                 DO NOTHING
+                RETURNING guild_id
             """, guild.id, universe_id, title, hex_color, game_name, root_place_id)
+            if added:
+                return True
+            else:
+                return False
 
     async def remove_custom_title(self, place_id, guild):
         universe_id = await self.api.get_universe_id(place_id)
