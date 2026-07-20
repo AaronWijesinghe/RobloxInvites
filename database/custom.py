@@ -30,7 +30,6 @@ class CGTManager:
             return exists
 
     async def add_custom_title(self, place_id, title, hex_color, guild):
-        place_id = get_number(place_id)
         hex_color = hex_color.lower().replace("#", "")
 
         success = await self.api.cache_id(place_id)
