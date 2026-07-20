@@ -311,3 +311,8 @@ while True:
         asyncio.run(upload_users())
     elif command == "upload_ct":
         asyncio.run(upload_custom_titles())
+    elif command == "upload":
+        asyncio.run(upload_caches())
+        asyncio.run(upload_stats())
+        asyncio.run(upload_custom_titles())
+        asyncio.run(upload_users())
