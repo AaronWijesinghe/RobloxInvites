@@ -40,7 +40,7 @@ You can generate playtime leaderboards (weekly/overall), game leaderboards, and 
 
 ### Leaderboards
 - /leaderboard all - Generates an all-time playtime leaderboard for your server
-- /leaderboard weekly - Generates a playtime leaderboard for your server from the last saved snapshot to now
+- /leaderboard last_snapshot - Generates a playtime leaderboard for your server from the last saved snapshot to now
 - /leadebroard save - Saves a snapshot of user data to `extended_stats.json`
 - /leaderboard remove - Removes the last saved saved snapshot from `extended_stats.json`
 
@@ -69,11 +69,11 @@ You can generate playtime leaderboards (weekly/overall), game leaderboards, and 
 - /blacklist remove `blacklisted_id` - Removes blacklisted place ID `blacklisted_id` from the blacklist.
 
 ### Managing Channels
-- /channel invites `channel_id` - Sets the invites channel to `channel_id`
-- /channel announcements `channel_id` - Sets the announcements channel to `channel_id`
+- /settings invites `channel_id` - Sets the invites channel to `channel_id`
+- /settings announcements `channel_id` - Sets the announcements channel to `channel_id`
 
 ### Sending Invite Cards
-- /invite_user `user_id` - Sends an invite card in the context of ID `user_id`
+- /invite_user - Sends an invite card with your current game name and a link to join you
 
 ## JSON Files
 Roblox Invites stores JSON files in /data to store configuration data, user data, Custom Titles, cookies, and more.<br>
