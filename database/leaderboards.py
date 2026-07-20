@@ -312,6 +312,10 @@ class LeaderboardManager:
         return (message_title, message_content)
 
     async def get_user_stats(self, guild, user_id):
+        guild_user_ids = self.bot.user_manager.get_guild_user_ids(guild)
+        if user_id not in guild_user_ids:
+            return ("Error", "That user isn't in this server.")
+
         creation_date = datetime.now().strftime("%m-%d-%Y")
         creation_time = datetime.now().strftime("%H:%M:%S")
 
@@ -386,12 +390,18 @@ class LeaderboardManager:
         return (message_title, message_content)
 
     async def get_alltime_game_leaderboard(self, guild, root_place_id):
+        if not await self.bot.stat_manager.check_if_game_played(guild, root_place_id):
+            return ("Error", "This game doesn't exist.")
+
         game_playtimes_breakdown = await self.get_game_playtimes_breakdown_ranked(guild, root_place_id)
         message_title, message_content = await self.get_game_leaderboard(root_place_id, game_playtimes_breakdown)
 
         return (message_title, message_content)
 
     async def get_ls_game_leaderboard(self, guild, root_place_id):
+        if not await self.bot.stat_manager.check_if_game_played(guild, root_place_id):
+            return ("Error", "This game doesn't exist.")
+
         ls_game_playtimes_breakdown = await self.get_ls_game_playtimes_breakdown_ranked(guild, root_place_id)
         if len(ls_game_playtimes_breakdown) == 0:
             message_title = "Error"

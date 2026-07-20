@@ -18,16 +18,17 @@ class StatManager:
             """, user_id)
             return exists
 
-    async def check_if_game_played(self, user_id, place_id):
+    async def check_if_game_played(self, guild, place_id):
+        guild_user_ids = await self.bot.user_manager.get_guild_user_ids(guild)
         async with self.pool.acquire() as conn:
             exists = await conn.fetchval("""
                 SELECT EXISTS (
                     SELECT 1
                     FROM game_playtimes
-                    WHERE user_id = $1
+                    WHERE user_id = ANY($1)
                     AND place_id = $2
                 )
-            """, user_id, place_id)
+            """, guild_user_ids, place_id)
             return exists
 
     async def get_current_place_id(self, user_id):
