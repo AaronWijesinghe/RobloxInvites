@@ -40,7 +40,7 @@ class CGTManager:
         if not "{0}" in title:
             return "You must include `{0}` in your Custom Title to represent the user's display name."
         elif title.count("{0}") > 1:
-            return "You can only include `{0}` in your Custom Title."
+            return "You can only include one `{0}` in your Custom Title."
         elif len(title) > 150:
             return f"Your Custom Title is too long ({len(title)}, max 150 characters)."
         elif "\\" in title:
