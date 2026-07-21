@@ -58,7 +58,7 @@ class CGTCog(commands.Cog):
         if success == True:
             embed = discord.Embed(
                 title="Removed Custom Title!",
-                description=f"Place ID: {place_id}",
+                description=f"**Place ID:** {place_id}",
                 color=green
             )
         else:
