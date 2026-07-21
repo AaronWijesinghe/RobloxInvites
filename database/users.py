@@ -216,3 +216,32 @@ class UserManager:
                 DELETE FROM old_presences
                 WHERE user_id = ANY($1)
             """, deleted_user_ids)
+
+    async def update_user_info(self, discord_user):
+        async with self.pool.acquire() as conn:
+            user_id = await conn.fetchval("""
+                SELECT user_id
+                FROM users
+                WHERE discord_id = $1
+            """, discord_user.id)
+            if user_id is None:
+                return f"You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!"
+
+        req = await self.api.post_misc("https://users.roblox.com/v1/users", json={"userIds": [user_id]})
+        if "data" not in req:
+            return "Couldn't update your user info."
+        if len(req["data"]) == 0:
+            return "Couldn't update your user info."
+        username = req["data"][0]["name"]
+        display_name = req["data"][0]["displayName"]
+
+        async with self.pool.acquire(self, discord_user):
+            await conn.execute("""
+                INSERT INTO users (user_id, discord_id, username, display_name)
+                VALUES ($1, $2, $3, $4)
+                ON CONFLICT (user_id)
+                DO UPDATE SET
+                    username = EXCLUDED.username,
+                    display_name = EXCLUDED.display_name
+            """, user_id, discord_user.id, username, display_name)
+        return True
