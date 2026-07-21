@@ -69,5 +69,28 @@ class CGTCog(commands.Cog):
             )
         await interaction.response.send_message(embed=embed)
 
+    @cgt.command(name="info", description="Gives information on a Custom Title")
+    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.autocomplete(place_id=cgt_game_autocomplete)
+    async def custom_title_info(
+        self, 
+        interaction: discord.Interaction, 
+        place_id: int
+    ):
+        ct_row = await self.bot.cgt_manager.get_custom_title_rpid(place_id, interaction.guild)
+        if ct_row is not None:
+            embed = discord.Embed(
+                title="Custom Title Info",
+                description=f"Place ID: {place_id}\nTitle: {ct_row["title"]}\nHex Color: #{ct_row["hex_color"].replace("#", "")}",
+                color=int(ct_row["hex_color"], 16)
+            )
+        else:
+            embed = discord.Embed(
+                title="Error",
+                description=f"That Place ID doesn't have a Custom Title associated with it.\nAdd a Custom Title with `/custom_title add`!",
+                color=red
+            )
+        await interaction.response.send_message(embed=embed)
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(CGTCog(bot))
