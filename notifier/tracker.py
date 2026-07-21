@@ -23,7 +23,7 @@ class PresenceTracker:
                 print(f"{gold}[Roblox Invites] [{self.version}] [{times_checked}]{end}")
                 user_ids = await self.bot.user_manager.get_all_user_ids()
                 if len(user_ids) == 0:
-                    print("No users are currently being tracked. Add some through the bot!")
+                    print("No users are currently being tracked.")
                 else:
                     await self.bot.presence_manager.save_presences("current")
                     await self.bot.notifier.preprocess_playtimes()
