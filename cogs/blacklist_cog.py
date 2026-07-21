@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from database.database import *
+from styling.ri_colors import *
 
 class BlacklistCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -31,10 +32,19 @@ class BlacklistCog(commands.Cog):
     ):
         await interaction.response.defer()
         success = await interaction.client.blacklist_manager.add_blacklist(interaction.guild, place_id, game_name)
-        if success:
-            await interaction.followup.send(f"Added place ID {place_id} to the blacklist.")
+        if success == True:
+            embed = discord.Embed(
+                title="Added to blacklist!",
+                description=f"Added place ID {place_id} to the blacklist.\nGame name: {game_name}",
+                color=green
+            )
         else:
-            await interaction.followup.send(f"Place ID {place_id} is already in the blacklist!")
+            embed = discord.Embed(
+                title="Error",
+                description=f"Place ID {place_id} is already in the blacklist!",
+                color=red
+            )
+        await interaction.followup.send(embed=embed)
 
     @blacklist.command(name="remove", description="Removes a game from the blacklist")
     @app_commands.default_permissions(manage_guild=True)
@@ -46,10 +56,19 @@ class BlacklistCog(commands.Cog):
     ):
         await interaction.response.defer()
         success = await interaction.client.blacklist_manager.remove_blacklist(interaction.guild, place_id)
-        if success:
-            await interaction.followup.send(f"Removed place ID {place_id} from the blacklist.")
+        if success == True:
+            embed = discord.Embed(
+                title="Added to blacklist!",
+                description=f"Removed place ID {place_id} from the blacklist.",
+                color=green
+            )
         else:
-            await interaction.followup.send(f"Place ID {place_id} is not in the blacklist!")
+            embed = discord.Embed(
+                title="Error",
+                description=f"Place ID {place_id} is not in the blacklist!",
+                color=red
+            )
+        await interaction.followup.send(embed=embed)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(BlacklistCog(bot))

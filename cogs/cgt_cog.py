@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from database.database import *
+from styling.ri_colors import *
 
 class CGTCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -32,9 +33,18 @@ class CGTCog(commands.Cog):
     ):
         success = await self.bot.cgt_manager.add_custom_title(place_id, title, hex_color, interaction.guild)
         if success == True:
-            await interaction.response.send_message(f"**Added custom title!**\nPlace ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color.replace("#", "")}")
+            embed = discord.Embed(
+                title="Added custom title!",
+                description=f"Place ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color.replace("#", "")}",
+                color=green
+            )
         else:
-            await interaction.response.send_message(success)
+            embed = discord.Embed(
+                title="Error",
+                description=success,
+                color=red
+            )
+        await interaction.response.send_message(embed=embed)
 
     @cgt.command(name="remove", description="Removes a Custom Title!")
     @app_commands.default_permissions(manage_guild=True)
@@ -44,8 +54,20 @@ class CGTCog(commands.Cog):
         interaction: discord.Interaction, 
         place_id: int
     ):
-        await self.bot.cgt_manager.remove_custom_title(place_id, interaction.guild)
-        await interaction.response.send_message(f"**Removed custom title!**\nPlace ID: {place_id}")
+        success = await self.bot.cgt_manager.remove_custom_title(place_id, interaction.guild)
+        if success == True:
+            embed = discord.Embed(
+                title="Removed custom title!",
+                description=f"Place ID: {place_id}",
+                color=green
+            )
+        else:
+            embed = discord.Embed(
+                title="Error",
+                description="That Place ID doesn't have a Custom Title associated with it.\nAdd a Custom Title with `/custom_title add`!",
+                color=red
+            )
+        await interaction.response.send_message(embed=embed)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(CGTCog(bot))

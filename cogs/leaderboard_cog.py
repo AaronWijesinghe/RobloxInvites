@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from database.database import *
+from styling.ri_colors import *
 
 class LeaderboardCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -45,7 +46,7 @@ class LeaderboardCog(commands.Cog):
         embed = discord.Embed(
             title=message_title,
             description=message_content,
-            color=discord.Color.dark_gold()
+            color=discord.Color.dark_gold() if message_title != "Error" else red
         )
         await interaction.response.send_message(embed=embed)
 
@@ -60,7 +61,7 @@ class LeaderboardCog(commands.Cog):
         embed = discord.Embed(
             title=message_title,
             description=message_content,
-            color=discord.Color.dark_gold()
+            color=discord.Color.dark_gold() if message_title != "Error" else red
         )
         await interaction.response.send_message(embed=embed)
 
@@ -75,7 +76,7 @@ class LeaderboardCog(commands.Cog):
         embed = discord.Embed(
             title=message_title,
             description=message_content,
-            color=discord.Color.dark_gold()
+            color=discord.Color.dark_gold() if message_title != "Error" else red
         )
         await interaction.response.send_message(embed=embed)
 

@@ -16,12 +16,11 @@ class SettingsCog(commands.Cog):
         interaction: discord.Interaction, 
         channel: discord.TextChannel
     ):
-        await interaction.response.defer()
         success = await interaction.client.settings_manager.set_channel(interaction.guild, "invite", channel)
         if success:
-            await interaction.followup.send(f"Set the invite channel to https://discord.com/channels/{interaction.guild.id}/{channel.id}")
+            await interaction.response.send_message(f"Set the invite channel to https://discord.com/channels/{interaction.guild.id}/{channel.id}")
         else:
-            await interaction.followup.send(f"Channel ID `{channel.id}` doesn't exist.")
+            await interaction.response.send_message(f"Channel ID `{channel.id}` doesn't exist.")
 
     @channel.command(name="announcements", description="Sets the channel ID for the announcements channel")
     @app_commands.default_permissions(manage_guild=True)
@@ -30,12 +29,11 @@ class SettingsCog(commands.Cog):
         interaction: discord.Interaction, 
         channel: discord.TextChannel
     ):
-        await interaction.response.defer()
         success = await interaction.client.settings_manager.set_channel(interaction.guild, "announcement", channel)
         if success:
-            await interaction.followup.send(f"Set the announcement channel to https://discord.com/channels/{interaction.guild.id}/{channel.id}")
+            await interaction.response.send_message(f"Set the announcement channel to https://discord.com/channels/{interaction.guild.id}/{channel.id}")
         else:
-            await interaction.followup.send(f"Channel ID `{channel.id}` doesn't exist.")
+            await interaction.response.send_message(f"Channel ID `{channel.id}` doesn't exist.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(SettingsCog(bot))

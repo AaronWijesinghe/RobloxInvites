@@ -74,11 +74,15 @@ class CGTManager:
 
         if await self.check_custom_title(guild, universe_id):
             async with self.pool.acquire() as conn:
-                await conn.execute("""
+                success = await conn.fetchval("""
                     DELETE FROM custom_titles
                     WHERE guild_id = $1
                     AND universe_id = $2
+                    RETURNING universe_id
                 """, guild.id, universe_id)
+                
+                if success is None:
+                    return False
             return True
 
     async def get_cgt_games(self, guild):
