@@ -1,5 +1,4 @@
 import discord
-import subprocess
 from discord import app_commands
 from discord.ext import commands
 from database.database import *
@@ -18,9 +17,6 @@ To remove a Custom Title, run `/custom_title remove`.
 To add or remove a blacklisted place ID, run `/blacklist [add | remove]`.
 To save/delete snapshots, run `/leaderboard [save | remove]`.
 """
-
-def get_latest_commit_hash():
-    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()
 
 class HelpCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
