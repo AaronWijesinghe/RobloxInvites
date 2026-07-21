@@ -88,7 +88,7 @@ class TrackerCore:
 
             if status in [0, 1]:
                 if user_id in old_presences:
-                    if old_status == 2 and not self.bot.transfer_manager.check_transfer(user_id):
+                    if old_status == 2 and not await self.bot.transfer_manager.check_transfer(user_id):
                         if not (old_game_instance_id is None or old_place_id is None):
                             await self.bot.transfer_manager.add_transfer(user_id, old_place_id, old_game_instance_id)
                     elif await self.bot.transfer_manager.check_transfer(user_id):
