@@ -35,7 +35,7 @@ class CGTCog(commands.Cog):
         if success == True:
             embed = discord.Embed(
                 title="Added custom title!",
-                description=f"Place ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color.replace("#", "")}",
+                description=f"**Place ID:** {place_id}\n**Title:** {title}\n**Hex Color:** #{hex_color.replace("#", "")}",
                 color=int(hex_color, 16)
             )
         else:
@@ -77,12 +77,12 @@ class CGTCog(commands.Cog):
         interaction: discord.Interaction, 
         place_id: int
     ):
-        ct_row = await self.bot.cgt_manager.get_custom_title_rpid(place_id, interaction.guild)
+        ct_row = await self.bot.cgt_manager.get_custom_title_rpid(interaction.guild, place_id)
         if ct_row is not None:
             embed = discord.Embed(
                 title="Custom Title Info",
-                description=f"Place ID: {place_id}\nTitle: {ct_row["title"]}\nHex Color: #{ct_row["hex_color"].replace("#", "")}",
-                color=int(ct_row["hex_color"], 16)
+                description=f"**Place ID:** {place_id}\n**Title:** {ct_row["title"]}\n**Hex Color:** #{ct_row["color"].replace("#", "")}",
+                color=int(ct_row["color"], 16)
             )
         else:
             embed = discord.Embed(
