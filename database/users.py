@@ -103,20 +103,39 @@ class UserManager:
                     AND user_id = $2
                 )
             """, guild.id, user_id)
-            owner_account_id = await conn.fetchval("""
-                SELECT discord_id
+            prev_discord = await conn.fetchrow("""
+                SELECT *
+                FROM users
+                WHERE discord_id = $1
+            """, discord_user.id)
+            prev_roblox = await conn.fetchrow("""
+                SELECT *
                 FROM users
                 WHERE user_id = $1
             """, user_id)
+
+            if not None in (prev_discord, prev_roblox):
+                if prev_discord == prev_roblox and user_exists_in_guild:
+                    return "You've already linked this account with Roblox Invites."
+                elif discord_user.id != prev_roblox["discord_id"]:
+                    return "This account has already been linked by someone else."
+                elif prev_discord["user_id"] != user_id:
+                    return "This account has already been linked by someone else."
+
+            if prev_roblox is not None:
+                if discord_user.id != prev_roblox["discord_id"]:
+                    return "Someone else already linked this account."
+
+            if prev_discord is not None:
+                if prev_discord["user_id"] != user_id:
+                    return "You have already linked a different account."
+
             if not user_exists_in_ri:
                 user_data = await self.api.get_misc(f"https://users.roblox.com/v1/users/{user_id}")
                 if user_data["description"].lower().strip() != "i confirm that i am joining the invites program.":
                     return f"**You must verify that the following account (@{username}) is yours.**\nPlease set `I confirm that I am joining the Invites program.` as your Roblox account description and try again.\nYou can edit your description [here](<https://www.roblox.com/users/profile/edit>)."
             elif user_exists_in_guild:
                 return f"This user already exists in this server."
-            else:
-                if owner_account_id != discord_user.id:
-                    return "This account has already been linked by someone else."
 
             await conn.execute("""
                 INSERT INTO users (user_id, discord_id, username, display_name)
