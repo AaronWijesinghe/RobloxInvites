@@ -18,7 +18,7 @@ class CGTManager:
             return row
 
     async def get_custom_title_rpid(self, guild, root_place_id):
-        universe_id = self.api.get_universe_id(root_place_id)
+        universe_id = await self.api.get_universe_id(root_place_id)
         if universe_id == None:
             return None
         if await self.check_custom_title(guild, universe_id):
