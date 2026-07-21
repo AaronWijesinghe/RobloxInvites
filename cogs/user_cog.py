@@ -28,10 +28,10 @@ class UserCog(commands.Cog):
         interaction: discord.Interaction, 
         username: str
     ):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         success = await interaction.client.user_manager.add_user(username, interaction.user, interaction.guild)
         if success == True:
-            await interaction.followup.send(f"Added user @{username} to Roblox Invites!")
+            await interaction.followup.send(f"Successfully added you (@{username}) to Roblox Invites!")
         else:
             await interaction.followup.send(success)
 
@@ -40,10 +40,10 @@ class UserCog(commands.Cog):
         self, 
         interaction: discord.Interaction, 
     ):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         success = await interaction.client.user_manager.remove_user(interaction.user, interaction.guild)
         if success == True:
-            await interaction.followup.send(f"Removed you from this guild. Hope you had a great time!")
+            await interaction.followup.send(f"Removed you from this server. Hope you had a great time!")
         else:
             await interaction.followup.send(f"You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!")
 
