@@ -9,17 +9,10 @@ from styling.ri_colors import *
 from dotenv import load_dotenv
 
 load_dotenv()
-version = "2.0.0"
+version = "2.1.0"
 headers = {
     "Cookie": f".ROBLOSECURITY={os.environ["cookie"]}"
 }
-
-patch_notes = f"""
-Updated to __v{version}__
-
-**Changes:**
-- Patch notes will be updated on release.
-"""
 
 dev_guild = discord.Object(id=os.environ["guild"])
 api = notifier.API(headers)
