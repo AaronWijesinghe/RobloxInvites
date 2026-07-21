@@ -40,6 +40,7 @@ class RobloxInvitesBot(commands.Bot):
 
         self.tree.copy_global_to(guild=self.dev_guild)
         await self.tree.sync(guild=self.dev_guild)
+        await self.tree.sync()
 
     async def on_ready(self):
         for guild in self.guilds:
