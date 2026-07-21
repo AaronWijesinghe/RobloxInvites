@@ -36,7 +36,7 @@ class CGTCog(commands.Cog):
             embed = discord.Embed(
                 title="Added custom title!",
                 description=f"Place ID: {place_id}\nTitle: {title}\nHex Color: #{hex_color.replace("#", "")}",
-                color=green
+                color=int(hex_color, 16)
             )
         else:
             embed = discord.Embed(

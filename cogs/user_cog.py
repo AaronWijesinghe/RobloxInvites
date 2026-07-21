@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from database.database import *
+from styling.ri_colors import *
 
 class UserCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -72,7 +73,7 @@ class UserCog(commands.Cog):
         embed = discord.Embed(
             title=message_title,
             description=message_content,
-            color=discord.Color.dark_purple()
+            color=discord.Color.dark_purple() if message_title != "Error" else red
         )
         
         view = discord.ui.View()

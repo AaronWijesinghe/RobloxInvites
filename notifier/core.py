@@ -7,7 +7,6 @@ from notifier.send_embed import send_embed
 class TrackerCore:
     def __init__(self, bot):
         self.bot = bot
-        self.transfers = {}
 
     async def preprocess_playtimes(self):
         presences = await self.bot.presence_manager.get_all_presences("current")
@@ -89,7 +88,7 @@ class TrackerCore:
 
             if status in [0, 1]:
                 if user_id in old_presences:
-                    if old_status == 2 and user_id not in self.transfers:
+                    if old_status == 2 and not self.bot.transfer_manager.check_transfer(user_id):
                         if not (old_game_instance_id is None or old_place_id is None):
                             await self.bot.transfer_manager.add_transfer(user_id, old_place_id, old_game_instance_id)
                     elif await self.bot.transfer_manager.check_transfer(user_id):
@@ -105,14 +104,14 @@ class TrackerCore:
                 if user_id in old_presences:
                     if await self.bot.transfer_manager.check_transfer(user_id) == True:
                         transfer = await self.bot.transfer_manager.get_transfer(user_id)
-                        if [transfer["old_place_id"], transfer["old_game_instance_id"]] == [place_id, game_instance_id]:
+                        if await self.bot.api.check_root_place_id(transfer["old_place_id"], place_id):
                             await self.bot.transfer_manager.remove_transfer(user_id)
                         else:
                             await self.bot.stat_manager.start_tracking_playtime(user_id, place_id)
                         continue
 
                     if presences[user_id] != old_presences[user_id]:
-                        if not await self.bot.api.check_root_place_id(old_presences[user_id]["place_id"], place_id):
+                        if not await self.bot.api.check_root_place_id(old_place_id, place_id):
                             await self.bot.stat_manager.start_tracking_playtime(user_id, place_id)
                 else:
                     await self.bot.stat_manager.start_tracking_playtime(user_id, place_id)

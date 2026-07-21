@@ -6,8 +6,6 @@ class PresenceTracker:
     def __init__(self, bot, version):
         self.bot = bot
         self.version = version
-        self.user_presences = {}
-        self.transfers = {}
 
     def clear(self):
         print("\033[2J\033[3J\033[H", end="")
