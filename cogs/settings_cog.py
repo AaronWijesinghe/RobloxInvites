@@ -27,9 +27,9 @@ class SettingsCog(commands.Cog):
 
         success = await interaction.client.settings_manager.set_channel(interaction.guild, "invite", channel)
         if success:
-            await interaction.response.send_message(f"Set the invite channel to https://discord.com/channels/{interaction.guild.id}/{channel.id}")
+            await interaction.response.send_message(f"Set the invite channel to https://discord.com/channels/{interaction.guild.id}/{channel.id}", ephemeral=True)
         else:
-            await interaction.response.send_message(f"Channel ID `{channel.id}` doesn't exist.")
+            await interaction.response.send_message(f"Channel ID `{channel.id}` doesn't exist.", ephemeral=True)
 
     @channel.command(name="announcements", description="Sets the channel ID for the announcements channel")
     @app_commands.default_permissions(manage_guild=True)

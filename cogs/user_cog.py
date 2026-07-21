@@ -53,7 +53,7 @@ class UserCog(commands.Cog):
         interaction: discord.Interaction, 
     ):
         await interaction.response.defer(ephemeral=True)
-        success = await interaction.client.user_manager.update_info(interaction.user)
+        success = await interaction.client.user_manager.update_user_info(interaction.user)
         if success == True:
             await interaction.followup.send(f"Successfully updated your user info!")
         else:

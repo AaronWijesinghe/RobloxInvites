@@ -235,7 +235,7 @@ class UserManager:
         username = req["data"][0]["name"]
         display_name = req["data"][0]["displayName"]
 
-        async with self.pool.acquire(self, discord_user):
+        async with self.pool.acquire() as conn:
             await conn.execute("""
                 INSERT INTO users (user_id, discord_id, username, display_name)
                 VALUES ($1, $2, $3, $4)
