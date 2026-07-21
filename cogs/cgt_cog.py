@@ -34,7 +34,7 @@ class CGTCog(commands.Cog):
         success = await self.bot.cgt_manager.add_custom_title(place_id, title, hex_color, interaction.guild)
         if success == True:
             embed = discord.Embed(
-                title="Added custom title!",
+                title="Added Custom Title!",
                 description=f"**Place ID:** {place_id}\n**Title:** {title}\n**Hex Color:** #{hex_color.replace("#", "")}",
                 color=int(hex_color, 16)
             )
@@ -57,7 +57,7 @@ class CGTCog(commands.Cog):
         success = await self.bot.cgt_manager.remove_custom_title(place_id, interaction.guild)
         if success == True:
             embed = discord.Embed(
-                title="Removed custom title!",
+                title="Removed Custom Title!",
                 description=f"Place ID: {place_id}",
                 color=green
             )
@@ -77,12 +77,12 @@ class CGTCog(commands.Cog):
         interaction: discord.Interaction, 
         place_id: int
     ):
-        ct_row = await self.bot.cgt_manager.get_custom_title_rpid(interaction.guild, place_id)
-        if ct_row is not None:
+        row = await self.bot.cgt_manager.get_custom_title_rpid(interaction.guild, place_id)
+        if row is not None:
             embed = discord.Embed(
                 title="Custom Title Info",
-                description=f"**Place ID:** {place_id}\n**Title:** {ct_row["title"]}\n**Hex Color:** #{ct_row["color"].replace("#", "")}",
-                color=int(ct_row["color"], 16)
+                description=f"**Place ID:** {place_id}\n**Title:** {row["title"]}\n**Hex Color:** #{row["color"].replace("#", "")}",
+                color=int(row["color"], 16)
             )
         else:
             embed = discord.Embed(
@@ -90,7 +90,7 @@ class CGTCog(commands.Cog):
                 description=f"That Place ID doesn't have a Custom Title associated with it.\nAdd a Custom Title with `/custom_title add`!",
                 color=red
             )
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(CGTCog(bot))

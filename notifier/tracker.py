@@ -41,3 +41,9 @@ class PresenceTracker:
                 print(f"{gold}[Roblox Invites] [{self.version}] [{times_checked}]{end}")
                 print(f"There's been a client response error! Status code: {e.status}")
                 await asyncio.sleep(10)
+            except aiohttp.client_exceptions.ClientConnectorCertificateError:
+                self.clear()
+                print(f"{gold}[Roblox Invites] [{self.version}] [{times_checked}]{end}")
+                print(f"Couldn't connect to Roblox's servers.")
+                print("Make sure your certificates are up to date and that Roblox isn't blocked on your network.")
+                await asyncio.sleep(5)

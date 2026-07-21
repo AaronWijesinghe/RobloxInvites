@@ -18,18 +18,14 @@ class CGTManager:
             return row
 
     async def get_custom_title_rpid(self, guild, root_place_id):
-        universe_id = await self.api.get_universe_id(root_place_id)
-        if universe_id == None:
-            return None
-        if await self.check_custom_title(guild, universe_id):
-            async with self.pool.acquire() as conn:
-                row = await conn.fetchrow("""
-                    SELECT *
-                    FROM custom_titles
-                    WHERE guild_id = $1
-                    AND universe_id = $2
-                """, guild.id, universe_id)
-            return row
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow("""
+                SELECT *
+                FROM custom_titles
+                WHERE guild_id = $1
+                AND root_place_id = $2
+            """, guild.id, root_place_id)
+        return row
 
     async def check_custom_title(self, guild, universe_id):
         async with self.pool.acquire() as conn:
