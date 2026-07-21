@@ -110,7 +110,7 @@ class UserManager:
             """, user_id)
             if not user_exists_in_ri:
                 user_data = await self.api.get_misc(f"https://users.roblox.com/v1/users/{user_id}")
-                if user_data["description"] != "I confirm that I am joining the Invites program.":
+                if user_data["description"].lower().strip() != "i confirm that i am joining the invites program.":
                     return f"You must verify that the following account (@{username}) is yours.\nPlease set `I confirm that I am joining the Invites program.` as your Roblox account description and retry again."
             elif user_exists_in_guild:
                 return f"This user already exists in this server."
