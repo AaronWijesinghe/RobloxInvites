@@ -32,6 +32,7 @@ class RobloxInvitesBot(commands.Bot):
         self.snapshot_manager = database.SnapshotManager(self.db, self, self.api)
         self.leaderboard_manager = database.LeaderboardManager(self.db, self, self.api)
 
+        await self.load_extension("cogs.help_cog")
         await self.load_extension("cogs.user_cog")
         await self.load_extension("cogs.cgt_cog")
         await self.load_extension("cogs.blacklist_cog")
