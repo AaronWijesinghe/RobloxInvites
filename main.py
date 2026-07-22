@@ -3,8 +3,6 @@ import asyncio
 import notifier
 import discord
 from bot import *
-from styling.ansi import *
-from styling.ri_colors import *
 from dotenv import load_dotenv
 
 load_dotenv()
