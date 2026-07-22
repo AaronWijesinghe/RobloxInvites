@@ -10,6 +10,7 @@ class RobloxInvitesBot(commands.Bot):
     def __init__(self, api, dev_guild):
         intents = discord.Intents.default()
         intents.message_content = True
+        intents.members = True
         super().__init__(command_prefix="!", intents=intents)
         
         self.db = Database()
@@ -48,3 +49,6 @@ class RobloxInvitesBot(commands.Bot):
         for guild in self.guilds:
             await self.db.create_guild(guild)
         print(f"{self.user} is online and ready!")
+
+    async def on_member_remove(self, member):
+        await self.user_manager.remove_user(member, member.guild)
