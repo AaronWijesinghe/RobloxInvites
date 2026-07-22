@@ -25,8 +25,11 @@ class API:
             universe_id = await self.get_misc(f"https://apis.roblox.com/universes/v1/places/{place_id}/universe")
             if "universeId" not in universe_id:
                 return False
-            universe_id = universe_id["universeId"]
             
+            universe_id = universe_id["universeId"]
+            if universe_id is None:
+                return False
+
             game_data = await self.get_misc(f"https://games.roblox.com/v1/games?universeIds={universe_id}")
             game_name = game_data["data"][0]["name"]
             root_place_id = game_data["data"][0]["rootPlaceId"]

@@ -2,7 +2,6 @@ import os
 import asyncio
 import notifier
 import discord
-import database
 from bot import *
 from styling.ansi import *
 from styling.ri_colors import *

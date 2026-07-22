@@ -1,5 +1,3 @@
-from styling.formatting import *
-
 class CGTManager:
     def __init__(self, database, api):
         self.database = database
