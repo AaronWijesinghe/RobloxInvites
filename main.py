@@ -8,7 +8,7 @@ from styling.ri_colors import *
 from dotenv import load_dotenv
 
 load_dotenv()
-version = "2.1.1"
+version = "2.1.2"
 headers = {
     "Cookie": f".ROBLOSECURITY={os.environ["cookie"]}"
 }
