@@ -71,7 +71,7 @@ class UserCog(commands.Cog):
         embed = discord.Embed(
             title=message_title,
             description=message_content,
-            color=discord.Color.dark_gold()
+            color=discord.Color.dark_gold() if message_title != "Error" else red
         )
         await interaction.followup.send(embed=embed)
 
