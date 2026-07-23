@@ -49,7 +49,8 @@ class TrackerCore:
                         transfer = await self.bot.transfer_manager.get_transfer(user_id)
                         await self.send_leave_message(guild, user_id, transfer["old_place_id"], "absolute" if status == 0 else "website")
             elif status == 2 and (game_instance_id is None or place_id is None):
-                continue
+                if await self.bot.stat_manager.check_currently_playing(user_id):
+                    await self.send_leave_message(guild, user_id, old_guild_presences[user_id]["place_id"], "absolute")
             elif status == 2:
                 if user_id in old_guild_presences:
                     if await self.bot.transfer_manager.check_transfer(user_id) == True:
@@ -98,6 +99,8 @@ class TrackerCore:
                         await self.bot.stat_manager.finish_tracking_playtime(user_id)
                 print(f"{users[user_id]["username"]} is {'offline.' if status == 0 else 'on the Roblox website!'}")
             elif status == 2 and (game_instance_id is None or place_id is None):
+                if await self.bot.stat_manager.check_currently_playing(user_id):
+                    await self.bot.stat_manager.finish_tracking_playtime(user_id)
                 print(f"{users[user_id]["username"]} has their joins off, or you aren't following them.")
                 print(f"   -> Follow them @ https://roblox.com/users/{user_id}/profile")
             elif status == 2:
