@@ -24,6 +24,7 @@ class BlacklistCog(commands.Cog):
 
     @blacklist.command(name="add", description="Adds a game to the blacklist")
     @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     async def add_blacklist(
         self, 
         interaction: discord.Interaction, 
@@ -48,6 +49,7 @@ class BlacklistCog(commands.Cog):
 
     @blacklist.command(name="remove", description="Removes a game from the blacklist")
     @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.autocomplete(place_id=blacklisted_games_autocomplete)
     async def remove_blacklist(
         self, 

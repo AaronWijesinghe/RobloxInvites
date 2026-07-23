@@ -48,6 +48,7 @@ class CGTCog(commands.Cog):
 
     @cgt.command(name="remove", description="Removes a Custom Title!")
     @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.autocomplete(place_id=cgt_game_autocomplete)
     async def remove_custom_title(
         self, 
@@ -71,6 +72,7 @@ class CGTCog(commands.Cog):
 
     @cgt.command(name="info", description="Gives information on a Custom Title")
     @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.autocomplete(place_id=cgt_game_autocomplete)
     async def custom_title_info(
         self, 

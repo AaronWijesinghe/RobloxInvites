@@ -11,6 +11,7 @@ class SettingsCog(commands.Cog):
 
     @channel.command(name="invites", description="Sets the channel ID for the invites channel")
     @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     async def set_invite_channel(
         self, 
         interaction: discord.Interaction, 
@@ -33,6 +34,7 @@ class SettingsCog(commands.Cog):
 
     @channel.command(name="announcements", description="Sets the channel ID for the announcements channel")
     @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     async def set_announcement_channel(
         self, 
         interaction: discord.Interaction, 

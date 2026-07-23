@@ -82,6 +82,7 @@ class LeaderboardCog(commands.Cog):
 
     @leaderboard.command(name="save", description="Saves a snapshot of user data for weekly leaderboards")
     @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     async def save_period(
         self, 
         interaction: discord.Interaction, 
@@ -92,6 +93,7 @@ class LeaderboardCog(commands.Cog):
 
     @leaderboard.command(name="remove", description="Removes the last saved user snapshot")
     @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     async def remove_last_period(
         self, 
         interaction: discord.Interaction, 
