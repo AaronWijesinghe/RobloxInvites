@@ -125,5 +125,5 @@ class PresenceManager:
 
         for guild_user in guild_users:
             if guild_user["user_id"] in joined_user_ids:
-                joined = [(guild_user["display_name"], guild_user["username"])]
+                joined += [(guild_user["display_name"], guild_user["username"])]
         return joined
