@@ -11,6 +11,10 @@ class BlacklistCog(commands.Cog):
     blacklist = app_commands.Group(
         name="blacklist",
         description="Blacklist commands",
+        allowed_installs=app_commands.AppInstallationType(
+            guild=True,
+            user=False
+        ),
         allowed_contexts=app_commands.AppCommandContext(
             guild=True,
             dm_channel=False,

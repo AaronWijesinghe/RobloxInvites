@@ -11,6 +11,10 @@ class LeaderboardCog(commands.Cog):
     leaderboard = app_commands.Group(
         name="leaderboard",
         description="Leaderboard commands",
+        allowed_installs=app_commands.AppInstallationType(
+            guild=True,
+            user=False
+        ),
         allowed_contexts=app_commands.AppCommandContext(
             guild=True,
             dm_channel=False,
