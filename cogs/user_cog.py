@@ -79,7 +79,6 @@ class UserCog(commands.Cog):
         await interaction.followup.send(embed=embed)
 
     @app_commands.command(name="stats", description="Shows your statistics")
-    @app_commands.dm_only()
     async def get_user_card_dms(
         self, 
         interaction: discord.Interaction
