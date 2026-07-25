@@ -6,7 +6,7 @@ from bot import *
 from dotenv import load_dotenv
 
 load_dotenv()
-version = "2.2.2"
+version = "2.3.0"
 headers = {
     "Cookie": f".ROBLOSECURITY={os.environ["cookie"]}"
 }
