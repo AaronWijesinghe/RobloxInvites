@@ -54,7 +54,7 @@ class ServerCog(commands.Cog):
         else:
             await interaction.followup.send(f"You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!")
 
-    @server.command(name="user_stats", description="Shows a user's statistics in that server")
+    @server.command(name="user_stats", description="Shows a user's statistics in a given server")
     @app_commands.autocomplete(user_id=user_autocomplete)
     async def get_user_card(
         self, 
