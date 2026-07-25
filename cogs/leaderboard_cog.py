@@ -8,7 +8,15 @@ class LeaderboardCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    leaderboard = app_commands.Group(name="leaderboard", description="Leaderboard commands")
+    leaderboard = app_commands.Group(
+        name="leaderboard",
+        description="Leaderboard commands",
+        allowed_contexts=app_commands.AppCommandContext(
+            guild=True,
+            dm_channel=False,
+            private_channel=False
+        )
+    )
     game = app_commands.Group(name="game", description="Game-related leaderboard commands", parent=leaderboard)
 
     async def all_games_autocomplete(
@@ -66,7 +74,6 @@ class LeaderboardCog(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @game.command(name="last_snapshot", description="Sends this server's playtime leaderboard for a game since the last saved snapshot")
-    @app_commands.guild_only()
     @app_commands.autocomplete(place_id=all_games_autocomplete)
     async def ls_game_leaderboard(
         self, 
@@ -82,7 +89,6 @@ class LeaderboardCog(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @leaderboard.command(name="save", description="Saves a snapshot of user data for weekly leaderboards")
-    @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
     async def save_period(
@@ -94,7 +100,6 @@ class LeaderboardCog(commands.Cog):
         await interaction.followup.send("Saved the current data to a snapshot!")
 
     @leaderboard.command(name="remove", description="Removes the last saved user snapshot")
-    @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
     async def remove_last_period(

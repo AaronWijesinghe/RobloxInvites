@@ -21,10 +21,17 @@ class CGTCog(commands.Cog):
             if query.lower() in game["game_name"].lower()
         ][:25]
 
-    cgt = app_commands.Group(name="custom_title", description="Custom game title commands")
+    cgt = app_commands.Group(
+        name="custom_title",
+        description="Custom game title commands",
+        allowed_contexts=app_commands.AppCommandContext(
+            guild=True,
+            dm_channel=False,
+            private_channel=False
+        )
+    )
 
     @cgt.command(name="add", description="Adds a Custom Title!")
-    @app_commands.guild_only()
     async def add_custom_title(
         self, 
         interaction: discord.Interaction, 
@@ -48,7 +55,6 @@ class CGTCog(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @cgt.command(name="remove", description="Removes a Custom Title!")
-    @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.autocomplete(place_id=cgt_game_autocomplete)
@@ -73,7 +79,6 @@ class CGTCog(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @cgt.command(name="info", description="Gives information on a Custom Title")
-    @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.autocomplete(place_id=cgt_game_autocomplete)

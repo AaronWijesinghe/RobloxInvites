@@ -20,36 +20,52 @@ class UserCog(commands.Cog):
             if query.lower() in user["username"].lower()
         ]
 
-    user = app_commands.Group(name="user", description="User commands")
+    user = app_commands.Group(
+        name="user",
+        description="User commands",
+        allowed_installs=app_commands.AppInstallationType(
+            guild=True,
+            user=True
+        ),
+        allowed_contexts=app_commands.AppCommandContext(
+            guild=True,
+            dm_channel=True,
+            private_channel=True
+        )
+    )
 
     @user.command(name="add", description="Adds a new user to Roblox Invites")
-    @app_commands.guild_only()
     async def add_user(
         self, 
         interaction: discord.Interaction, 
         username: str
     ):
         await interaction.response.defer(ephemeral=True)
-        success = await interaction.client.user_manager.add_user(username, interaction.user, interaction.guild)
+        success = await interaction.client.user_manager.add_user(username, interaction.user)
         if success == True:
             await interaction.followup.send(f"Successfully added you (@{username}) to Roblox Invites!")
         else:
             await interaction.followup.send(success)
 
-    @user.command(name="remove", description="Removes you from the current server")
-    @app_commands.guild_only()
+    @user.command(name="remove", description="Removes you from Roblox Invites")
     async def remove_user(
         self, 
         interaction: discord.Interaction, 
     ):
         await interaction.response.defer(ephemeral=True)
-        success = await interaction.client.user_manager.remove_user(interaction.user, interaction.guild)
+        success = await interaction.client.user_manager.remove_user(interaction.user)
         if success == True:
-            await interaction.followup.send(f"Removed you from this server. Hope you had a great time!")
+            await interaction.followup.send(f"Removed you from Roblox Invites. Hope you had a great time!")
         else:
             await interaction.followup.send(f"You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!")
 
     @user.command(name="update_info", description="Updates your display name/username")
+    @app_commands.allowed_installs(guilds=True, users=True)
+    @app_commands.allowed_contexts(
+        guilds=True,
+        dms=True,
+        private_channels=True
+    )
     async def update_info(
         self, 
         interaction: discord.Interaction, 
@@ -61,24 +77,7 @@ class UserCog(commands.Cog):
         else:
             await interaction.followup.send(success)
 
-    @user.command(name="stats", description="Shows a user's statistics")
-    @app_commands.guild_only()
-    @app_commands.autocomplete(user_id=user_autocomplete)
-    async def get_user_card(
-        self, 
-        interaction: discord.Interaction, 
-        user_id: int
-    ):
-        await interaction.response.defer()
-        message_title, message_content = await interaction.client.leaderboard_manager.get_user_stats(interaction.guild, user_id)
-        embed = discord.Embed(
-            title=message_title,
-            description=message_content,
-            color=discord.Color.dark_gold() if message_title != "Error" else red
-        )
-        await interaction.followup.send(embed=embed)
-
-    @app_commands.command(name="stats", description="Shows your statistics")
+    @user.command(name="stats", description="Shows your statistics")
     async def get_user_card_dms(
         self, 
         interaction: discord.Interaction
@@ -93,6 +92,12 @@ class UserCog(commands.Cog):
         await interaction.followup.send(embed=embed)
 
     @app_commands.command(name="send_invite", description="Sends out your own personal invite card!")
+    @app_commands.allowed_installs(guilds=True, users=True)
+    @app_commands.allowed_contexts(
+        guilds=True,
+        dms=True,
+        private_channels=True
+    )
     async def send_invite(
         self, 
         interaction: discord.Interaction

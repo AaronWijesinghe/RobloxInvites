@@ -39,6 +39,7 @@ class RobloxInvitesBot(commands.Bot):
         await self.load_extension("cogs.blacklist_cog")
         await self.load_extension("cogs.settings_cog")
         await self.load_extension("cogs.leaderboard_cog")
+        await self.load_extension("cogs.server_cog")
 
         await self.tree.sync()
 

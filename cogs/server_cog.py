@@ -1,0 +1,80 @@
+import discord
+from discord import app_commands
+from discord.ext import commands
+from database.database import *
+from styling.ri_colors import *
+
+class ServerCog(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    async def user_autocomplete(
+        self,
+        interaction: discord.Interaction,
+        query: str,
+    ) -> list[app_commands.Choice[str]]:
+        users = await interaction.client.user_manager.get_guild_users(interaction.guild)
+        return [
+            app_commands.Choice(name=user["username"], value=user["user_id"])
+            for user in users
+            if query.lower() in user["username"].lower()
+        ]
+
+    server = app_commands.Group(
+        name="server",
+        description="Server commands",
+        allowed_contexts=app_commands.AppCommandContext(
+            guild=True,
+            dm_channel=False,
+            private_channel=False
+        )
+    )
+
+    @server.command(name="link", description="Links your account with the current server")
+    async def link(
+        self, 
+        interaction: discord.Interaction
+    ):
+        await interaction.response.defer(ephemeral=True)
+        success = await interaction.client.user_manager.link_user(interaction.user, interaction.guild)
+        if success == True:
+            await interaction.followup.send(f"Successfully added you to this server!")
+        else:
+            await interaction.followup.send(success)
+
+    @server.command(name="unlink", description="Unlinks you from the current server")
+    async def unlink(
+        self, 
+        interaction: discord.Interaction,
+    ):
+        await interaction.response.defer(ephemeral=True)
+        success = await interaction.client.user_manager.unlink_user(interaction.user, interaction.guild)
+        if success == True:
+            await interaction.followup.send(f"Removed you from this server. Hope you had a great time!")
+        else:
+            await interaction.followup.send(f"You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!")
+
+    @app_commands.command(name="stats", description="Shows a user's statistics")
+    @app_commands.allowed_installs(guilds=True, users=False)
+    @app_commands.allowed_contexts(
+        guilds=True,
+        dms=False,
+        private_channels=False
+    )
+    @app_commands.autocomplete(user_id=user_autocomplete)
+    async def get_user_card(
+        self, 
+        interaction: discord.Interaction, 
+        user_id: int
+    ):
+        await interaction.response.defer()
+        message_title, message_content = await interaction.client.leaderboard_manager.get_user_stats(interaction.guild, user_id)
+        embed = discord.Embed(
+            title=message_title,
+            description=message_content,
+            color=discord.Color.dark_gold() if message_title != "Error" else red
+        )
+        await interaction.followup.send(embed=embed)
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(ServerCog(bot))
