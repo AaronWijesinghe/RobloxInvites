@@ -8,32 +8,6 @@ class TrackerCore:
     def __init__(self, bot):
         self.bot = bot
 
-    async def preprocess_playtimes(self):
-        presences = await self.bot.presence_manager.get_all_presences("current")
-        old_presences = await self.bot.presence_manager.get_all_presences("old")
-
-        for user_id in presences:
-            status = presences[user_id]["user_status"]
-            place_id = presences[user_id]["place_id"]
-            game_instance_id = presences[user_id]["game_instance_id"]
-
-            if status == 2 and (game_instance_id is None or place_id is None):
-                continue
-            if status == 2:
-                if user_id in old_presences:
-                    if await self.bot.transfer_manager.check_transfer(user_id):
-                        transfer = await self.bot.transfer_manager.get_transfer(user_id)
-                        if not [transfer["old_place_id"], transfer["old_game_instance_id"]] == [place_id, game_instance_id]:
-                            await self.bot.stat_manager.start_tracking_playtime(user_id, place_id)
-                        continue
-
-                    if presences[user_id] != old_presences[user_id]:
-                        if not await self.bot.api.check_root_place_id(old_presences[user_id]["place_id"], place_id):
-                            await self.bot.stat_manager.start_tracking_playtime(user_id, place_id)
-                else:
-                    await self.bot.stat_manager.start_tracking_playtime(user_id, place_id)
-
-
     async def send_guild_updates(self, guild):
         guild_presences = await self.bot.presence_manager.get_guild_presences(guild, "current")
         old_guild_presences = await self.bot.presence_manager.get_guild_presences(guild, "old")
@@ -53,11 +27,12 @@ class TrackerCore:
                     await self.send_leave_message(guild, user_id, old_guild_presences[user_id]["place_id"], "absolute")
             elif status == 2:
                 if user_id in old_guild_presences:
-                    if await self.bot.transfer_manager.check_transfer(user_id) == True:
+                    if await self.bot.transfer_manager.check_transfer(user_id):
                         transfer = await self.bot.transfer_manager.get_transfer(user_id)
                         if await self.bot.api.check_root_place_id(transfer["old_place_id"], place_id):
                             await self.send_invite(guild, user_id, place_id, game_instance_id, transfer=True)
                         else:
+                            await self.send_leave_message(guild, user_id, transfer["old_place_id"], "game")
                             await self.send_invite(guild, user_id, place_id, game_instance_id)
                         continue
 
@@ -65,6 +40,7 @@ class TrackerCore:
                         if await self.bot.api.check_root_place_id(old_guild_presences[user_id]["place_id"], place_id):
                             await self.send_invite(guild, user_id, place_id, game_instance_id, transfer=True)
                         else:
+                            await self.send_leave_message(guild, user_id, old_guild_presences[user_id]["place_id"], "game")
                             await self.send_invite(guild, user_id, place_id, game_instance_id)
                 else:
                     await self.send_invite(guild, user_id, place_id, game_instance_id)
@@ -105,12 +81,11 @@ class TrackerCore:
                 print(f"   -> Follow them @ https://roblox.com/users/{user_id}/profile")
             elif status == 2:
                 if user_id in old_presences:
-                    if await self.bot.transfer_manager.check_transfer(user_id) == True:
+                    if await self.bot.transfer_manager.check_transfer(user_id):
                         transfer = await self.bot.transfer_manager.get_transfer(user_id)
-                        if await self.bot.api.check_root_place_id(transfer["old_place_id"], place_id):
-                            await self.bot.transfer_manager.remove_transfer(user_id)
-                        else:
+                        if not await self.bot.api.check_root_place_id(transfer["old_place_id"], place_id):
                             await self.bot.stat_manager.start_tracking_playtime(user_id, place_id)
+                        await self.bot.transfer_manager.remove_transfer(user_id)
                         continue
 
                     if presences[user_id] != old_presences[user_id]:
@@ -125,9 +100,6 @@ class TrackerCore:
                 print(f"{users[user_id]["username"]} is in Roblox Studio.")
 
     async def send_invite(self, guild, user_id, place_id, game_instance_id, transfer=False):
-        if await self.bot.transfer_manager.check_transfer(user_id):
-            await self.bot.transfer_manager.remove_transfer(user_id)
-
         if await self.bot.blacklist_manager.check_blacklist(guild, place_id):
             return
 

@@ -96,6 +96,20 @@ class StatManager:
             current_playtime = round(diff.total_seconds())
             return round(current_playtime)
 
+    async def get_current_playtime_placeid(self, user_id, root_place_id):
+        async with self.pool.acquire() as conn:
+            start_time = await conn.fetchval("""
+                SELECT start_time
+                FROM currently_playing
+                WHERE user_id = $1
+                AND place_id = $2
+            """, user_id, root_place_id)
+            if start_time is None:
+                return 0
+            diff = datetime.now() - start_time
+            current_playtime = round(diff.total_seconds())
+            return round(current_playtime)
+
     async def get_current_playtimes(self, user_ids):
         async with self.pool.acquire() as conn:
             current_rows = await conn.fetch("""
@@ -153,7 +167,7 @@ class StatManager:
         if playtime_type == "both":
             playtime += await self.get_game_playtime(user_id, root_place_id)
         if playtime_type in ["current", "both"]:
-            playtime += await self.get_current_playtime(user_id)
+            playtime += await self.get_current_playtime_placeid(user_id, root_place_id)
 
         hours = round(playtime // 3600)
         minutes = round((playtime % 3600) // 60)
