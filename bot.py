@@ -40,9 +40,6 @@ class RobloxInvitesBot(commands.Bot):
         await self.load_extension("cogs.settings_cog")
         await self.load_extension("cogs.leaderboard_cog")
 
-        #self.tree.copy_global_to(guild=self.dev_guild)
-        self.tree.clear_commands(guild=self.dev_guild)
-        await self.tree.sync(guild=self.dev_guild)
         await self.tree.sync()
 
     async def on_ready(self):

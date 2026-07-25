@@ -367,6 +367,37 @@ class LeaderboardManager:
 
         return (message_title, message_content)
 
+    async def get_user_stats_dms(self, discord_user):
+        user_id = await self.bot.user_manager.get_user_from_discord_id(discord_user)
+
+        creation_date = datetime.now().strftime("%m-%d-%Y")
+        creation_time = datetime.now().strftime("%H:%M:%S")
+
+        game_playtimes = await self.get_game_playtimes_ranked(user_id)
+
+        total = await self.bot.stat_manager.get_total_playtime(user_id)
+        display_name = await self.bot.user_manager.get_display_name(user_id)
+        username = await self.bot.user_manager.get_username(user_id)
+
+        message_title = f"{display_name}'s usercard"
+        message_content = f"Created on {creation_date} @ {creation_time} EST"
+
+        message_content += f"\n\n**Your Playtimes:**"
+        message_content += f"\nOverall Playtime: {total / 3600:.2f}h"
+
+        overall_games = 0
+        message_content += f"\n\n**Your Top 10 Games Overall:**"
+        for game in game_playtimes[:10]:
+            if game["playtime"] > 0:
+                await self.api.cache_id(game["place_id"])
+                name = await self.api.get_game_name(game["place_id"])
+                message_content += f"\n[#{game["rank"]}] {name}: {game["playtime"] / 3600:.2f}h"
+                overall_games += 1
+        if overall_games == 0:
+            message_content += "\nYou haven't played any games yet."
+
+        return (message_title, message_content)
+
     async def get_alltime_user_leaderboard(self, guild):
         total_playtimes = await self.get_total_playtimes_ranked(guild)
         agg_game_playtimes = await self.get_agg_game_playtimes_ranked(guild)

@@ -10,6 +10,7 @@ class SettingsCog(commands.Cog):
     channel = app_commands.Group(name="settings", description="Server settings for Roblox Invites")
 
     @channel.command(name="invites", description="Sets the channel ID for the invites channel")
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
     async def set_invite_channel(
@@ -33,6 +34,7 @@ class SettingsCog(commands.Cog):
             await interaction.response.send_message(f"Channel ID `{channel.id}` doesn't exist.", ephemeral=True)
 
     @channel.command(name="announcements", description="Sets the channel ID for the announcements channel")
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
     async def set_announcement_channel(

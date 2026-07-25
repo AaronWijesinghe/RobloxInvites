@@ -23,6 +23,7 @@ class BlacklistCog(commands.Cog):
         ][:25]
 
     @blacklist.command(name="add", description="Adds a game to the blacklist")
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
     async def add_blacklist(
@@ -48,6 +49,7 @@ class BlacklistCog(commands.Cog):
         await interaction.followup.send(embed=embed)
 
     @blacklist.command(name="remove", description="Removes a game from the blacklist")
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.autocomplete(place_id=blacklisted_games_autocomplete)

@@ -23,6 +23,7 @@ class UserCog(commands.Cog):
     user = app_commands.Group(name="user", description="User commands")
 
     @user.command(name="add", description="Adds a new user to Roblox Invites")
+    @app_commands.guild_only()
     async def add_user(
         self, 
         interaction: discord.Interaction, 
@@ -36,6 +37,7 @@ class UserCog(commands.Cog):
             await interaction.followup.send(success)
 
     @user.command(name="remove", description="Removes you from the current server")
+    @app_commands.guild_only()
     async def remove_user(
         self, 
         interaction: discord.Interaction, 
@@ -59,7 +61,8 @@ class UserCog(commands.Cog):
         else:
             await interaction.followup.send(success)
 
-    @user.command(name="stats", description="Gets a user's statistics")
+    @user.command(name="stats", description="Shows a user's statistics")
+    @app_commands.guild_only()
     @app_commands.autocomplete(user_id=user_autocomplete)
     async def get_user_card(
         self, 
@@ -68,6 +71,21 @@ class UserCog(commands.Cog):
     ):
         await interaction.response.defer()
         message_title, message_content = await interaction.client.leaderboard_manager.get_user_stats(interaction.guild, user_id)
+        embed = discord.Embed(
+            title=message_title,
+            description=message_content,
+            color=discord.Color.dark_gold() if message_title != "Error" else red
+        )
+        await interaction.followup.send(embed=embed)
+
+    @app_commands.command(name="stats", description="Shows your statistics")
+    @app_commands.dm_only()
+    async def get_user_card_dms(
+        self, 
+        interaction: discord.Interaction
+    ):
+        await interaction.response.defer()
+        message_title, message_content = await interaction.client.leaderboard_manager.get_user_stats_dms(interaction.user)
         embed = discord.Embed(
             title=message_title,
             description=message_content,
