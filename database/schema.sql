@@ -9,15 +9,19 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS presences (
     user_id BIGINT PRIMARY KEY,
-    game_instance_id TEXT,
+    last_location TEXT,
     place_id BIGINT,
+    root_place_id BIGINT,
+    game_instance_id TEXT,
     user_status INT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS old_presences (
     user_id BIGINT PRIMARY KEY,
-    game_instance_id TEXT,
+    last_location TEXT,
     place_id BIGINT,
+    root_place_id BIGINT,
+    game_instance_id TEXT,
     user_status INT DEFAULT 0
 );
 

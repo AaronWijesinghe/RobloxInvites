@@ -12,8 +12,10 @@ class PresenceManager:
             presence_records = [
                 (
                     user_ids[i],
-                    presences["userPresences"][i]["gameId"],
+                    presences["userPresences"][i]["lastLocation"],
                     presences["userPresences"][i]["placeId"],
+                    presences["userPresences"][i]["rootPlaceId"],
+                    presences["userPresences"][i]["gameId"],
                     presences["userPresences"][i]["userPresenceType"]
                 )
                 for i in range(len(presences["userPresences"]))
@@ -23,12 +25,14 @@ class PresenceManager:
 
         async with self.pool.acquire() as conn:
             await conn.executemany(f"""
-                INSERT INTO {"old_presences" if presence_type == "old" else "presences"} (user_id, game_instance_id, place_id, user_status)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO {"old_presences" if presence_type == "old" else "presences"} (user_id, last_location, place_id, root_place_id, game_instance_id, user_status)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT (user_id)
                 DO UPDATE SET
-                    game_instance_id = EXCLUDED.game_instance_id,
+                    last_location = EXCLUDED.last_location,
                     place_id = EXCLUDED.place_id,
+                    root_place_id = EXCLUDED.root_place_id,
+                    game_instance_id = EXCLUDED.game_instance_id,
                     user_status = EXCLUDED.user_status
             """, presence_records)
 
@@ -60,8 +64,10 @@ class PresenceManager:
         else:
             presences = {
                 row["user_id"]: {
-                    "game_instance_id": None,
+                    "last_location": None,
                     "place_id": None,
+                    "root_place_id": None,
+                    "game_instance_id": None,
                     "user_status": 0
                 }
                 for row in rows
