@@ -13,6 +13,11 @@ class TrackerCore:
         old_guild_presences = await self.bot.presence_manager.get_guild_presences(guild, "old")
 
         for user_id in guild_presences:
+            if await self.bot.user_manager.get_freeze_status(user_id):
+                continue
+            elif await self.bot.user_manager.get_freeze_invites_status(guild, user_id):
+                continue
+
             status = guild_presences[user_id]["user_status"]
             place_id = guild_presences[user_id]["place_id"]
             game_instance_id = guild_presences[user_id]["game_instance_id"]
@@ -54,6 +59,12 @@ class TrackerCore:
         users = await self.bot.user_manager.get_all_users()
 
         for user_id in presences:
+            if await self.bot.user_manager.get_freeze_status(user_id):
+                if await self.bot.transfer_manager.check_transfer(user_id):
+                    await self.bot.transfer_manager.remove_transfer(user_id)
+                if await self.bot.stat_manager.check_currently_playing(user_id):
+                    await self.bot.stat_manager.finish_tracking_playtime(user_id)
+
             status = presences[user_id]["user_status"]
             place_id = presences[user_id]["place_id"]
             game_instance_id = presences[user_id]["game_instance_id"]
