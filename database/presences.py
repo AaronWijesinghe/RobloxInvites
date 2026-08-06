@@ -45,6 +45,20 @@ class PresenceManager:
                     user_status = EXCLUDED.user_status
             """, presence_records)
 
+    async def erase_presence(self, user_id):
+        async with self.pool.acquire() as conn:
+            await conn.execute(f"""
+                INSERT INTO presences (user_id, last_location, place_id, root_place_id, game_instance_id, user_status)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT (user_id)
+                DO UPDATE SET
+                    last_location = EXCLUDED.last_location,
+                    place_id = EXCLUDED.place_id,
+                    root_place_id = EXCLUDED.root_place_id,
+                    game_instance_id = EXCLUDED.game_instance_id,
+                    user_status = EXCLUDED.user_status
+            """, user_id, None, None, None, None, 0)
+
     async def get_presence(self, user_id):
         async with self.pool.acquire() as conn:
             return await conn.fetchrow("""
