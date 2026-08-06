@@ -212,6 +212,84 @@ class UserManager:
             """, guild.id, user_id)
         return True
 
+    async def pause_server_invites(self, discord_user, guild):
+        user_id = await self.get_user_from_discord_id(discord_user)
+        if user_id is None:
+            return "You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!"
+
+        async with self.pool.acquire() as conn:
+            user_exists_in_guild = await conn.fetchval("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM subscriptions
+                    WHERE guild_id = $1
+                    AND user_id = $2
+                )
+            """, guild.id, user_id)
+
+            if not user_exists_in_guild:
+                return f"You are not in this server."
+
+            await conn.execute("""
+                UPDATE subscriptions
+                SET freeze_invites = 1
+                WHERE guild_id = $1
+                AND user_id = $2
+            """, guild.id, user_id)
+        return True
+
+    async def resume_server_invites(self, discord_user, guild):
+        user_id = await self.get_user_from_discord_id(discord_user)
+        if user_id is None:
+            return "You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!"
+
+        async with self.pool.acquire() as conn:
+            user_exists_in_guild = await conn.fetchval("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM subscriptions
+                    WHERE guild_id = $1
+                    AND user_id = $2
+                )
+            """, guild.id, user_id)
+
+            if not user_exists_in_guild:
+                return f"You are not in this server."
+
+            await conn.execute("""
+                UPDATE subscriptions
+                SET freeze_invites = 0
+                WHERE guild_id = $1
+                AND user_id = $2
+            """, guild.id, user_id)
+        return True
+
+    async def freeze_user(self, discord_user):
+        user_id = await self.get_user_from_discord_id(discord_user)
+        if user_id is None:
+            return "You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!"
+
+        async with self.pool.acquire() as conn:
+            await conn.execute("""
+                UPDATE users
+                SET frozen = 1
+                WHERE user_id = $1
+            """, user_id)
+        return True
+
+    async def unfreeze_user(self, discord_user):
+        user_id = await self.get_user_from_discord_id(discord_user)
+        if user_id is None:
+            return "You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!"
+
+        async with self.pool.acquire() as conn:
+            await conn.execute("""
+                UPDATE users
+                SET frozen = 0
+                WHERE user_id = $1
+            """, user_id)
+        return True
+
     async def remove_deleted_users(self):
         async with self.pool.acquire() as conn:
             rows = await conn.fetch("""
