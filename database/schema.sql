@@ -3,24 +3,19 @@ CREATE TABLE IF NOT EXISTS users (
     discord_id BIGINT NOT NULL,
     username TEXT NOT NULL,
     display_name TEXT NOT NULL,
-    erased INT DEFAULT 0,
     joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS presences (
     user_id BIGINT PRIMARY KEY,
-    last_location TEXT,
     place_id BIGINT,
-    root_place_id BIGINT,
     game_instance_id TEXT,
     user_status INT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS old_presences (
     user_id BIGINT PRIMARY KEY,
-    last_location TEXT,
     place_id BIGINT,
-    root_place_id BIGINT,
     game_instance_id TEXT,
     user_status INT DEFAULT 0
 );

@@ -168,7 +168,7 @@ class TrackerCore:
         if place_id == None:
             return ("Invite Card", f"{display_name} (@{username}) isn't playing anything right now.", "https://roblox.com/home")
 
-        game = await self.bot.api.get_game_name(place_id)
+        game = presence["last_location"]
         embed_title = f"Invite Card"
         embed_desc = f"**{display_name} (@{username}) has invited you** to play *{game}* with them!\n**Join them** with the button below."
         join_embed_url = f"https://join.rblxevnts.co/?placeId={place_id}&gameInstanceId={game_instance_id}"
