@@ -1,8 +1,7 @@
 class BlacklistManager:
-    def __init__(self, database, api):
-        self.database = database
+    def __init__(self, pool, api):
+        self.pool = pool
         self.api = api
-        self.pool = self.database.pool
 
     async def check_blacklist(self, guild, place_id):
         async with self.pool.acquire() as conn:

@@ -74,5 +74,29 @@ class ServerCog(commands.Cog):
         )
         await interaction.followup.send(embed=embed)
 
+    @server.command(name="pause_invites", description="Pauses sending invites pertaining to your account in the current server")
+    async def pause_invites(
+        self, 
+        interaction: discord.Interaction
+    ):
+        await interaction.response.defer(ephemeral=True)
+        success = await interaction.client.user_manager.pause_server_invites(interaction.user, interaction.guild)
+        if success == True:
+            await interaction.followup.send(f"Successfully paused messages related to your account in this server!")
+        else:
+            await interaction.followup.send(success)
+
+    @server.command(name="resume_invites", description="Resumes sending invites pertaining to your account in the current server")
+    async def resume_invites(
+        self, 
+        interaction: discord.Interaction
+    ):
+        await interaction.response.defer(ephemeral=True)
+        success = await interaction.client.user_manager.resume_server_invites(interaction.user, interaction.guild)
+        if success == True:
+            await interaction.followup.send(f"Successfully resumed messages related to your account in this server!")
+        else:
+            await interaction.followup.send(success)
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(ServerCog(bot))

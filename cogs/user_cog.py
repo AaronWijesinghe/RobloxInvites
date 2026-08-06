@@ -60,12 +60,6 @@ class UserCog(commands.Cog):
             await interaction.followup.send(f"You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!")
 
     @user.command(name="update_info", description="Updates your display name/username")
-    @app_commands.allowed_installs(guilds=True, users=True)
-    @app_commands.allowed_contexts(
-        guilds=True,
-        dms=True,
-        private_channels=True
-    )
     async def update_info(
         self, 
         interaction: discord.Interaction, 
@@ -90,6 +84,30 @@ class UserCog(commands.Cog):
             color=discord.Color.dark_gold() if message_title != "Error" else red
         )
         await interaction.followup.send(embed=embed)
+
+    @user.command(name="freeze", description="Freezes your Roblox Invites account")
+    async def freeze(
+        self, 
+        interaction: discord.Interaction, 
+    ):
+        await interaction.response.defer(ephemeral=True)
+        success = await interaction.client.user_manager.freeze_user(interaction.user)
+        if success == True:
+            await interaction.followup.send(f"Successfully froze your account!")
+        else:
+            await interaction.followup.send(f"You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!")
+
+    @user.command(name="unfreeze", description="Unfreezes your Roblox Invites account")
+    async def unfreeze(
+        self, 
+        interaction: discord.Interaction, 
+    ):
+        await interaction.response.defer(ephemeral=True)
+        success = await interaction.client.user_manager.unfreeze_user(interaction.user)
+        if success == True:
+            await interaction.followup.send(f"Successfully unfroze your account!")
+        else:
+            await interaction.followup.send(f"You don't have a Roblox account associated with Roblox Invites.\nAdd one with `/user add`!")
 
     @app_commands.command(name="send_invite", description="Sends out your own personal invite card!")
     @app_commands.allowed_installs(guilds=True, users=True)

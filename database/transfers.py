@@ -1,7 +1,6 @@
 class TransferManager:
-    def __init__(self, database):
-        self.database = database
-        self.pool = self.database.pool
+    def __init__(self, pool):
+        self.pool = pool
 
     async def get_transfer(self, user_id):
         try:

@@ -1,8 +1,7 @@
 class SettingsManager:
-    def __init__(self, database, bot):
+    def __init__(self, pool, bot):
         self.bot = bot
-        self.database = database
-        self.pool = database.pool
+        self.pool = pool
 
     async def get_channel(self, guild, channel_type):
         async with self.pool.acquire() as conn:

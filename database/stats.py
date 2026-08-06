@@ -1,9 +1,8 @@
 from datetime import datetime
 
 class StatManager:
-    def __init__(self, database, api, user_manager):
-        self.database = database
-        self.pool = self.database.pool
+    def __init__(self, pool, api, user_manager):
+        self.pool = pool
         self.api = api
         self.user_manager = user_manager
         

@@ -1,7 +1,6 @@
 class SnapshotManager:
-    def __init__(self, database, bot, api):
-        self.database = database
-        self.pool = self.database.pool
+    def __init__(self, pool, bot, api):
+        self.pool = pool
         self.bot = bot
         self.api = api
 

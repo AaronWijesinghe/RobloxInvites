@@ -1,8 +1,7 @@
 class PresenceManager:
-    def __init__(self, database, api, user_manager):
-        self.database = database
+    def __init__(self, pool, api, user_manager):
+        self.pool = pool
         self.api = api
-        self.pool = self.database.pool
         self.user_manager = user_manager
 
     async def save_presences(self, presence_type):

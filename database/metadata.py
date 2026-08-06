@@ -1,7 +1,6 @@
 class MetadataManager:
-    def __init__(self, database):
-        self.database = database
-        self.pool = self.database.pool
+    def __init__(self, pool):
+        self.pool = pool
 
     async def get_version(self):
         async with self.pool.acquire() as conn:
@@ -17,5 +16,5 @@ class MetadataManager:
                 VALUES (1, $1)
                 ON CONFLICT (id)
                 DO UPDATE SET
-                    current_version = EXCLUDED.current_version,
+                    current_version = EXCLUDED.current_version
             """, version_string)

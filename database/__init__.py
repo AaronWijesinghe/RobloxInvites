@@ -8,3 +8,4 @@ from .settings import *
 from .stats import *
 from .snapshots import *
 from .leaderboards import *
+from .metadata import *

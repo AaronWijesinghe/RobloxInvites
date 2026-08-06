@@ -23,15 +23,16 @@ class RobloxInvitesBot(commands.Bot):
 
         self.api.pool = self.db.pool
 
-        self.user_manager = database.UserManager(self.db, self.api)
-        self.presence_manager = database.PresenceManager(self.db, self.api, self.user_manager)
-        self.transfer_manager = database.TransferManager(self.db)
-        self.cgt_manager = database.CGTManager(self.db, self.api)
-        self.blacklist_manager = database.BlacklistManager(self.db, self.api)
-        self.settings_manager = database.SettingsManager(self.db, self)
-        self.stat_manager = database.StatManager(self.db, self.api, self.user_manager)
-        self.snapshot_manager = database.SnapshotManager(self.db, self, self.api)
-        self.leaderboard_manager = database.LeaderboardManager(self.db, self, self.api)
+        self.metadata_manager = database.MetadataManager(self.db.pool)
+        self.user_manager = database.UserManager(self.db.pool, self.api)
+        self.presence_manager = database.PresenceManager(self.db.pool, self.api, self.user_manager)
+        self.transfer_manager = database.TransferManager(self.db.pool)
+        self.cgt_manager = database.CGTManager(self.db.pool, self.api)
+        self.blacklist_manager = database.BlacklistManager(self.db.pool, self.api)
+        self.settings_manager = database.SettingsManager(self.db.pool, self)
+        self.stat_manager = database.StatManager(self.db.pool, self.api, self.user_manager)
+        self.snapshot_manager = database.SnapshotManager(self.db.pool, self, self.api)
+        self.leaderboard_manager = database.LeaderboardManager(self.db.pool, self, self.api)
 
         await self.load_extension("cogs.help_cog")
         await self.load_extension("cogs.user_cog")
