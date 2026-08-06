@@ -1,6 +1,6 @@
 class CGTManager:
     def __init__(self, pool, api):
-        self.database = pool
+        self.pool = pool
         self.api = api
 
     async def get_custom_title(self, guild, universe_id):

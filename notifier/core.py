@@ -64,6 +64,7 @@ class TrackerCore:
                     await self.bot.transfer_manager.remove_transfer(user_id)
                 if await self.bot.stat_manager.check_currently_playing(user_id):
                     await self.bot.stat_manager.finish_tracking_playtime(user_id)
+                continue
 
             status = presences[user_id]["user_status"]
             place_id = presences[user_id]["place_id"]
