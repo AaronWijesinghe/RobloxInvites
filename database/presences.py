@@ -7,21 +7,31 @@ class PresenceManager:
 
     async def save_presences(self, presence_type):
         user_ids = await self.user_manager.get_all_user_ids()
+        p_keys = {
+            "current": ["userId", "lastLocation", "placeId", "rootPlaceId", "gameId", "userPresenceType"],
+            "old": ["user_id", "last_location", "place_id", "root_place_id", "game_instance_id", "user_status"]
+        }
         if presence_type == "current":
-            presences = await self.api.get_presences(user_ids)
-            presence_records = [
-                (
-                    user_ids[i],
-                    presences["userPresences"][i]["lastLocation"],
-                    presences["userPresences"][i]["placeId"],
-                    presences["userPresences"][i]["rootPlaceId"],
-                    presences["userPresences"][i]["gameId"],
-                    presences["userPresences"][i]["userPresenceType"]
-                )
-                for i in range(len(presences["userPresences"]))
-            ]
+            api_presences = await self.api.get_presences(user_ids)
+            presences = api_presences["userPresences"]
         elif presence_type == "old":
-            presence_records = await self.get_all_presences_unfiltered()
+            async with self.pool.acquire() as conn:
+                presences = await conn.fetch(f"""
+                    SELECT *
+                    FROM presences
+                """)
+
+        presence_records = [
+            (
+                presence[p_keys[presence_type][0]],
+                presence[p_keys[presence_type][1]],
+                presence[p_keys[presence_type][2]],
+                presence[p_keys[presence_type][3]],
+                presence[p_keys[presence_type][4]],
+                presence[p_keys[presence_type][5]]
+            )
+            for presence in presences
+        ]
 
         async with self.pool.acquire() as conn:
             await conn.executemany(f"""
@@ -96,25 +106,6 @@ class PresenceManager:
         }
 
         return presences
-    
-    async def get_all_presences_unfiltered(self):
-        async with self.pool.acquire() as conn:
-            rows = await conn.fetch("""
-                SELECT *
-                FROM users
-                ORDER BY user_id
-            """)
-        
-        user_ids = [row["user_id"] for row in rows]
-        async with self.pool.acquire() as conn:
-            rows = await conn.fetch(f"""
-                SELECT *
-                FROM presences
-                WHERE user_id = ANY($1)
-                ORDER BY user_id
-            """, user_ids)
-
-        return rows
 
     async def check_joins(self, guild, user_id, place_id, game_instance_id):
         joined = []
