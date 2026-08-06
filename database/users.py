@@ -30,13 +30,12 @@ class UserManager:
 
     async def get_freeze_invites_status(self, guild, user_id):
         async with self.pool.acquire() as conn:
-            discord_id = self.get_discord_id_from_user(user_id)
             return await conn.fetchval("""
                 SELECT freeze_invites
                 FROM subscriptions
                 WHERE guild_id = $1
-                AND discord_id = $2
-            """, guild.id, discord_id)
+                AND user_id = $2
+            """, guild.id, user_id)
 
     async def get_guild_users(self, guild):
         async with self.pool.acquire() as conn:
@@ -64,21 +63,11 @@ class UserManager:
 
     async def get_user_from_discord_id(self, discord_user):
         async with self.pool.acquire() as conn:
-            user_id = await conn.fetchval("""
+            return await conn.fetchval("""
                 SELECT user_id
                 FROM users
                 WHERE discord_id = $1
             """, discord_user.id)
-            return user_id
-
-    async def get_discord_id_from_user(self, discord_user):
-        async with self.pool.acquire() as conn:
-            user_id = await conn.fetchval("""
-                SELECT user_id
-                FROM users
-                WHERE discord_id = $1
-            """, discord_user.id)
-            return user_id
 
     async def get_all_users(self):
         async with self.pool.acquire() as conn:

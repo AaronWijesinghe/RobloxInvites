@@ -1,3 +1,3 @@
 ALTER TABLE presences
-ADD last_location TEXT,
-ADD root_place_id BIGINT DEFAULT 0;
+ADD IF NOT EXISTS last_location TEXT,
+ADD IF NOT EXISTS root_place_id BIGINT DEFAULT 0;

@@ -29,7 +29,8 @@ class Database:
         schema_path = Path(__file__).parent / ".." / "database" / "migrations"
         for migration_sql in os.listdir(schema_path):
             async with self.pool.acquire() as conn:
-                await conn.execute(migration_sql.read_text())
+                migration_sql_path = Path(__file__).parent / ".." / "database" / "migrations" / migration_sql
+                await conn.execute(migration_sql_path.read_text())
 
     async def create_guild(self, guild):
         async with self.pool.acquire() as conn:
