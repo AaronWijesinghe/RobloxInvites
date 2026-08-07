@@ -3,6 +3,24 @@ import asyncio
 from styling.ansi import *
 import discord
 
+patch_notes = """
+Updated from __v{0}__ to __v{1}__
+
+**Changes:**
+- Added enhanced privacy controls
+- Added the ability to hide invite messages in a specific server
+    - This stops sending invite messages to a specific server, but still lets you accumulate playtime.
+   - Run `/server pause_invites` to enable this privacy control.
+   - Run `/server resume_invites` to disable this privacy control.
+- Added the ability to freeze your account
+    - This stops sending invite messages to all servers you are in and stops accumulating playtime.
+   - Run `/user freeze` to enable this privacy control.
+   - Run `/user unfreeze` to disable this privacy control.
+- Added update announcements like this one
+- Fixed an issue where usercards would show the incorrect position for the Since Last Snapshot leaderboard
+- Other small improvements and optimizations
+"""
+
 class PresenceTracker:
     def __init__(self, bot, version):
         self.bot = bot
@@ -24,7 +42,7 @@ class PresenceTracker:
 
                 embed = discord.Embed(
                     title="An update has been issued!",
-                    description="description",
+                    description=patch_notes.format(saved_version, self.version),
                     color=discord.Color.blue()
                 )
 

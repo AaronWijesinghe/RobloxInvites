@@ -4,10 +4,15 @@ class MetadataManager:
 
     async def get_version(self):
         async with self.pool.acquire() as conn:
-            return await conn.fetchval("""
+            saved_version = await conn.fetchval("""
                 SELECT current_version
                 FROM metadata
             """)
+
+            if saved_version is None:
+                return "0.0.0"
+            else:
+                return saved_version
 
     async def set_version(self, version_string):
         async with self.pool.acquire() as conn:
