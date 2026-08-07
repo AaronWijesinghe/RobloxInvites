@@ -36,25 +36,33 @@ class LeaderboardManager:
             return leaderboard_spot
 
     async def get_ls_leaderboard_position(self, guild, user_id):
+        guild_user_ids = await self.bot.user_manager.get_guild_user_ids(guild)
         snapshot_id = await self.bot.snapshot_manager.get_latest_snapshot_id(guild)
         async with self.pool.acquire() as conn:
             ls_leaderboard_spot = await conn.fetchval("""
-                SELECT RANK() OVER (ORDER BY total_playtime DESC) AS rank
+                SELECT rank
                 FROM (
                     SELECT
-                        s.user_id,
-                        COALESCE(t.total_playtime, 0)
-                        + COALESCE(EXTRACT(EPOCH FROM (NOW() - cp.start_time)), 0)
-                        - s.total_playtime AS total_playtime
-                    FROM total_playtime_snapshots s
-                    LEFT JOIN total_playtimes t
-                        ON t.user_id = s.user_id
-                    LEFT JOIN currently_playing cp
-                        ON cp.user_id = s.user_id
-                    WHERE s.snapshot_id = $1
-                ) playtimes
-                WHERE user_id = $2
-            """, snapshot_id, user_id)
+                        user_id,
+                        total_playtime,
+                        RANK() OVER (ORDER BY total_playtime DESC) AS rank
+                    FROM (
+                        SELECT
+                            s.user_id,
+                            t.total_playtime
+                            - COALESCE(s.total_playtime, 0)
+                            + COALESCE(EXTRACT(EPOCH FROM (NOW() - cp.start_time)), 0) AS total_playtime
+                        FROM total_playtime_snapshots s
+                        LEFT JOIN total_playtimes t
+                            ON t.user_id = s.user_id
+                        LEFT JOIN currently_playing cp
+                            ON cp.user_id = s.user_id
+                        WHERE s.snapshot_id = $1
+                        AND s.user_id = ANY($2)
+                    ) playtimes
+                )
+                WHERE user_id = $3
+            """, snapshot_id, guild_user_ids, user_id)
             
             if ls_leaderboard_spot == None:
                 return 0

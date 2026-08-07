@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 from styling.ansi import *
+import discord
 
 class PresenceTracker:
     def __init__(self, bot, version):
@@ -15,6 +16,25 @@ class PresenceTracker:
         print(f"{gold}[Roblox Invites] [{self.version}] [0]{end}")
         print("Waiting for the bot to get ready...")
         await self.bot.wait_until_ready()
+
+        saved_version = await self.bot.metadata_manager.get_version()
+        if saved_version != self.version:
+            for guild in self.bot.guilds:
+                announcement_channel = await self.bot.settings_manager.get_channel(guild, "announcement")
+
+                embed = discord.Embed(
+                    title="An update has been issued!",
+                    description="description",
+                    color=discord.Color.blue()
+                )
+
+                try:
+                    channel = self.bot.get_channel(announcement_channel)
+                    await channel.send(embed=embed)
+                except:
+                    pass
+
+            await self.bot.metadata_manager.set_version(self.version)
 
         times_checked = 1
         while True:
