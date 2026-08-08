@@ -1,7 +1,6 @@
 import os
 import asyncio
 import notifier
-import discord
 from bot import *
 from dotenv import load_dotenv
 
