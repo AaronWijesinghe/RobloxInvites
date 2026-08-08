@@ -3,6 +3,8 @@ from discord import app_commands
 from discord.ext import commands
 from database.database import *
 from styling.ri_colors import *
+from subprocess import Popen
+from datetime import datetime
 
 class AdminCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -42,7 +44,7 @@ class AdminCog(commands.Cog):
         user_id: int
     ):
         if not await self.bot.is_owner(interaction.user):
-            await interaction.response.send_message(f"You are not the owner of this bot.")
+            await interaction.response.send_message(f"You are not the bot owner.")
 
         await interaction.response.defer(ephemeral=True)
         success = await interaction.client.user_manager.remove_user_id(user_id)
@@ -50,6 +52,23 @@ class AdminCog(commands.Cog):
             await interaction.followup.send(f"Removed this user from Roblox Invites.")
         else:
             await interaction.followup.send(f"This user isn't associated with Roblox Invites.")
+
+    @admin.command(name="backup", description="Creates a .sql server backup")
+    async def create_backup(
+        self, 
+        interaction: discord.Interaction
+    ):
+        if not await self.bot.is_owner(interaction.user):
+            await interaction.response.send_message(f"You are not the bot owner.")
+
+        await interaction.response.defer(ephemeral=True)
+        filename = datetime.now().strftime("backup_%m-%d-%Y_%H-%M-%S.sql")
+        backup_proc = Popen(["pg_dump", "-U", getpass.getuser(), "-d", "roblox_invites", "-f", f"./database/backups/{filename}"])
+        exit_code = backup_proc.wait()
+        if exit_code == 0:
+            await interaction.followup.send("Successfully created a backup!")
+        else:
+            await interaction.followup.send(f"Couldn't create a backup. Exit code: {exit_code}")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(AdminCog(bot))
