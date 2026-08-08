@@ -51,4 +51,4 @@ class RobloxInvitesBot(commands.Bot):
         print(f"{self.user} is online and ready!")
 
     async def on_member_remove(self, member):
-        await self.user_manager.remove_user(member, member.guild)
+        await self.user_manager.unlink_user(member, member.guild)
