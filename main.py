@@ -11,7 +11,7 @@ patch_notes = """
 Updated from __v{0}__ to __v{1}__
 
 **Patch Notes:**
-- Added a set of admin commands
+- Added admin commands
     - These commands can only be run by the bot owner (me)
    - Run `/admin backup` to create a server backup.
    - Run `/admin remove` to remove any user from Roblox Invites.
