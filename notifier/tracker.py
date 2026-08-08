@@ -7,6 +7,11 @@ patch_notes = """
 Updated from __v{0}__ to __v{1}__
 
 **Patch Notes:**
+- Added a set of admin commands
+    - These commands can only be run by the bot owner (me)
+   - Run `/admin backup` to create a server backup.
+   - Run `/admin remove` to remove any user from Roblox Invites.
+   - Run `/admin announce` to send an announcement to all announcement channels.
 - Added a new invite link service at https://ropresencetools.github.io/
     - This should be much more reliable than https://rblxevents.co, which went down recently
 - Added enhanced privacy controls (see below)
@@ -20,6 +25,7 @@ Updated from __v{0}__ to __v{1}__
    - Run `/server resume_invites` to disable this privacy control.
 - Added the framework for sending update announcements
 - Fixed an issue where usercards would show the incorrect position for the Since Last Snapshot leaderboard
+- Fixed an issue where leaving a server wouldn't properly unlink that user from that server
 - Fixed the text in the Remove Blacklist success embed
 - Optimized searching within commands
 - Switched Roblox Invites to use a GitHub organization (RoPresenceTools)

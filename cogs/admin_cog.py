@@ -69,5 +69,31 @@ class AdminCog(commands.Cog):
         else:
             await interaction.followup.send(f"Couldn't create a backup. Exit code: {exit_code}")
 
+    @admin.command(name="announce", description="Sends a global announcement")
+    async def send_announcement(
+        self, 
+        interaction: discord.Interaction,
+        announcement_text: str
+    ):
+        if not await self.bot.is_owner(interaction.user):
+            await interaction.response.send_message(f"You are not the bot owner.")
+
+        await interaction.response.defer(ephemeral=True)
+        for guild in self.bot.guilds:
+            announcement_channel = await self.bot.settings_manager.get_channel(guild, "announcement")
+
+            embed = discord.Embed(
+                title="Global Announcement",
+                description=announcement_text,
+                color=discord.Color.blue()
+            )
+
+            try:
+                channel = self.bot.get_channel(announcement_channel)
+                await channel.send(embed=embed)
+            except:
+                pass
+        await interaction.followup.send("Successfully sent announcement!")
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(AdminCog(bot))
