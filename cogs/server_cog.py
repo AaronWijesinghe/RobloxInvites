@@ -80,7 +80,7 @@ class ServerCog(commands.Cog):
         interaction: discord.Interaction
     ):
         await interaction.response.defer(ephemeral=True)
-        success = await interaction.client.user_manager.pause_server_invites(interaction.user, interaction.guild)
+        success = await interaction.client.user_manager.modify_server_invites(interaction.user, interaction.guild, 1)
         if success == True:
             await interaction.followup.send(f"Successfully paused messages related to your account in this server!")
         else:
@@ -92,7 +92,7 @@ class ServerCog(commands.Cog):
         interaction: discord.Interaction
     ):
         await interaction.response.defer(ephemeral=True)
-        success = await interaction.client.user_manager.resume_server_invites(interaction.user, interaction.guild)
+        success = await interaction.client.user_manager.modify_server_invites(interaction.user, interaction.guild, 0)
         if success == True:
             await interaction.followup.send(f"Successfully resumed messages related to your account in this server!")
         else:

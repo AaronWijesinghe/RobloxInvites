@@ -91,7 +91,7 @@ class UserCog(commands.Cog):
         interaction: discord.Interaction, 
     ):
         await interaction.response.defer(ephemeral=True)
-        success = await interaction.client.user_manager.freeze_user(interaction.user)
+        success = await interaction.client.user_manager.modify_freeze_user(interaction.user, 1)
         if success == True:
             await interaction.followup.send(f"Successfully froze your account!")
         else:
@@ -103,7 +103,7 @@ class UserCog(commands.Cog):
         interaction: discord.Interaction, 
     ):
         await interaction.response.defer(ephemeral=True)
-        success = await interaction.client.user_manager.unfreeze_user(interaction.user)
+        success = await interaction.client.user_manager.modify_freeze_user(interaction.user, 0)
         if success == True:
             await interaction.followup.send(f"Successfully unfroze your account!")
         else:
