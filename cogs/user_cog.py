@@ -8,18 +8,6 @@ class UserCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    async def user_autocomplete(
-        self,
-        interaction: discord.Interaction,
-        query: str,
-    ) -> list[app_commands.Choice[str]]:
-        users = await interaction.client.user_manager.get_guild_users(interaction.guild)
-        return [
-            app_commands.Choice(name=user["username"], value=user["user_id"])
-            for user in users
-            if query.lower() in user["username"].lower()
-        ]
-
     user = app_commands.Group(
         name="user",
         description="User commands",

@@ -169,6 +169,18 @@ class UserManager:
             """, user_id)
         return True
 
+    async def remove_user_id(self, user_id):
+        async with self.pool.acquire() as conn:
+            if user_id is None:
+                return False
+
+            await conn.execute("""
+                UPDATE users
+                SET erased = 1
+                WHERE user_id = $1
+            """, user_id)
+        return True
+
     async def link_user(self, discord_user, guild):
         user_id = await self.get_user_from_discord_id(discord_user)
         if user_id is None:
