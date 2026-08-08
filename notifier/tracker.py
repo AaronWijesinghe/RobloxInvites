@@ -6,19 +6,21 @@ import discord
 patch_notes = """
 Updated from __v{0}__ to __v{1}__
 
-**Changes:**
+**Changes ({1}):**
+- Added a new invite link service at https://ropresencetools.github.io/
+    - This should be much more reliable than https://rblxevents.co, which went down recently
 - Added enhanced privacy controls
-- Added the ability to hide invite messages in a specific server
-    - This stops sending invite messages to a specific server, but still lets you accumulate playtime.
-   - Run `/server pause_invites` to enable this privacy control.
-   - Run `/server resume_invites` to disable this privacy control.
 - Added the ability to freeze your account
     - This stops sending invite messages to all servers you are in and stops accumulating playtime.
    - Run `/user freeze` to enable this privacy control.
    - Run `/user unfreeze` to disable this privacy control.
-- Added update announcements like this one
+- Added the ability to hide invite messages in a specific server
+    - This stops sending invite messages to a specific server, but still lets you accumulate playtime.
+   - Run `/server pause_invites` to enable this privacy control.
+   - Run `/server resume_invites` to disable this privacy control.
+- Added the framework for sending update announcements
 - Fixed an issue where usercards would show the incorrect position for the Since Last Snapshot leaderboard
-- Other small improvements and optimizations
+- Switched Roblox Invites to use a GitHub organization (RoPresenceTools)
 """
 
 class PresenceTracker:
