@@ -38,6 +38,9 @@ Updated from __v{0}__ to __v{1}__
 - Roblox Invites is now a part of RoPresenceTools (GitHub)
 """
 
+if not os.path.exists("./database/backups/"):
+    os.makedirs("./database/backups/")
+
 dev_guild = discord.Object(id=os.environ["guild"])
 api = notifier.API(headers)
 bot = RobloxInvitesBot(api, dev_guild)
