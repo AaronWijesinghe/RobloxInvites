@@ -3,38 +3,11 @@ import asyncio
 from styling.ansi import *
 import discord
 
-patch_notes = """
-Updated from __v{0}__ to __v{1}__
-
-**Patch Notes:**
-- Added a set of admin commands
-    - These commands can only be run by the bot owner (me)
-   - Run `/admin backup` to create a server backup.
-   - Run `/admin remove` to remove any user from Roblox Invites.
-   - Run `/admin announce` to send an announcement to all announcement channels.
-- Added a new invite link service at https://ropresencetools.github.io/
-    - This should be much more reliable than https://rblxevents.co, which went down recently
-- Added enhanced privacy controls (see below)
-- Added the ability to freeze your account
-    - This stops sending invite messages to all servers you are in and stops accumulating playtime.
-   - Run `/user freeze` to enable this privacy control.
-   - Run `/user unfreeze` to disable this privacy control.
-- Added the ability to hide invite messages in a specific server
-    - This stops sending invite messages to a specific server, but still lets you accumulate playtime.
-   - Run `/server pause_invites` to enable this privacy control.
-   - Run `/server resume_invites` to disable this privacy control.
-- Added the framework for sending update announcements
-- Fixed an issue where usercards would show the incorrect position for the Since Last Snapshot leaderboard
-- Fixed an issue where leaving a server wouldn't properly unlink that user from that server
-- Fixed the text in the Remove Blacklist success embed
-- Optimized searching within commands
-- Switched Roblox Invites to use a GitHub organization (RoPresenceTools)
-"""
-
 class PresenceTracker:
-    def __init__(self, bot, version):
+    def __init__(self, bot, version, patch_notes):
         self.bot = bot
         self.version = version
+        self.patch_notes = patch_notes
 
     def clear(self):
         print("\033[2J\033[3J\033[H", end="")
@@ -52,7 +25,7 @@ class PresenceTracker:
 
                 embed = discord.Embed(
                     title="An update has been issued!",
-                    description=patch_notes.format(saved_version, self.version),
+                    description=self.patch_notes.format(saved_version, self.version),
                     color=discord.Color.blue()
                 )
 
