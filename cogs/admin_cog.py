@@ -84,7 +84,7 @@ class AdminCog(commands.Cog):
 
             embed = discord.Embed(
                 title="Global Announcement",
-                description=announcement_text,
+                description=announcement_text.replace("\\n", "\n"),
                 color=discord.Color.dark_purple()
             )
 
