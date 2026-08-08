@@ -15,9 +15,9 @@ class AdminCog(commands.Cog):
     ) -> list[app_commands.Choice[str]]:
         users = await interaction.client.user_manager.get_all_users()
         return [
-            app_commands.Choice(name=user["username"], value=user["user_id"])
-            for user in users
-            if query.lower() in user["username"].lower()
+            app_commands.Choice(name=data["username"], value=user_id)
+            for user_id, data in users.items()
+            if query.lower() in data["username"].lower()
         ]
 
     admin = app_commands.Group(
