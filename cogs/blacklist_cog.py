@@ -71,7 +71,7 @@ class BlacklistCog(commands.Cog):
         success = await interaction.client.blacklist_manager.remove_blacklist(interaction.guild, place_id)
         if success == True:
             embed = discord.Embed(
-                title="Added to blacklist!",
+                title="Removed from blacklist!",
                 description=f"Removed place ID {place_id} from the blacklist.",
                 color=green
             )
