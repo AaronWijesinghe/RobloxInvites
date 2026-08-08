@@ -27,7 +27,7 @@ Updated from __v{0}__ to __v{1}__
     - This stops sending invite messages to a specific server, but still lets you accumulate playtime.
    - Run `/server pause_invites` to enable this privacy control.
    - Run `/server resume_invites` to disable this privacy control.
-- Added the framework for sending update announcements
+- Added update announcements like this one
 - Fixed an issue where usercards would show the incorrect position for the Since Last Snapshot leaderboard
 - Fixed an issue where leaving a server wouldn't properly unlink that user from that server
 - Fixed the text in the Remove Blacklist success embed
