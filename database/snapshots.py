@@ -95,6 +95,7 @@ class SnapshotManager:
         snapshot_id = await self.get_latest_snapshot_id(guild)
         if snapshot_id is None:
             return (None, None)
+
         async with self.pool.acquire() as conn:
             total_rows = await conn.fetch("""
                 SELECT
