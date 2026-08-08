@@ -35,7 +35,7 @@ Updated from __v{0}__ to __v{1}__
 - Fixed an issue where leaving a server wouldn't properly unlink that user from that server
 - Fixed the text in the Remove Blacklist success embed
 - Optimized searching within commands
-- Switched Roblox Invites to use a GitHub organization (RoPresenceTools)
+- Roblox Invites is now a part of RoPresenceTools (GitHub)
 """
 
 dev_guild = discord.Object(id=os.environ["guild"])
