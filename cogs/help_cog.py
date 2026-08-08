@@ -1,7 +1,6 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from database.database import *
 
 help_message = """
 **Welcome to Roblox Invites!**

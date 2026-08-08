@@ -1,8 +1,7 @@
 import discord
+import getpass
 from discord import app_commands
 from discord.ext import commands
-from database.database import *
-from styling.ri_colors import *
 from subprocess import Popen
 from datetime import datetime
 
