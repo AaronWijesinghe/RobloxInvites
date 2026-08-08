@@ -10,20 +10,19 @@ headers = {
     "Cookie": f".ROBLOSECURITY={os.environ["cookie"]}"
 }
 
-version = "2.4.1"
+version = "2.4.2"
 patch_notes = """
 Updated from __v{0}__ to __v{1}__
 
 **Patch Notes:**
-- Automatically create the backups folder so the bot doesn't crash when trying to make backups
+- Remove references to `dev_guild`
 """
 
 if not os.path.exists("./database/backups/"):
     os.makedirs("./database/backups/")
 
-dev_guild = discord.Object(id=os.environ["guild"])
 api = notifier.API(headers)
-bot = RobloxInvitesBot(api, dev_guild)
+bot = RobloxInvitesBot(api)
 tracker_core = notifier.TrackerCore(bot)
 bot.notifier = tracker_core
 presence_tracker = notifier.PresenceTracker(bot, version, patch_notes)

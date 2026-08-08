@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class RobloxInvitesBot(commands.Bot):
-    def __init__(self, api, dev_guild):
+    def __init__(self, api):
         intents = discord.Intents.default()
         intents.message_content = True
         intents.members = True
@@ -15,7 +15,6 @@ class RobloxInvitesBot(commands.Bot):
         
         self.db = Database()
         self.api = api
-        self.dev_guild = dev_guild
 
     async def setup_hook(self):
         await self.api.start()
