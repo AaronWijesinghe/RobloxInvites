@@ -6,6 +6,10 @@ from bot import *
 from dotenv import load_dotenv
 
 load_dotenv()
+headers = {
+    "Cookie": f".ROBLOSECURITY={os.environ["cookie"]}"
+}
+
 version = "2.4.0"
 patch_notes = """
 Updated from __v{0}__ to __v{1}__
@@ -33,9 +37,6 @@ Updated from __v{0}__ to __v{1}__
 - Optimized searching within commands
 - Switched Roblox Invites to use a GitHub organization (RoPresenceTools)
 """
-headers = {
-    "Cookie": f".ROBLOSECURITY={os.environ["cookie"]}"
-}
 
 dev_guild = discord.Object(id=os.environ["guild"])
 api = notifier.API(headers)
