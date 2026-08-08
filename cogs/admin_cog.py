@@ -41,7 +41,7 @@ class AdminCog(commands.Cog):
         interaction: discord.Interaction,
         user_id: int
     ):
-        if not self.bot.is_owner():
+        if not await self.bot.is_owner(interaction.user):
             await interaction.response.send_message(f"You are not the owner of this bot.")
 
         await interaction.response.defer(ephemeral=True)

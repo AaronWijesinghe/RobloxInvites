@@ -171,9 +171,6 @@ class UserManager:
 
     async def remove_user_id(self, user_id):
         async with self.pool.acquire() as conn:
-            if user_id is None:
-                return False
-
             await conn.execute("""
                 UPDATE users
                 SET erased = 1
