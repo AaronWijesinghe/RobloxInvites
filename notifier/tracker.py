@@ -10,7 +10,7 @@ Updated from __v{0}__ to __v{1}__
 - Added a new invite link service at https://ropresencetools.github.io/
     - This should be much more reliable than https://rblxevents.co, which went down recently
 - Added enhanced privacy controls
-- Added the ability to freeze your account
+- Added the ability to freeze your account (see below)
     - This stops sending invite messages to all servers you are in and stops accumulating playtime.
    - Run `/user freeze` to enable this privacy control.
    - Run `/user unfreeze` to disable this privacy control.
