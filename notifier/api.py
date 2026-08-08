@@ -165,25 +165,31 @@ class API:
             user_data = await response.json()
             return user_data
     
-    async def get_cached_games(self, guild):
-        async with self.pool.acquire() as conn:
-            rows = await conn.fetch("""
-                SELECT user_id
-                FROM subscriptions
-                WHERE guild_id = $1
-            """, guild.id)
-            user_ids = [row["user_id"] for row in rows]
+    async def get_cached_games(self, guild, query):
+        try:
+            async with self.pool.acquire() as conn:
+                rows = await conn.fetch("""
+                    SELECT user_id
+                    FROM subscriptions
+                    WHERE guild_id = $1
+                """, guild.id)
+                user_ids = [row["user_id"] for row in rows]
 
-            rows = await conn.fetch("""
-                SELECT place_id
-                FROM game_playtimes
-                WHERE user_id = ANY($1)
-            """, user_ids)
-            place_ids = [row["place_id"] for row in rows]
-
-            rows = await conn.fetch("""
-                SELECT *
-                FROM universe_id_cache
-                WHERE root_place_id = ANY($1)
-            """, place_ids)
-            return rows
+                rows = await conn.fetch("""
+                    SELECT *
+                    FROM universe_id_cache
+                    WHERE root_place_id IN (
+                        SELECT
+                            gp.place_id
+                        FROM game_playtimes gp
+                        LEFT JOIN users u
+                            ON u.user_id = gp.user_id
+                        WHERE gp.user_id = ANY($1)
+                    )
+                    AND game_name ILIKE '%' || $2 || '%'
+                    LIMIT 25
+                """, user_ids, query)
+                return rows
+        except:
+            import traceback
+            traceback.print_exc()

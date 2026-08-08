@@ -38,11 +38,13 @@ class BlacklistManager:
         else:
             return False
 
-    async def get_blacklisted_games(self, guild):
+    async def get_blacklisted_games(self, guild, query):
         async with self.pool.acquire() as conn:
             rows = await conn.fetch("""
                 SELECT *
                 FROM blacklist
                 WHERE guild_id = $1
-            """, guild.id)
+                AND game_name ILIKE '%' || $2 || '%'
+                LIMIT 25
+            """, guild.id, query)
             return rows

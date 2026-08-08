@@ -28,13 +28,12 @@ class LeaderboardCog(commands.Cog):
         interaction: discord.Interaction,
         query: str,
     ) -> list[app_commands.Choice[str]]:
-        game_list = await self.bot.api.get_cached_games(interaction.guild)
+        game_list = await self.bot.api.get_cached_games(interaction.guild, query)
 
         return [
             app_commands.Choice(name=game["game_name"], value=game["root_place_id"])
             for game in game_list
-            if query.lower() in game["game_name"].lower()
-        ][:25]
+        ]
 
     @leaderboard.command(name="all", description="Sends this server's all-time playtime leaderboard")
     async def all_time_user_leaderboard(

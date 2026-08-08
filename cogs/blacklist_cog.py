@@ -27,12 +27,11 @@ class BlacklistCog(commands.Cog):
         interaction: discord.Interaction,
         query: str,
     ) -> list[app_commands.Choice[str]]:
-        blacklisted_games = await interaction.client.blacklist_manager.get_blacklisted_games(interaction.guild)
+        blacklisted_games = await interaction.client.blacklist_manager.get_blacklisted_games(interaction.guild, query)
         return [
             app_commands.Choice(name=game["game_name"], value=game["place_id"])
             for game in blacklisted_games
-            if query.lower() in game["game_name"].lower()
-        ][:25]
+        ]
 
     @blacklist.command(name="add", description="Adds a game to the blacklist")
     @app_commands.default_permissions(manage_guild=True)

@@ -20,6 +20,7 @@ Updated from __v{0}__ to __v{1}__
    - Run `/server resume_invites` to disable this privacy control.
 - Added the framework for sending update announcements
 - Fixed an issue where usercards would show the incorrect position for the Since Last Snapshot leaderboard
+- Optimized searching for games/blacklisted games/custom titles in commands
 - Switched Roblox Invites to use a GitHub organization (RoPresenceTools)
 """
 

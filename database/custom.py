@@ -92,18 +92,13 @@ class CGTManager:
                     return False
             return True
 
-    async def get_cgt_games(self, guild):
+    async def get_cgt_games(self, guild, query):
         async with self.pool.acquire() as conn:
             rows = await conn.fetch("""
-                SELECT root_place_id
+                SELECT *
                 FROM custom_titles
                 WHERE guild_id = $1
-            """, guild.id)
-            place_ids = [row["root_place_id"] for row in rows]
-
-            rows = await conn.fetch("""
-                SELECT *
-                FROM universe_id_cache
-                WHERE root_place_id = ANY($1)
-            """, place_ids)
+                AND game_name ILIKE '%' || $2 || '%'
+                LIMIT 25
+            """, guild.id, query)
             return rows
